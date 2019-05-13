@@ -1,1 +1,0 @@
-_disease = {'firstDisease': 'value'}

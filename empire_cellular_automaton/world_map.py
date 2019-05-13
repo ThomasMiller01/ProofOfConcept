@@ -15,13 +15,25 @@ class Map:
         # for i in range(0, self.h):
         #     for j in range(0, self.w):
         #         rgb = self.map_image[i, j].tolist()
+        #         if rgb == [0, 124, 5]:
+        #             pass
+        cv2.namedWindow('image')
+        # cv2.setMouseCallback("image", self.mouse_drawing)
+        cv2.imshow('image', self.map_image)
+        # cv2.waitKey(0)
 
+    def updateMap(self):
         cv2.imshow('image', self.map_image)
 
-    def getRandomNeighbour(pixel):
+    def updatePixel(self, x, y, color):
+        self.map_image[y, x].itemset(0, color[0])
+        self.map_image[y, x].itemset(1, color[1])
+        self.map_image[y, x].itemset(2, color[2])
+
+    def getRandomNeighbour(self, pixel):
         x = -1
         y = -1
-        while x <= 0 and x >= self.w and y <= 0 and y >= self.h:
+        while x <= 0 or x >= self.w and y <= 0 or y >= self.h:
             rnd = randint(0, 7)
             if rnd == 0:  # oben
                 x = pixel[0]
@@ -47,7 +59,22 @@ class Map:
             elif rnd == 7:  # oben links
                 x = pixel[0] - 1
                 y = pixel[1] + 1
-        self.map_image(y, x)
+        return [[x, y], self.map_image[y, x]]
+
+    def getPixel(self, x, y):
+        return self.map_image[y, x]
 
     def getPixelState(self, pixel):
-        return self.colorCodes[str(self.map_image[pixel[0], pixel[1]])]
+        if str(pixel[1].tolist()) not in self.colorCodes:
+            return "undefinded"
+        else:
+            return self.colorCodes[str(pixel[1].tolist())]
+
+    def getColorPercentage(self, color):
+        allColor = self.map_image[color]
+        pass
+
+    # def mouse_drawing(self, event, x, y, flags, params):
+    #     if event == cv2.EVENT_LBUTTONDOWN:
+    #         print("Left click")
+    #         circles.append((x, y))
