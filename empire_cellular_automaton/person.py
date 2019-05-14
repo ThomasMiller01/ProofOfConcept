@@ -1,4 +1,5 @@
 from random import randint
+import random
 
 
 class Person:
@@ -9,6 +10,7 @@ class Person:
         self._age = age
         self._strength = strength
         self._reproductionValue = reproductionValue
+        self.reproductionThreshold = 100
         self.x = x
         self.y = y
         self.color = color
@@ -27,24 +29,37 @@ class Person:
             self.x = neighbour[0][0]
             self.y = neighbour[0][1]
             self._map.updatePixel(self.x, self.y, self.color)
-            if checkForReproduction != None:
-                return {'age': self._age, 'strength': self._strength, 'reproductionValue': self._reproductionValue, 'x': self.x, 'y': self.y}
+            if checkForReproduction == 'reproduction':
+                mutation = self.getMutation(self._strength)
+                return {'age': self._age, 'strength': mutation, 'reproductionValue': self._reproductionValue, 'x': self.x, 'y': self.y}
             else:
                 return None
         else:
             # fight
             return None
 
+    def getMutation(self, strength):
+        rnd_plus_minus = randint(0, 1)
+        rnd_amount = randint(0, 10)
+        if rnd_plus_minus == 0:
+            return strength + rnd_amount
+        elif rnd_plus_minus == 1:
+            return strength - rnd_amount
+
     def checkFor(self, check):
         if check == 'age':
-            # check if person dies of age
-            # return 'dead'
+            if self._age > self._strength:
+                return 'dead'
+            rnd = randint(0, 1) * 0.2
+            self._age += rnd
             return None
         elif check == 'reproduction':
-            rnd = randint(0, 500)
-            if rnd == self._reproductionValue:
+            if self._reproductionValue > self.reproductionThreshold:
+                self._reproductionValue = 0
                 return 'reproduction'
             else:
+                rnd = randint(0, 1)
+                self._reproductionValue += rnd
                 return None
         else:
             return None

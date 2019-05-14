@@ -12,6 +12,14 @@ class Map:
         self.h = self.map_image.shape[0]
         self.w = self.map_image.shape[1]
 
+        nmb = 0
+        for y in range(0, self.h):
+            for x in range(0, self.w):
+                if self.map_image[y, x].item(0) == 0 and self.map_image[y, x].item(1) == 124 and self.map_image[y, x].item(2) == 5:
+                    nmb += 1
+
+        self.land_pixel_nmb = nmb
+
         # for i in range(0, self.h):
         #     for j in range(0, self.w):
         #         rgb = self.map_image[i, j].tolist()
@@ -71,8 +79,14 @@ class Map:
             return self.colorCodes[str(pixel[1].tolist())]
 
     def getColorPercentage(self, color):
-        allColor = self.map_image[color]
-        pass
+        allColor = []
+        for y in range(0, self.h):
+            for x in range(0, self.w):
+                if self.map_image[y, x].item(0) == color[0] and self.map_image[y, x].item(1) == color[1] and self.map_image[y, x].item(2) == color[2]:
+                    allColor.append([[x, y], color])
+        allColorNmb = allColor.__len__()
+        percentage = allColorNmb / self.land_pixel_nmb * 100
+        return round(percentage)
 
     # def mouse_drawing(self, event, x, y, flags, params):
     #     if event == cv2.EVENT_LBUTTONDOWN:

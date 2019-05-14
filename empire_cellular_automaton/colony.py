@@ -21,22 +21,14 @@ class Colony:
         else:
             self._map.updatePixel(self.x, self.y, color)
 
-        _x = self.x
-        _y = self.y
-
         for i in range(0, self.population):
-            age = randint(0, 100)
+            age = 0
             strength = randint(0, 100)
-            reproductionValue = randint(0, 500)
-            for j in range(0, 10):
-                pixel = self._map.getRandomNeighbour([_x, _y])
-                if self._map.getPixelState(pixel) == 'empty':
-                    self.people.append(person.Person(
-                        i, self._id, self.name, age, strength, reproductionValue, pixel[0][0], pixel[0][1], self.color, self._map))
-                    self._map.updatePixel(pixel[0][0], pixel[0][1], self.color)
-                    _x = pixel[0][0]
-                    _y = pixel[0][1]
-                    break
+            reproductionValue = randint(0, 100)
+            pixel = self._map.getPixel(self.x, self.y)
+            self.people.append(person.Person(
+                i, self._id, self.name, age, strength, reproductionValue, self.x, self.y, self.color, self._map))
+            self._map.updatePixel(self.x, self.y, self.color)
 
     def update(self):
         for _person in self.people:
@@ -47,5 +39,5 @@ class Colony:
                 _id = self.people[self.people.__len__() - 1]._id + 1
                 self.people.append(person.Person(_id, self._id, self.name,
                                                  move['age'], move['strength'], move['reproductionValue'], move['x'], move['y'], self.color, self._map))
-                self.population += 1
                 self._map.updatePixel(move['x'], move['y'], self.color)
+        self.population = self.people.__len__()
