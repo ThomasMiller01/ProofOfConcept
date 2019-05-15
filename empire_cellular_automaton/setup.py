@@ -55,7 +55,7 @@ i = 0
 while not isDone(percentages):
     # cv2.waitKey(0)
     print("---------------------")
-    print("Generation: " + str(i))
+    print("Generation: " + str(i + 1))
     print("---------------------")
     loop.run_until_complete(main())
     print("---------------------")
