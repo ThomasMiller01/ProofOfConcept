@@ -34,6 +34,7 @@ class Colony:
         for _person in self.people:
             move = _person.move()
             if move == 'dead':
+                self._map.updatePixel(_person.x, _person.y, [0, 124, 5])
                 self.people.remove(_person)
             elif move != None:
                 _id = self.people[self.people.__len__() - 1]._id + 1
