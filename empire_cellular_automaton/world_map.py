@@ -26,7 +26,7 @@ class Map:
         cv2.namedWindow('image')
         # cv2.setMouseCallback("image", self.mouse_drawing)
         cv2.imshow('image', self.map_image)
-        cv2.waitKey(0)
+        # cv2.waitKey(0)
 
     def updateMap(self):
         # show image

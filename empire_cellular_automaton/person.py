@@ -18,6 +18,8 @@ class Person:
         self.y = y
         self.color = color
         self._map = _map
+        # set pixel color back to empty if person moves or dies
+        self._setPixelColorBack = False
 
     def move(self):
         # get rnd place around person
@@ -25,14 +27,13 @@ class Person:
         # check if rnd place is water, empty, etc.
         neighbour_state = self._map.getPixelState(neighbour)
         # check if person needs to die / reproduce, increase age and reproduction_value
-        # checkForAge = self.checkFor('age')
-        # checkForReproduction = self.checkFor('reproduction')
-        checkForAge = None
-        checkForReproduction = None
+        checkForAge = self.checkFor('age')
+        checkForReproduction = self.checkFor('reproduction')
         checkForDisease = self.checkFor('disease')
-        # if person needs to die, return checkForAge
-        if checkForAge != None:
-            return checkForAge
+        checkForOwnTerritory = self.checkFor('ownTerritory')
+        # if person needs to die, return 'dead'
+        if checkForAge == 'dead' or checkForOwnTerritory == 'dead':
+            return 'dead'
         # check what state the rnd place is
         if neighbour_state == 'water':
             # if person wants to move to water, do nothing
@@ -57,7 +58,8 @@ class Person:
                 return {'age': self._age, 'strength': mutation_strength, 'reproductionValue': mutation_reproductionsValue, 'x': self.x, 'y': self.y}
             else:
                 # if person only moves, set old place to empty place color
-                # self._map.updatePixel(old_x, old_y, [0, 124, 5])
+                if self._setPixelColorBack:
+                    self._map.updatePixel(old_x, old_y, [0, 124, 5])
                 return None
         else:
             # person fights other colony
@@ -114,5 +116,29 @@ class Person:
                     return None
             else:
                 return None
+        # check if person is surrounded by its own territory
+        # if true delete person
+        elif check == 'ownTerritory':
+            xy = []
+            # oben
+            xy.append([self.x, self.y + 1])
+            # oben rechts
+            xy.append([self.x + 1, self.y + 1])
+            # rechts
+            xy.append([self.x + 1, self.y])
+            # unten rechts
+            xy.append([self.x + 1, self.y - 1])
+            # unten
+            xy.append([self.x, self.y - 1])
+            # unten links
+            xy.append([self.x - 1, self.y - 1])
+            # links
+            xy.append([self.x - 1, self.y])
+            # oben links
+            xy.append([self.x - 1, self.y + 1])
+            for _xy in xy:
+                if self._map.getPixelState(self._map.getPixel(_xy[0], _xy[1])) != self._colonyName:
+                    return None
+            return 'ownTerritory'
         else:
             return None
