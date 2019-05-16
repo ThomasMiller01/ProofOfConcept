@@ -5,6 +5,7 @@ from random import randint
 
 class Map:
     def __init__(self, img, colonys):
+        # init colorCodes for getPixelState()
         self.colorCodes = {'[168, 0, 3]': 'water', '[0, 124, 5]': 'empty'}
         for colony in colonys:
             self.colorCodes[str(colony[1])] = colony[0]
@@ -18,22 +19,20 @@ class Map:
                 if self.map_image[y, x].item(0) == 0 and self.map_image[y, x].item(1) == 124 and self.map_image[y, x].item(2) == 5:
                     nmb += 1
 
+        # set earth pixel nmb for getColorPercentage()
         self.land_pixel_nmb = nmb
-
-        # for i in range(0, self.h):
-        #     for j in range(0, self.w):
-        #         rgb = self.map_image[i, j].tolist()
-        #         if rgb == [0, 124, 5]:
-        #             pass
+        # show image
         cv2.namedWindow('image')
         # cv2.setMouseCallback("image", self.mouse_drawing)
         cv2.imshow('image', self.map_image)
         # cv2.waitKey(0)
 
     def updateMap(self):
+        # show image
         cv2.imshow('image', self.map_image)
 
     def updatePixel(self, x, y, color):
+        # set pixel color
         self.map_image[y, x].itemset(0, color[0])
         self.map_image[y, x].itemset(1, color[1])
         self.map_image[y, x].itemset(2, color[2])

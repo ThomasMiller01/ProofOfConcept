@@ -13,7 +13,7 @@ colonys = [
 _colonys = []
 
 _map = world_map.Map(
-    'empire_cellular_automaton/map.jpg', colonys)
+    'map.jpg', colonys)
 
 for i in range(0, colonys.__len__()):
     _colonys.append(colony.Colony(

@@ -39,6 +39,6 @@ class Colony:
             elif move != None:
                 _id = self.people[self.people.__len__() - 1]._id + 1
                 self.people.append(person.Person(_id, self._id, self.name,
-                                                 move['age'], move['strength'], move['reproductionValue'], move['x'], move['y'], self.color, self._map))
+                                                 0, move['strength'], move['reproductionValue'], move['x'], move['y'], self.color, self._map))
                 self._map.updatePixel(move['x'], move['y'], self.color)
         self.population = self.people.__len__()
