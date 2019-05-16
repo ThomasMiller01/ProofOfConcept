@@ -3,7 +3,7 @@ import random
 
 
 class Person:
-    def __init__(self, _id, colonyID, colonyName, age, strength, reproductionValue, x, y, color, _map):
+    def __init__(self, _id, colonyID, colonyName, age, strength, reproductionValue, disease, x, y, color, _map):
         # set person attributes
         self._id = _id
         self._colonyID = colonyID
@@ -13,6 +13,7 @@ class Person:
         self._reproductionValue = reproductionValue
         self._old_reproductionValue = reproductionValue
         self.reproductionThreshold = 118
+        self.disease = disease
         self.x = x
         self.y = y
         self.color = color
@@ -24,8 +25,11 @@ class Person:
         # check if rnd place is water, empty, etc.
         neighbour_state = self._map.getPixelState(neighbour)
         # check if person needs to die / reproduce, increase age and reproduction_value
-        checkForAge = self.checkFor('age')
-        checkForReproduction = self.checkFor('reproduction')
+        # checkForAge = self.checkFor('age')
+        # checkForReproduction = self.checkFor('reproduction')
+        checkForAge = None
+        checkForReproduction = None
+        checkForDisease = self.checkFor('disease')
         # if person needs to die, return checkForAge
         if checkForAge != None:
             return checkForAge
@@ -53,7 +57,7 @@ class Person:
                 return {'age': self._age, 'strength': mutation_strength, 'reproductionValue': mutation_reproductionsValue, 'x': self.x, 'y': self.y}
             else:
                 # if person only moves, set old place to empty place color
-                self._map.updatePixel(old_x, old_y, [0, 124, 5])
+                # self._map.updatePixel(old_x, old_y, [0, 124, 5])
                 return None
         else:
             # person fights other colony
@@ -95,6 +99,20 @@ class Person:
             else:
                 # else increase reproduction_value
                 self._reproductionValue += 1
+                return None
+        elif check == 'disease':
+            # if person has disease
+            if self.disease != None:
+                # if person still has disease
+                if self.disease.update():
+                    # get deathrate by deathrate * current State
+                    deathRate = self.disease.getDeathRate() * self.disease.state * 0.1
+                    self._age += deathRate
+                    return None
+                else:
+                    self.disease = None
+                    return None
+            else:
                 return None
         else:
             return None

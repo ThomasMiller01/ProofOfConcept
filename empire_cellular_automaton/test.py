@@ -1,21 +1,12 @@
-# Include the PySFML extension
-from PySFML import sf
+import numpy as np
+import scipy.misc as smp
+from PIL import Image
 
-# Create the main window
-window = sf.RenderWindow(sf.VideoMode(800, 600), "PySFML test")
+# Create a 1024x1024x3 array of 8 bit unsigned integers
+data = np.zeros((1024, 1024, 3), dtype=np.uint8)
 
-# Create a graphical string to display
-text = sf.String("Hello SFML")
+data[512, 512] = [254, 0, 0]       # Makes the middle pixel red
+data[512, 513] = [0, 0, 255]       # Makes the next pixel blue
 
-# Start the game loop
-running = True
-while running:
-    event = sf.Event()
-    while window.GetEvent(event):
-        if event.Type == sf.Event.Closed:
-            running = False
-
-    # Clear screen, draw the text, and update the window
-    window.Clear()
-    window.Draw(text)
-    window.Display()
+img = Image.fromarray(data)       # Create a PIL image
+img.show()

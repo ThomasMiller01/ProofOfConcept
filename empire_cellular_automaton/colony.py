@@ -1,6 +1,7 @@
 from random import randint
 
 import person
+import disease
 
 
 class Colony:
@@ -30,7 +31,7 @@ class Colony:
             reproductionValue = randint(0, 100)
             pixel = self._map.getPixel(self.x, self.y)
             self.people.append(person.Person(
-                i, self._id, self.name, age, strength, reproductionValue, self.x, self.y, self.color, self._map))
+                i, self._id, self.name, age, strength, reproductionValue, None, self.x, self.y, self.color, self._map))
             self._map.updatePixel(self.x, self.y, self.color)
 
     def update(self):
@@ -40,12 +41,12 @@ class Colony:
             move = _person.move()
             # if person is dead, remove person and change pixel color
             if move == 'dead':
-                self._map.updatePixel(_person.x, _person.y, [0, 124, 5])
+                # self._map.updatePixel(_person.x, _person.y, [0, 124, 5])
                 self.people.remove(_person)
             # if person needs to reproduce, create new person with given attributes
             elif move != None:
                 _id = self.people[self.people.__len__() - 1]._id + 1
                 self.people.append(person.Person(_id, self._id, self.name,
-                                                 0, move['strength'], move['reproductionValue'], move['x'], move['y'], self.color, self._map))
+                                                 0, move['strength'], move['reproductionValue'], None, move['x'], move['y'], self.color, self._map))
                 self._map.updatePixel(move['x'], move['y'], self.color)
         self.population = self.people.__len__()
