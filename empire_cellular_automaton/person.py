@@ -12,7 +12,7 @@ class Person:
         self._strength = strength
         self._reproductionValue = reproductionValue
         self._old_reproductionValue = reproductionValue
-        self.reproductionThreshold = 100
+        self.reproductionThreshold = 118
         self.x = x
         self.y = y
         self.color = color

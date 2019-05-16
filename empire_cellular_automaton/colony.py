@@ -19,9 +19,12 @@ class Colony:
             # colony would not start on empty land ...
             raise
         else:
+            # set startpoint with color
             self._map.updatePixel(self.x, self.y, color)
 
+        # create person in range(0, population_nmb)
         for i in range(0, self.population):
+            # init attributes
             age = 0
             strength = randint(0, 100)
             reproductionValue = randint(0, 100)
@@ -31,11 +34,15 @@ class Colony:
             self._map.updatePixel(self.x, self.y, self.color)
 
     def update(self):
+        # foreach person
         for _person in self.people:
+            # call persons move() function
             move = _person.move()
+            # if person is dead, remove person and change pixel color
             if move == 'dead':
                 self._map.updatePixel(_person.x, _person.y, [0, 124, 5])
                 self.people.remove(_person)
+            # if person needs to reproduce, create new person with given attributes
             elif move != None:
                 _id = self.people[self.people.__len__() - 1]._id + 1
                 self.people.append(person.Person(_id, self._id, self.name,
