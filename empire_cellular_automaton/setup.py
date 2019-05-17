@@ -24,18 +24,18 @@ for i in range(0, colonys.__len__()):
 
 
 # task for doing one generation with count=years
-async def myTask(_c, count):
+async def myTask(_c, count, generation):
     print("Rendering Colony: '" + _c.name + "'")
     for i in range(0, count):
-        _c.update()
+        _c.update(generation)
     print("Population: " + str(_c.population))
     print("---------------------")
 
 
 # create task for each colony
-async def main():
+async def main(generation):
     for _colony in _colonys:
-        asyncio.ensure_future(myTask(_colony, 100))
+        asyncio.ensure_future(myTask(_colony, 100, generation))
 
 
 # check if simulation is done
@@ -69,7 +69,7 @@ while not isDone(percentages):
     print("Generation: " + str(i + 1))
     print("---------------------")
     # init main task
-    loop.run_until_complete(main())
+    loop.run_until_complete(main(i))
     print("---------------------")
     print("Rendered all colonys")
     print("---------------------")

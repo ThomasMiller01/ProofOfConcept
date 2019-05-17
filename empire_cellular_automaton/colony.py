@@ -34,11 +34,11 @@ class Colony:
                 i, self._id, self.name, age, strength, reproductionValue, None, self.x, self.y, self.color, self._map))
             self._map.updatePixel(self.x, self.y, self.color)
 
-    def update(self):
+    def update(self, generation):
         # foreach person
         for _person in self.people:
             # call persons move() function
-            move = _person.move()
+            move = _person.move(generation)
             # if person is dead, remove person and change pixel color
             if move == 'dead':
                 if _person._setPixelColorBack:

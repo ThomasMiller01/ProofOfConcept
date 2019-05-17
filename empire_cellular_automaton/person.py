@@ -21,7 +21,7 @@ class Person:
         # set pixel color back to empty if person moves or dies
         self._setPixelColorBack = False
 
-    def move(self):
+    def move(self, generation):
         # get rnd place around person
         neighbour = self._map.getRandomNeighbour([self.x, self.y])
         # check if rnd place is water, empty, etc.
@@ -138,7 +138,11 @@ class Person:
             xy.append([self.x - 1, self.y + 1])
             for _xy in xy:
                 if self._map.getPixelState([[], self._map.getPixel(_xy[0], _xy[1])]) != self._colonyName:
-                    return None            
-            return 'dead'
+                    return None
+            rnd = randint(0, 50)
+            if rnd == 0:
+                return 'dead'
+            else:
+                return None
         else:
             return None
