@@ -64,7 +64,7 @@ for _colony in _colonys:
 i = 0
 # while simulation is running
 while not isDone(percentages):
-    cv2.waitKey(1)
+    cv2.waitKey(1000)
     print("---------------------")
     print("Generation: " + str(i + 1))
     print("---------------------")
