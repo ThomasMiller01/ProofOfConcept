@@ -137,8 +137,8 @@ class Person:
             # oben links
             xy.append([self.x - 1, self.y + 1])
             for _xy in xy:
-                if self._map.getPixelState(self._map.getPixel(_xy[0], _xy[1])) != self._colonyName:
-                    return None
-            return 'ownTerritory'
+                if self._map.getPixelState([[], self._map.getPixel(_xy[0], _xy[1])]) != self._colonyName:
+                    return None            
+            return 'dead'
         else:
             return None
