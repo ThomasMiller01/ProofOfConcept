@@ -46,20 +46,9 @@ while True:
 
     # iterate over the list of Event objects
     # that was returned by pygame.event.get() method.
-    for event in pygame.event.get():
 
-        # if event object type is QUIT
-        # then quitting the pygame
-        # and program both.
-        if event.type == pygame.QUIT:
-
-            # deactivates the pygame library
-            pygame.quit()
-
-            # quit the program.
-            quit()
-
-        pixels = getPixelArray("empire_cellular_automaton/map.jpg")
+    pixels = getPixelArray("empire_cellular_automaton/map.jpg")
+    while True:
 
         pixels[i][j] = [255, 255, 255]
         i += 1

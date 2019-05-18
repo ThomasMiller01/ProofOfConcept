@@ -19,7 +19,7 @@ class Person:
         self.color = color
         self._map = _map
         # set pixel color back to empty if person moves or dies
-        self._setPixelColorBack = False
+        self._setPixelColorBack = True
 
     def move(self, generation):
         # get rnd place around person
@@ -60,7 +60,7 @@ class Person:
                 else:
                     # if person only moves, set old place to empty place color
                     if self._setPixelColorBack:
-                        self._map.updatePixel(old_x, old_y, [0, 124, 5])
+                        self._map.updatePixel(old_x, old_y, [5, 124, 0])
                     return None
             else:
                 # person fights other colony

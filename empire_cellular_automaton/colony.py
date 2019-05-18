@@ -42,7 +42,7 @@ class Colony:
             # if person is dead, remove person and change pixel color
             if move == 'dead':
                 if _person._setPixelColorBack:
-                    self._map.updatePixel(_person.x, _person.y, [0, 124, 5])
+                    self._map.updatePixel(_person.x, _person.y, [5, 124, 0])
                 self.people.remove(_person)
             # if person needs to reproduce, create new person with given attributes
             elif move != None:

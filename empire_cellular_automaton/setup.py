@@ -1,13 +1,13 @@
-import cv2
 import asyncio
+import pygame
 
 import world_map
 import colony
 
 # [name, [r, g, b], population, [x, y]]
 colonys = [
-    ['red', [0, 0, 255], 100, [675, 213]],
-    ['yellow', [0, 255, 255], 100, [506, 443]],
+    ['red', [255, 0, 0], 100, [675, 213]],
+    ['yellow', [255, 255, 0], 100, [506, 443]],
     ['white', [255, 255, 255], 100, [138, 219]]
 ]
 _colonys = []
@@ -62,9 +62,16 @@ percentages = []
 for _colony in _colonys:
     percentages.append([_colony.name, _map.getColorPercentage(_colony.color)])
 i = 0
+clock = pygame.time.Clock()
+_map.updateMap()
 # while simulation is running
 while not isDone(percentages):
-    cv2.waitKey(1)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            # quit pygame
+            pygame.quit()
+            # quit the program.
+            quit()
     print("---------------------")
     print("Generation: " + str(i + 1))
     print("---------------------")
@@ -86,11 +93,15 @@ while not isDone(percentages):
     i += 1
     # update map
     _map.updateMap()
+    clock.tick(1)
 # close loop
 loop.close()
 
 # update map
 _map.updateMap()
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# quit pygame
+pygame.quit()
+
+# quit the program.
+quit()
