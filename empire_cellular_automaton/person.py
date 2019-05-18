@@ -32,37 +32,40 @@ class Person:
         checkForDisease = self.checkFor('disease')
         checkForOwnTerritory = self.checkFor('ownTerritory')
         # if person needs to die, return 'dead'
-        if checkForAge == 'dead' or checkForOwnTerritory == 'dead':
-            return 'dead'
-        # check what state the rnd place is
-        if neighbour_state == 'water':
-            # if person wants to move to water, do nothing
-            return None
-        elif neighbour_state == 'empty' or neighbour_state == self._colonyName:
-            # person wants to move to an empty place
-            # get old x and y values
-            old_x = self.x
-            old_y = self.y
-            # set new x and y values from empty place
-            self.x = neighbour[0][0]
-            self.y = neighbour[0][1]
-            # update pixel of new place
-            self._map.updatePixel(self.x, self.y, self.color)
-            # if person needs to reproduce
-            if checkForReproduction == 'reproduction':
-                # get mutation for strength and reproduction_value
-                mutation_strength = self.getMutation(self._strength)
-                mutation_reproductionsValue = self.getMutation(
-                    self._old_reproductionValue)
-                # return data, child person gets
-                return {'age': self._age, 'strength': mutation_strength, 'reproductionValue': mutation_reproductionsValue, 'x': self.x, 'y': self.y}
+        if checkForAge == 'dead':
+            return checkForAge
+        if checkForOwnTerritory == None:
+            # check what state the rnd place is
+            if neighbour_state == 'water':
+                # if person wants to move to water, do nothing
+                return None
+            elif neighbour_state == 'empty' or neighbour_state == self._colonyName:
+                # person wants to move to an empty place
+                # get old x and y values
+                old_x = self.x
+                old_y = self.y
+                # set new x and y values from empty place
+                self.x = neighbour[0][0]
+                self.y = neighbour[0][1]
+                # update pixel of new place
+                self._map.updatePixel(self.x, self.y, self.color)
+                # if person needs to reproduce
+                if checkForReproduction == 'reproduction':
+                    # get mutation for strength and reproduction_value
+                    mutation_strength = self.getMutation(self._strength)
+                    mutation_reproductionsValue = self.getMutation(
+                        self._old_reproductionValue)
+                    # return data, child person gets
+                    return {'age': self._age, 'strength': mutation_strength, 'reproductionValue': mutation_reproductionsValue, 'x': old_x, 'y': old_y}
+                else:
+                    # if person only moves, set old place to empty place color
+                    if self._setPixelColorBack:
+                        self._map.updatePixel(old_x, old_y, [0, 124, 5])
+                    return None
             else:
-                # if person only moves, set old place to empty place color
-                if self._setPixelColorBack:
-                    self._map.updatePixel(old_x, old_y, [0, 124, 5])
+                # person fights other colony
                 return None
         else:
-            # person fights other colony
             return None
 
     def getMutation(self, value):
@@ -139,9 +142,10 @@ class Person:
             for _xy in xy:
                 if self._map.getPixelState([[], self._map.getPixel(_xy[0], _xy[1])]) != self._colonyName:
                     return None
-            rnd = randint(0, 50)
+            rnd = randint(0, 40)
             if rnd == 0:
-                return 'dead'
+                # return None
+                return 'ownTerritory'
             else:
                 return None
         else:
