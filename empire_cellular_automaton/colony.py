@@ -29,9 +29,13 @@ class Colony:
             age = 0
             strength = randint(0, 100)
             reproductionValue = randint(0, 100)
+            if randint(0, 1) == 0:
+                _disease = disease.disease()
+            else:
+                _disease = None
             pixel = self._map.getPixel(self.x, self.y)
             self.people.append(person.Person(
-                i, self._id, self.name, age, strength, reproductionValue, None, self.x, self.y, self.color, self._map))
+                i, self._id, self.name, age, strength, reproductionValue, _disease, self.x, self.y, self.color, self._map))
             self._map.updatePixel(self.x, self.y, self.color)
 
     def update(self, generation):
@@ -48,6 +52,6 @@ class Colony:
             elif move != None:
                 _id = self.people[self.people.__len__() - 1]._id + 1
                 self.people.append(person.Person(_id, self._id, self.name,
-                                                 0, move['strength'], move['reproductionValue'], None, move['x'], move['y'], self.color, self._map))
+                                                 0, move['strength'], move['reproductionValue'], move['disease'], move['x'], move['y'], self.color, self._map))
                 self._map.updatePixel(move['x'], move['y'], self.color)
         self.population = self.people.__len__()

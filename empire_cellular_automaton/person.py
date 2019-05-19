@@ -1,5 +1,7 @@
 from random import randint
 import random
+from numpy import interp
+import disease
 
 
 class Person:
@@ -13,19 +15,15 @@ class Person:
         self._reproductionValue = reproductionValue
         self._old_reproductionValue = reproductionValue
         self.reproductionThreshold = 118
-        self.disease = disease
+        self._disease = disease
         self.x = x
         self.y = y
         self.color = color
         self._map = _map
         # set pixel color back to empty if person moves or dies
-        self._setPixelColorBack = True
+        self._setPixelColorBack = False
 
     def move(self, generation):
-        # get rnd place around person
-        neighbour = self._map.getRandomNeighbour([self.x, self.y])
-        # check if rnd place is water, empty, etc.
-        neighbour_state = self._map.getPixelState(neighbour)
         # check if person needs to die / reproduce, increase age and reproduction_value
         checkForAge = self.checkFor('age')
         checkForReproduction = self.checkFor('reproduction')
@@ -35,6 +33,10 @@ class Person:
         if checkForAge == 'dead':
             return checkForAge
         if checkForOwnTerritory == None:
+            # get rnd place around person
+            neighbour = self._map.getRandomNeighbour([self.x, self.y])
+            # check if rnd place is water, empty, etc.
+            neighbour_state = self._map.getPixelState(neighbour)
             # check what state the rnd place is
             if neighbour_state == 'water':
                 # if person wants to move to water, do nothing
@@ -55,8 +57,22 @@ class Person:
                     mutation_strength = self.getMutation(self._strength)
                     mutation_reproductionsValue = self.getMutation(
                         self._old_reproductionValue)
+                    if self._disease != None:
+                        rndNmb = randint(0, 1)
+                        if rndNmb == 0:
+                            _disease = self._disease
+                            _disease.state = 0
+                        else:
+                            rndNmb = randint(0, 10)
+                            if rndNmb == 0:
+                                _disease = disease.disease()
+                            else:
+                                _disease = None
+
+                    else:
+                        _disease = None
                     # return data, child person gets
-                    return {'age': self._age, 'strength': mutation_strength, 'reproductionValue': mutation_reproductionsValue, 'x': old_x, 'y': old_y}
+                    return {'age': self._age, 'strength': mutation_strength, 'reproductionValue': mutation_reproductionsValue, 'disease': _disease, 'x': old_x, 'y': old_y}
                 else:
                     # if person only moves, set old place to empty place color
                     if self._setPixelColorBack:
@@ -107,15 +123,21 @@ class Person:
                 return None
         elif check == 'disease':
             # if person has disease
-            if self.disease != None:
+            if self._disease != None:
                 # if person still has disease
-                if self.disease.update():
-                    # get deathrate by deathrate * current State
-                    deathRate = self.disease.getDeathRate() * self.disease.state * 0.1
-                    self._age += deathRate
+                if self._disease.update():
+                    # get deathrate
+                    deathRate = self._disease.getDeathRate() * 0.1
+                    rndNmb = randint(0, 100)
+                    if rndNmb == deathRate:
+                        return 'dead'
+                    rate = self._disease.state * self._disease.strength
+                    _mapped = interp(rate, [0, 10000], [0, 10])
+                    # map death rate between 0 and 1
+                    self._age *= 1 + _mapped
                     return None
                 else:
-                    self.disease = None
+                    self._disease = None
                     return None
             else:
                 return None
