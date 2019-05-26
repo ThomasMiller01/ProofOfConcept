@@ -3,50 +3,12 @@ from random import randint
 import pygame
 
 
-class Map:
-    def __init__(self, img, colonys):
-        # init colorCodes for getPixelState()
-        self.colorCodes = {'[3, 0, 168]': 'water', '[5, 124, 0]': 'empty'}
-        # add foreach colony the colonys color code
-        for colony in colonys:
-            self.colorCodes[str(colony[1])] = colony[0]
-
-        # init pygame
-        pygame.init()
-
-        # load image
-        self._image = pygame.image.load(img)
-
-        # get 2d pixel array
-        self._pixel_arr = pygame.surfarray.array3d(self._image)
-
-        # set image dimensions
-        self.h = self._pixel_arr.shape[0]
-        self.w = self._pixel_arr.shape[1]
-
-        # create display surface
-        self.display_surface = pygame.display.set_mode((self.h, self.w))
-
-        # set the pygame window name
-        pygame.display.set_caption('Empire - Cellular Automaton')
-
-        # completely fill the surface object with white color
-        self.display_surface.fill([255, 255, 255])
-
-        # set earth pixel nmb for getColorPercentage()
-        nmb = 0
-        for x in self._pixel_arr:
-            for y in x:
-                if y.item(0) == 5 and y.item(1) == 124 and y.item(2) == 0:
-                    nmb += 1
-        self.land_pixel_nmb = nmb
-        # show image
-        self.updateMap()
-
-    def updateMap(self):
-        surface = pygame.surfarray.make_surface(self._pixel_arr)
-        self.display_surface.blit(surface, (0, 0))
-        pygame.display.update()
+class Map_Utilities:
+    def __init__(self, _pixel_arr, colorCodes, w, h):
+        self._pixel_arr = _pixel_arr
+        self.colorCodes = colorCodes
+        self.w = w
+        self.h = h
 
     def updatePixel(self, x, y, color):
         # set pixel color
@@ -99,6 +61,56 @@ class Map:
             # else return pixel state name
             return self.colorCodes[str(pixel[1].tolist())]
 
+
+class Map:
+    def __init__(self, img, colonys):
+        # init colorCodes for getPixelState()
+        self.colorCodes = {'[3, 0, 168]': 'water', '[5, 124, 0]': 'empty'}
+        # add foreach colony the colonys color code
+        for colony in colonys:
+            self.colorCodes[str(colony[1])] = colony[0]
+
+        # init pygame
+        pygame.init()
+
+        # load image
+        self._image = pygame.image.load(img)
+
+        # get 2d pixel array
+        self._pixel_arr = pygame.surfarray.array3d(self._image)
+
+        # set image dimensions
+        self.h = self._pixel_arr.shape[0]
+        self.w = self._pixel_arr.shape[1]
+
+        # create map_utilities obj
+        self.map_utilities = Map_Utilities(
+            self._pixel_arr, self.colorCodes, self.w, self.h)
+
+        # create display surface
+        self.display_surface = pygame.display.set_mode((self.h, self.w))
+
+        # set the pygame window name
+        pygame.display.set_caption('Empire - Cellular Automaton')
+
+        # completely fill the surface object with white color
+        self.display_surface.fill([255, 255, 255])
+
+        # set earth pixel nmb for getColorPercentage()
+        nmb = 0
+        for x in self._pixel_arr:
+            for y in x:
+                if y.item(0) == 5 and y.item(1) == 124 and y.item(2) == 0:
+                    nmb += 1
+        self.land_pixel_nmb = nmb
+        # show image
+        self.updateMap()
+
+    def updateMap(self):
+        surface = pygame.surfarray.make_surface(self.map_utilities._pixel_arr)
+        self.display_surface.blit(surface, (0, 0))
+        pygame.display.update()
+
     def getColorPercentage(self, color):
         allColor = []
         # foreach pixel
@@ -112,10 +124,3 @@ class Map:
         percentage = allColorNmb / self.land_pixel_nmb * 100
         return round(percentage)
         # return 0
-
-    # method used for getting x and y value of mouse click
-    # def mouse_drawing(self, event, x, y, flags, params):
-    #     if event == cv2.EVENT_LBUTTONDOWN:
-    #         print("Left click")
-    #         print("x, y: ", x, y)
-    #         circles.append((x, y))
