@@ -4,7 +4,8 @@ from numpy import interp
 
 class disease:
     def __init__(self):
-        self.allKinds = {'Ebola': 70, 'Pest': 80, 'Grippe': 40}
+        self.allKinds = {'Ebola': 70, 'Pest': 80,
+                         'Grippe': 40, 'SaaaschZilla': 10}
         chances_Nmb = 0
         for _kind in self.allKinds:
             chances_Nmb += 100 - self.allKinds[_kind]
@@ -23,9 +24,9 @@ class disease:
         return self.kind[1]
 
     def update(self):
-        _rnd = randint(0, 100)
-        if _rnd == 0:
-            return False
+        # _rnd = randint(0, 100)
+        # if _rnd == 0:
+        #     return False
         if self.state >= 100:
             return False
         else:

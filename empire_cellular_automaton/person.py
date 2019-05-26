@@ -21,7 +21,7 @@ class Person:
         self.color = color
         self._map = _map
         # set pixel color back to empty if person moves or dies
-        self._setPixelColorBack = False
+        self._setPixelColorBack = True
 
     def move(self, generation):
         # check if person needs to die / reproduce, increase age and reproduction_value
@@ -29,6 +29,10 @@ class Person:
         checkForReproduction = self.checkFor('reproduction')
         checkForDisease = self.checkFor('disease')
         checkForOwnTerritory = self.checkFor('ownTerritory')
+        # checkForAge = None
+        # checkForReproduction = None
+        # checkForDisease = None
+        # checkForOwnTerritory = None
         # if person needs to die, return 'dead'
         if checkForAge == 'dead':
             return checkForAge
@@ -70,7 +74,11 @@ class Person:
                                 _disease = None
 
                     else:
-                        _disease = None
+                        rndNmb = randint(0, 100)
+                        if rndNmb == 0:
+                            _disease = disease.disease()
+                        else:
+                            _disease = None                        
                     # return data, child person gets
                     return {'age': self._age, 'strength': mutation_strength, 'reproductionValue': mutation_reproductionsValue, 'disease': _disease, 'x': old_x, 'y': old_y}
                 else:
@@ -131,8 +139,8 @@ class Person:
                     rndNmb = randint(0, 100)
                     if rndNmb == deathRate:
                         return 'dead'
-                    rate = self._disease.state * self._disease.strength
-                    _mapped = interp(rate, [0, 10000], [0, 10])
+                    rate = self._disease.state * self._disease.strength * self._disease.getDeathRate()
+                    _mapped = interp(rate, [0, 10000], [0, 1])
                     # map death rate between 0 and 1
                     self._age *= 1 + _mapped
                     return None
