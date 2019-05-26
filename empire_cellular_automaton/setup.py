@@ -78,7 +78,7 @@ if __name__ == "__main__":
     i = 0
     clock = pygame.time.Clock()
     _map.updateMap()
-    # while simulation is running    
+    # while simulation is running
     while not isDone(percentages):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         i += 1
         # update map
         _map.updateMap()
-        clock.tick(1)
+        clock.tick(1000)
     # close loop
     loop.close()
 
