@@ -14,15 +14,15 @@ class Map_Utilities:
 
     def getPixel(self, x, y):
         # return pixel of x and y
-        return self._pixel_arr[x][y]
-        # return self._pixel_arr[x, y]
+        with self._pixel_arr.get_lock():
+            i = (self.w * y - (self.w - x)) * 3 - 3
+            return self._pixel_arr[i:i+3:1]
 
     def updatePixel(self, x, y, color):
         # set pixel color
-        self._pixel_arr[x][y] = color
-        # self._pixel_arr[x, y].itemset(0, color[0])
-        # self._pixel_arr[x, y].itemset(1, color[1])
-        # self._pixel_arr[x, y].itemset(2, color[2])
+        with self._pixel_arr.get_lock():
+            i = (self.w * y - (self.w - x)) * 3 - 3
+            self._pixel_arr[i:i+3] = color
 
     def getRandomNeighbour(self, pixel):
         x = -1
@@ -87,24 +87,13 @@ class Map:
         self.h = self._pixel_arr.shape[0]
         self.w = self._pixel_arr.shape[1]
 
-        # settings up map_utilities obj for shared memory
-        mp_array = mp.Array(ctypes.c_int, self._pixel_arr.shape[0])
-        arr = numpy.frombuffer(mp_array.get_obj())
+        # settings up array for shared memory
+        mp_array = mp.Array(ctypes.c_ubyte, self.h * self.w * 3)
+        self.arr = numpy.frombuffer(
+            mp_array.get_obj(), dtype=numpy.dtype(numpy.uint8))
 
-        i = 0
-        j = 0
-
-        for x in self._pixel_arr:
-            mp_tmp_list = mp.Array(ctypes.c_int, x.__len__())
-            tmp_list = numpy.frombuffer(mp_tmp_list.get_obj())
-            for y in x:
-                mp_empty_arr = mp.Array(ctypes.c_int, 10)
-                empty_arr = numpy.frombuffer(mp_empty_arr.get_obj())
-                empty_arr = [y[0], y[1], y[2]]
-                tmp_list[j] = empty_arr
-                j += 1
-            arr[i] = tmp_list
-            i += 1
+        # fill arr obj with pixel data
+        self.arr[:] = self._pixel_arr.reshape(self.h * self.w * 3)
 
         # create map_utilities obj
         self.map_utilities = Map_Utilities(
@@ -131,7 +120,7 @@ class Map:
 
     def updateMap(self):
         surface = pygame.surfarray.make_surface(
-            numpy.asarray(self.map_utilities._pixel_arr))
+            self.arr.reshape(self.h, self.w, 3))
         self.display_surface.blit(surface, (0, 0))
         pygame.display.update()
 
