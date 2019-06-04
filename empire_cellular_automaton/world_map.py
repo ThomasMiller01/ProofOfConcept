@@ -1,6 +1,7 @@
 import numpy
 from random import randint
 import pygame
+import multiprocessing as mp
 
 
 class Map_Utilities:
@@ -10,11 +11,17 @@ class Map_Utilities:
         self.w = w
         self.h = h
 
+    def getPixel(self, x, y):
+        # return pixel of x and y
+        return self._pixel_arr[x][y]
+        # return self._pixel_arr[x, y]
+
     def updatePixel(self, x, y, color):
         # set pixel color
-        self._pixel_arr[x, y].itemset(0, color[0])
-        self._pixel_arr[x, y].itemset(1, color[1])
-        self._pixel_arr[x, y].itemset(2, color[2])
+        self._pixel_arr[x][y] = color
+        # self._pixel_arr[x, y].itemset(0, color[0])
+        # self._pixel_arr[x, y].itemset(1, color[1])
+        # self._pixel_arr[x, y].itemset(2, color[2])
 
     def getRandomNeighbour(self, pixel):
         x = -1
@@ -48,18 +55,14 @@ class Map_Utilities:
                 y = pixel[1] + 1
         return [[x, y], self.getPixel(x, y)]
 
-    def getPixel(self, x, y):
-        # return pixel of x and y
-        return self._pixel_arr[x, y]
-
     def getPixelState(self, pixel):
         # check pixel color in colorCodes
         # if it does not exist, return "undefinded"
-        if str(pixel[1].tolist()) not in self.colorCodes:
+        if str(pixel[1]) not in self.colorCodes:
             return "undefinded"
         else:
             # else return pixel state name
-            return self.colorCodes[str(pixel[1].tolist())]
+            return self.colorCodes[str(pixel[1])]
 
 
 class Map:
@@ -83,9 +86,19 @@ class Map:
         self.h = self._pixel_arr.shape[0]
         self.w = self._pixel_arr.shape[1]
 
+        # settings up map_utilities obj for shared memory
+        manager = mp.Manager()
+
+        manager_list = manager.list()
+        for x in self._pixel_arr:
+            tmp_list = []
+            for y in x:
+                tmp_list.append([y[0], y[1], y[2]])
+            manager_list.append(tmp_list)
+
         # create map_utilities obj
         self.map_utilities = Map_Utilities(
-            self._pixel_arr, self.colorCodes, self.w, self.h)
+            manager_list, self.colorCodes, self.w, self.h)
 
         # create display surface
         self.display_surface = pygame.display.set_mode((self.h, self.w))
@@ -107,7 +120,8 @@ class Map:
         self.updateMap()
 
     def updateMap(self):
-        surface = pygame.surfarray.make_surface(self.map_utilities._pixel_arr)
+        surface = pygame.surfarray.make_surface(
+            numpy.asarray(self.map_utilities._pixel_arr))
         self.display_surface.blit(surface, (0, 0))
         pygame.display.update()
 
