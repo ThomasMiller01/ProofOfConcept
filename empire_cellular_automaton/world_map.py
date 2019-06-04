@@ -2,6 +2,7 @@ import numpy
 from random import randint
 import pygame
 import multiprocessing as mp
+import ctypes
 
 
 class Map_Utilities:
@@ -87,18 +88,27 @@ class Map:
         self.w = self._pixel_arr.shape[1]
 
         # settings up map_utilities obj for shared memory
-        manager = mp.Manager()
+        mp_array = mp.Array(ctypes.c_int, self._pixel_arr.shape[0])
+        arr = numpy.frombuffer(mp_array.get_obj())
 
-        manager_list = manager.list()
+        i = 0
+        j = 0
+
         for x in self._pixel_arr:
-            tmp_list = []
+            mp_tmp_list = mp.Array(ctypes.c_int, x.__len__())
+            tmp_list = numpy.frombuffer(mp_tmp_list.get_obj())
             for y in x:
-                tmp_list.append([y[0], y[1], y[2]])
-            manager_list.append(tmp_list)
+                mp_empty_arr = mp.Array(ctypes.c_int, 10)
+                empty_arr = numpy.frombuffer(mp_empty_arr.get_obj())
+                empty_arr = [y[0], y[1], y[2]]
+                tmp_list[j] = empty_arr
+                j += 1
+            arr[i] = tmp_list
+            i += 1
 
         # create map_utilities obj
         self.map_utilities = Map_Utilities(
-            manager_list, self.colorCodes, self.w, self.h)
+            mp_array, self.colorCodes, self.w, self.h)
 
         # create display surface
         self.display_surface = pygame.display.set_mode((self.h, self.w))

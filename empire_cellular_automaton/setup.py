@@ -68,8 +68,6 @@ if __name__ == "__main__":
         _colonys.append(colony.Colony(
             i, colonys[i][0], colonys[i][2], colonys[i][1], colonys[i][3][0], colonys[i][3][1], _map_utilities))
 
-    # set loop
-    loop = asyncio.get_event_loop()
     percentages = []
     # get starting percentage
     for _colony in _colonys:
@@ -110,7 +108,6 @@ if __name__ == "__main__":
         _map.updateMap()
         clock.tick(1000)
     # close loop
-    loop.close()
 
     # update map
     _map.updateMap()

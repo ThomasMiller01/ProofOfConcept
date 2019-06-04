@@ -1,62 +1,58 @@
-# import pygame module in this program
-import pygame
+import ctypes
+import multiprocessing as mp
+
+from contextlib import closing
+
+import numpy as np
 
 
-def getPixelArray(filename):
-    image = pygame.image.load(filename)
-    return pygame.surfarray.array3d(image)
+def main():
+    # create shared array
+    N, M = 10, 11
+    shared_arr = mp.Array(ctypes.c_double, N)
+    arr = tonumpyarray(shared_arr)
+
+    # fill with random values
+    arr[:] = np.random.uniform(size=N)
+    arr_orig = arr.copy()
+
+    # write to arr from different processes
+    with closing(mp.Pool(initializer=init, initargs=(shared_arr,))) as p:
+        # many processes access the same slice
+        stop_f = N // 10
+        p.map_async(f, [slice(stop_f)]*M)
+
+        # many processes access different slices of the same array
+        step = N // 10
+        p.map_async(g, [slice(i, i + step) for i in range(stop_f, N, step)])
+    p.join()
+    print("shared:", tonumpyarray(shared_arr))
+    print("origin:", arr_orig)
 
 
-# activate the pygame library .
-# initiate pygame and give permission
-# to use pygame's functionality.
-pygame.init()
+def init(shared_arr_):
+    global shared_arr
+    shared_arr = shared_arr_  # must be inherited, not passed as an argument
 
-# define the RGB value
-# for white colour
-white = (255, 255, 255)
 
-# assigning values to X and Y variable
-X = 1000
-Y = 700
+def tonumpyarray(mp_arr):
+    return np.frombuffer(mp_arr.get_obj())
 
-# create the display surface object
-# of specific dimension..e(X, Y).
-display_surface = pygame.display.set_mode((X, Y))
 
-# set the pygame window name
-pygame.display.set_caption('Image')
+def f(i):
+    """synchronized."""
+    with shared_arr.get_lock():  # synchronize access
+        g(i)
 
-# create a surface object, image is drawn on it.
-image = pygame.image.load("empire_cellular_automaton/map.jpg")
 
-i = 0
-j = 0
+def g(i):
+    """no synchronization."""
+    print("start %s" % (i,))
+    arr = tonumpyarray(shared_arr)
+    arr[i] = -1 * arr[i]
+    print("end   %s" % (i,))
 
-# infinite loop
-while True:
 
-    # completely fill the surface object
-    # with white colour
-    display_surface.fill(white)
-
-    # copying the image surface object
-    # to the display surface object at
-    # (0, 0) coordinate.
-
-    # iterate over the list of Event objects
-    # that was returned by pygame.event.get() method.
-
-    pixels = getPixelArray("empire_cellular_automaton/map.jpg")
-    while True:
-
-        pixels[i][j] = [255, 255, 255]
-        i += 1
-        j += 1
-
-        surface = pygame.surfarray.make_surface(pixels)
-
-        display_surface.blit(surface, (0, 0))
-
-        # Draws the surface object to the screen.
-        pygame.display.update()
+if __name__ == '__main__':
+    mp.freeze_support()
+    main()
