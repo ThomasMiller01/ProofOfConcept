@@ -16,7 +16,7 @@ class Map_Utilities:
         # return pixel of x and y
         with self._pixel_arr.get_lock():
             i = (self.w * y - (self.w - x)) * 3 - 3
-            return self._pixel_arr[i:i+3:1]
+            return self._pixel_arr[i:i+3]
 
     def updatePixel(self, x, y, color):
         # set pixel color
@@ -84,8 +84,8 @@ class Map:
         self._pixel_arr = pygame.surfarray.array3d(self._image)
 
         # set image dimensions
-        self.h = self._pixel_arr.shape[0]
-        self.w = self._pixel_arr.shape[1]
+        self.h = self._pixel_arr.shape[1]
+        self.w = self._pixel_arr.shape[0]
 
         # settings up array for shared memory
         mp_array = mp.Array(ctypes.c_ubyte, self.h * self.w * 3)
