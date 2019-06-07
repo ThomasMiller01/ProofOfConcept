@@ -102,8 +102,8 @@ class Particle:
         self.ray_casts = []
 
     def update(self, x, y, angleMin, angleMax, walls):
-        self.pt_obj = self.canvas2d.create_oval(x - 2, y - 2, x + 2, y + 2)
-        self.pt = self.canvas2d.coords(self.pt_obj)
+        self.pt_obj = self.canvas2d.create_oval(x - 5, y - 5, x + 5, y + 5)
+        self.pt = [x, y]
         self.angleMin = angleMin
         self.angleMax = angleMax
 
