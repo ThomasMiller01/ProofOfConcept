@@ -15,13 +15,13 @@ class Map_Utilities:
     def getPixel(self, x, y):
         # return pixel of x and y
         with self._pixel_arr.get_lock():
-            i = (self.w * y - (self.w - x)) * 3 - 3
+            i = (x * self.h * 3 + y * 3 + 0)
             return self._pixel_arr[i:i+3]
 
     def updatePixel(self, x, y, color):
         # set pixel color
         with self._pixel_arr.get_lock():
-            i = (self.w * y - (self.w - x)) * 3 - 3
+            i = (x * self.h * 3 + y * 3 + 0)
             self._pixel_arr[i:i+3] = color
 
     def getRandomNeighbour(self, pixel):
@@ -126,8 +126,9 @@ class Map:
 
     def getColorPercentage(self, color):
         allColor = []
+        pix_arr = self.arr.reshape(self.h, self.w, 3)
         # foreach pixel
-        for x in self._pixel_arr:
+        for x in pix_arr:
             for y in x:
                 # if pixel matches color append pixel to allColor
                 if y.item(0) == color[0] and y.item(1) == color[1] and y.item(2) == color[2]:
