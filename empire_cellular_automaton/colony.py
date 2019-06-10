@@ -17,11 +17,13 @@ class Colony:
 
         # check if the colony start on land
         if self._map.getPixelState([[self.x, self.y], self._map.getPixel(self.x, self.y)]) != 'empty':
-            # colony would not start on empty land ...
+            # colony can not start on empty land ...
             raise
         else:
             # set startpoint with color
             self._map.updatePixel(self.x, self.y, color)
+
+        self._map.updatePixel(self.x, self.y, color)
 
         # create person in range(0, population_nmb)
         for i in range(0, self.population):

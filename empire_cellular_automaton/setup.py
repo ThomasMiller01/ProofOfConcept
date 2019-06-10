@@ -11,8 +11,10 @@ def main(generation):
     print('---------------------')
     pool = mp.Pool(mp.cpu_count())
 
+    # results = pool.starmap(
+    #     myTask, [(_colony, 100, generation) for _colony in _colonys])
     results = pool.starmap(
-        myTask, [(_colony, 100, generation) for _colony in _colonys])
+        myTask, [(_colonys[0], 100, generation)])
     print(results)
     print('---------------------')
     for _colony in results:
@@ -25,6 +27,7 @@ def main(generation):
 
 # task for doing one generation with count=years
 def myTask(_c, count, generation):
+    print("task called")
     for i in range(0, count):
         _c.update(generation)
     return [_c.name, _c.population]
