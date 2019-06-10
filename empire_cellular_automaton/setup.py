@@ -11,10 +11,8 @@ def main(generation):
     print('---------------------')
     pool = mp.Pool(mp.cpu_count())
 
-    # results = pool.starmap(
-    #     myTask, [(_colony, 100, generation) for _colony in _colonys])
     results = pool.starmap(
-        myTask, [(_colonys[0], 100, generation)])
+        myTask, [(_colony, 100, generation) for _colony in _colonys])
     print(results)
     print('---------------------')
     for _colony in results:
