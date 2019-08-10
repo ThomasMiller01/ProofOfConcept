@@ -9,6 +9,8 @@ let nextPoint = null;
 let index = 0;
 let nextIndex = 0;
 
+// test123
+
 function setup() {
   createCanvas(800, 800);
 
