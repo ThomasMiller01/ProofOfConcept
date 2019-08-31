@@ -7,14 +7,64 @@ let currentNeighbours = [];
 
 let lastNode;
 
+let _path = [];
+
+let start = "A";
+let end = "F";
+
+let i = 0;
+
 function setup() {
   createCanvas(800, 400);
   init_graph();
   draw_graph();
-  djikstra("A", "F");
+  init_dijkstra();
 }
 
-function djikstra(start, end) {
+function draw() {
+  i++;
+  if (i % 50 === 0) {
+    draw_graph();
+
+    let currentNodePos = graph.nodePos.get(currentNode);
+    stroke("rgb(0,255,0)");
+    fill("rgb(0,255,0)");
+    currentNeighbours.forEach(neighbour => {
+      let neighbourPos = graph.nodePos.get(neighbour.name);
+      ellipse(neighbourPos.x, neighbourPos.y, 20, 20);
+      line(currentNodePos.x, currentNodePos.y, neighbourPos.x, neighbourPos.y);
+    });
+
+    stroke("red");
+    fill("red");
+    ellipse(currentNodePos.x, currentNodePos.y, 20, 20);
+
+    currentNode = calculation_queue[0].name;
+    currentNeighbours = calculation_queue.find(findNode)["neighbours"];
+
+    let pos1 = graph.nodePos.get(
+      finished_queue[finished_queue.length - 1].name
+    );
+    let pos2 = graph.nodePos.get(currentNode);
+    stroke(color(0, 0, 255));
+    line(pos1.x, pos1.y, pos2.x, pos2.y);
+    calculate_cost();
+
+    if (calculation_queue.length === 0) {
+      draw_graph();
+      draw_path();
+      finished_queue = [];
+      calculation_queue = [];
+      currentNode = undefined;
+      currentNeighbours = [];
+      lastNode = undefined;
+      _path = [];
+      init_dijkstra();
+    }
+  }
+}
+
+function init_dijkstra() {
   let vertice_keys = graph.nodes.keys();
   for (let vertice_key of vertice_keys) {
     let neighbours = [];
@@ -38,12 +88,11 @@ function djikstra(start, end) {
   currentNode = start;
   currentNeighbours = calculation_queue.find(findNode)["neighbours"];
   calculate_cost();
-  do {
-    currentNode = calculation_queue[0].name;
-    currentNeighbours = calculation_queue.find(findNode)["neighbours"];
-    calculate_cost();
-  } while (calculation_queue.length != 0);
-  let _path = [];
+}
+
+function draw_path() {
+  stroke(255, 204, 0);
+  fill(255, 204, 0);
   let tmp_node = finished_queue[getNodeIndex(finished_queue, { name: end })];
   _path.push(tmp_node.name);
   let next = tmp_node["cost"]["name"];
@@ -52,7 +101,13 @@ function djikstra(start, end) {
     _path.push(node["name"]);
     next = node["cost"]["name"];
   }
-  console.log("_path", _path);
+  for (let i = 0; i < _path.length - 1; i++) {
+    let pos = graph.nodePos.get(_path[i]);
+    let pos2 = graph.nodePos.get(_path[i + 1]);
+    ellipse(pos.x, pos.y, 20, 20);
+    line(pos.x, pos.y, pos2.x, pos2.y);
+    ellipse(pos2.x, pos2.y, 20, 20);
+  }
 }
 
 function calculate_cost() {
