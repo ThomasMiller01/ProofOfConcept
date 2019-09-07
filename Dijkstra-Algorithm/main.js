@@ -23,7 +23,7 @@ function setup() {
 
 function draw() {
   i++;
-  if (i % 50 === 0) {
+  if (i % 30 === 0) {
     draw_graph();
 
     let currentNodePos = graph.nodePos.get(currentNode);
