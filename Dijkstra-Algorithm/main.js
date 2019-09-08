@@ -2,17 +2,17 @@ let graph;
 let finished_queue = [];
 let calculation_queue = [];
 
-let currentNode;
-let currentNeighbours = [];
+let dists = {};
+let parents = {};
 
-let lastNode;
+let startNode = "A";
+let endNode = "F";
+
+let currentNode = startNode;
 
 let _path = [];
 
-let start = "A";
-let end = "F";
-
-let i = 0;
+let j = 0;
 
 function setup() {
   createCanvas(800, 400);
@@ -22,158 +22,125 @@ function setup() {
 }
 
 function draw() {
-  i++;
-  if (i % 30 === 0) {
+  if (j % 20 == 0) {
     draw_graph();
 
-    let currentNodePos = graph.nodePos.get(currentNode);
-    stroke("rgb(0,255,0)");
-    fill("rgb(0,255,0)");
-    currentNeighbours.forEach(neighbour => {
-      let neighbourPos = graph.nodePos.get(neighbour.name);
-      ellipse(neighbourPos.x, neighbourPos.y, 20, 20);
-      line(currentNodePos.x, currentNodePos.y, neighbourPos.x, neighbourPos.y);
-    });
+    if (calculation_queue.length == 0) {
+      console.log("finished!!!");
+      finishedPath();
+      console.log(_path);
+      console.log(parents);
+      let lastNode = _path[0];
+      _path.forEach(node => {
+        stroke("yellow");
+        fill("yellow");
 
-    stroke("red");
-    fill("red");
-    ellipse(currentNodePos.x, currentNodePos.y, 20, 20);
+        let pos1 = graph.nodePos.get(lastNode);
+        let pos2 = graph.nodePos.get(node);
+        ellipse(pos2.x, pos2.y, 20, 20);
+        ellipse(pos1.x, pos1.y, 20, 20);
+        line(pos1.x, pos1.y, pos2.x, pos2.y);
+      });
+      noLoop();
+    } else {
+      currentNode = getMin(calculation_queue);
+      calculation_queue.splice(calculation_queue.indexOf(currentNode), 1);
 
-    currentNode = calculation_queue[0].name;
-    currentNeighbours = calculation_queue.find(findNode)["neighbours"];
+      getNeighbours(currentNode).forEach(neighbour => {
+        stroke("green");
+        fill("green");
+        ellipse(
+          graph.nodePos.get(neighbour.name).x,
+          graph.nodePos.get(neighbour.name).y,
+          20,
+          20
+        );
+        let pos1 = graph.nodePos.get(currentNode);
+        let pos2 = graph.nodePos.get(neighbour.name);
+        stroke("green");
+        line(pos1.x, pos1.y, pos2.x, pos2.y);
+        updateDist(neighbour);
+      });
 
-    let pos1 = graph.nodePos.get(
-      finished_queue[finished_queue.length - 1].name
-    );
-    let pos2 = graph.nodePos.get(currentNode);
-    stroke(color(0, 0, 255));
-    line(pos1.x, pos1.y, pos2.x, pos2.y);
-    calculate_cost();
+      stroke("blue");
+      fill("blue");
+      ellipse(
+        graph.nodePos.get(currentNode).x,
+        graph.nodePos.get(currentNode).y,
+        20,
+        20
+      );
 
-    if (calculation_queue.length === 0) {
-      draw_graph();
-      draw_path();
-      finished_queue = [];
-      calculation_queue = [];
-      currentNode = undefined;
-      currentNeighbours = [];
-      lastNode = undefined;
-      _path = [];
-      init_dijkstra();
+      stroke("yellow");
+      fill("yellow");
+      ellipse(
+        graph.nodePos.get(startNode).x,
+        graph.nodePos.get(startNode).y,
+        20,
+        20
+      );
+      ellipse(
+        graph.nodePos.get(endNode).x,
+        graph.nodePos.get(endNode).y,
+        20,
+        20
+      );
     }
   }
+  j++;
+}
+
+function finishedPath() {
+  _path.push(parents[endNode]);
+  let node = endNode;
+  while (parents[node] != undefined) {
+    u = parents[node];
+    _path.push(u);
+  }
+  _path.reverse();
+}
+
+function updateDist(neighbour) {
+  let dist = dists[currentNode] + neighbour.weight;
+  if (dist < dists[neighbour.name]) {
+    dists[neighbour.name] = dist;
+    parents[neighbour.name] = currentNode;
+  }
+}
+
+function getNeighbours(node) {
+  console.log(node);
+  let neighbours = [];
+  for (let edge of graph.nodes.get(node)) {
+    neighbours.push({ name: edge.name, weight: edge.weight });
+  }
+  return neighbours;
+}
+
+function getMin(keys) {
+  let minKey = keys[0];
+  let min = dists[minKey];
+  keys.forEach(key => {
+    if (min > dists[key] && calculation_queue.indexOf(key) != -1) {
+      minKey = key;
+      min = dists[minKey];
+    }
+  });
+  return minKey;
 }
 
 function init_dijkstra() {
-  let vertice_keys = graph.nodes.keys();
-  for (let vertice_key of vertice_keys) {
-    let neighbours = [];
-    for (let edge of graph.nodes.get(vertice_key)) {
-      neighbours.push({ name: edge.name, weight: edge.weight });
-    }
-    let amount = Infinity;
-    if (vertice_key === start) {
-      amount = 0;
-    }
-    calculation_queue.push({
-      name: vertice_key,
-      neighbours: neighbours,
-      cost: {
-        amount: amount,
-        name: ""
-      }
-    });
-  }
-  calculation_queue.sort(compareNodes);
-  currentNode = start;
-  currentNeighbours = calculation_queue.find(findNode)["neighbours"];
-  calculate_cost();
-}
-
-function draw_path() {
-  stroke(255, 204, 0);
-  fill(255, 204, 0);
-  let tmp_node = finished_queue[getNodeIndex(finished_queue, { name: end })];
-  _path.push(tmp_node.name);
-  let next = tmp_node["cost"]["name"];
-  while (next !== "") {
-    let node = finished_queue[getNodeIndex(finished_queue, { name: next })];
-    _path.push(node["name"]);
-    next = node["cost"]["name"];
-  }
-  for (let i = 0; i < _path.length - 1; i++) {
-    let pos = graph.nodePos.get(_path[i]);
-    let pos2 = graph.nodePos.get(_path[i + 1]);
-    ellipse(pos.x, pos.y, 20, 20);
-    line(pos.x, pos.y, pos2.x, pos2.y);
-    ellipse(pos2.x, pos2.y, 20, 20);
-  }
-}
-
-function calculate_cost() {
-  let index;
-  currentNeighbours.forEach(neighbour => {
-    if (neighbour.name !== lastNode) {
-      index = getNodeIndex(calculation_queue, neighbour);
-      if (index !== null) {
-        let node = calculation_queue[index];
-        let currentNodeObj =
-          calculation_queue[
-            getNodeIndex(calculation_queue, { name: currentNode })
-          ];
-        let cost;
-        let cost_amount_tmp =
-          currentNodeObj["cost"]["amount"] + neighbour["weight"];
-        if (node["cost"]["amount"] < cost_amount_tmp) {
-          cost = {
-            amount: node["cost"]["amount"],
-            name: currentNodeObj["cost"]["name"]
-          };
-        } else {
-          cost = {
-            amount: cost_amount_tmp,
-            name: currentNode
-          };
-        }
-        let new_neighbour = {
-          name: node["name"],
-          neighbours: node["neighbours"],
-          cost: cost
-        };
-        calculation_queue[index] = new_neighbour;
-      } else {
-        console.log("null");
-      }
+  let q = [];
+  graph.nodes.forEach((value, key) => {
+    let node = key;
+    dists[node] = Infinity;
+    parents[node] = null;
+    if (node != startNode) {
+      q.push(node);
     }
   });
-  let currentNodeIndex = getNodeIndex(calculation_queue, { name: currentNode });
-  finished_queue.push(calculation_queue[currentNodeIndex]);
-  calculation_queue.splice(currentNodeIndex, 1);
-  lastNode = currentNode;
-}
-
-function getNodeIndex(list, node) {
-  let index = null;
-  list.forEach(_node => {
-    if (_node.name === node.name) {
-      index = list.indexOf(_node);
-      return;
-    }
-  });
-  return index;
-}
-
-function findNode(node) {
-  if (node.name === currentNode) {
-    return true;
-  }
-  return false;
-}
-
-function compareNodes(node1, node2) {
-  if (node1["cost"]["amount"] > node2["cost"]["amount"]) return 1;
-  if (node1["cost"]["amount"] < node2["cost"]["amount"]) return -1;
-  if (node1["cost"]["amount"] === node2["cost"]["amount"]) return 0;
+  dists[startNode] = 0;
+  calculation_queue = q;
 }
 
 function draw_graph() {

@@ -21,6 +21,8 @@ class Node {
     this.name = name;
     this.x = x;
     this.y = y;
+    this.dist = null;
+    this.parent = null;
   }
 }
 
