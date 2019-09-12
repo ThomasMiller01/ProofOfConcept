@@ -1,39 +1,44 @@
-let gridSize = 30;
-
 let snake;
+let scl = 20;
 
-let dirDict = ["up", "right", "down", "left"];
-
-let currentDir = dirDict[Math.floor(Math.random() * dirDict.length)];
-
-let i = 0;
+let food;
 
 function setup() {
   createCanvas(800, 800);
-  snake = new Snake(3, 6, width / gridSize);
+  snake = new Snake();
+  frameRate(10);
+  pickLocation();
 }
 
 function draw() {
-  if (i % 20 == 0) {
-    if (snake.isAlive()) {
-      background("black");
-      snake.update(currentDir);
-      snake.draw();
-    } else {
-      noLoop();
-    }
+  background(51);
+
+  if (snake.eat(food)) {
+    pickLocation();
   }
-  i++;
+  snake.death();
+  snake.update();
+  snake.show();
+
+  fill(255, 0, 100);
+  rect(food.x, food.y, scl, scl);
+}
+
+function pickLocation() {
+  var cols = floor(width / scl);
+  var rows = floor(height / scl);
+  food = createVector(floor(random(cols)), floor(random(rows)));
+  food.mult(scl);
 }
 
 function keyPressed() {
   if (keyCode === UP_ARROW) {
-    currentDir = dirDict[0];
-  } else if (keyCode === RIGHT_ARROW) {
-    currentDir = dirDict[1];
+    snake.dir(0, -1);
   } else if (keyCode === DOWN_ARROW) {
-    currentDir = dirDict[2];
+    snake.dir(0, 1);
+  } else if (keyCode === RIGHT_ARROW) {
+    snake.dir(1, 0);
   } else if (keyCode === LEFT_ARROW) {
-    currentDir = dirDict[3];
+    snake.dir(-1, 0);
   }
 }
