@@ -7,7 +7,7 @@ def star(t, points=5):
     starXY = [100, 100]
     tmp_pts = []
     for i in range(0, points * 2 + 1):
-        r = radius * ((points * 2 + 1 - i) % 2 + 1) / 2
+        r = radius * ((points * 2 + 1 - i) % 2 + 0.2) / 2
         omega = alpha * (points * 2 + 1 - i)
         x = r * np.sin(omega) + starXY[0]
         y = r * np.cos(omega) + starXY[1]

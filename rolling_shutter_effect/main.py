@@ -13,7 +13,7 @@ line_func = None
 
 def init(t):
     global corner_pts
-    corner_pts = figures.star(t, 8)
+    corner_pts = figures.star(t, 6)
 
 
 def init_func():
@@ -50,12 +50,17 @@ def show_plot(red_pts=None, red_pts_only=False):
             plt.annotate(txt, (ptsX[i], ptsY[i]))
         i = 0
 
+    # show red points
     if red_pts:
         rPtsX = []
         rPtsY = []
         for rPt in red_pts:
-            rPtsX.append(rPt[0])
-            rPtsY.append(rPt[1])
+            if rPt[0] is 'p':
+                rPtsX.append(rPt[1][0])
+                rPtsY.append(rPt[1][1])
+            elif rPt[0] is 'l':
+                x = np.linspace(rPt[1][0][0], rPt[1][1][0], 100)
+                plt.plot(x, 0*x+rPt[1][0][1], '-r')
         plt.scatter(rPtsX, rPtsY, s=10)
 
     # show star lines
@@ -63,7 +68,7 @@ def show_plot(red_pts=None, red_pts_only=False):
         for func in corner_funcs:
             x = np.linspace(func[1][0][0], func[1][1][0], 100)
             i = i + 1
-            plt.plot(x, func[0][0]*x+func[0][1], '-r',
+            plt.plot(x, func[0][0]*x+func[0][1], '-g',
                      label=str(i) + ' - ' + str(i + 1))
 
     # show marker line
@@ -106,9 +111,26 @@ def get_intersection():
     return pts
 
 
+def manage_intersection_points(pts):
+    all_pts = []
+    add_next = None
+    sorted_pts = sorted(pts, key=lambda x: (x[0]))
+    for pt in sorted_pts:
+        if pt in corner_pts:
+            all_pts.append(('p', pt))
+        else:
+            if not add_next:
+                add_next = pt
+            else:
+                all_pts.append(('l', (add_next, pt)))
+                add_next = None
+    return all_pts
+
+
 if __name__ == '__main__':
     degree = 0
     init(degree * np.pi / 180)
+    # show_plot()
     init_func()
     intersections = []
     minX = np.amin(np.asarray(corner_pts), axis=0)[1]
@@ -122,7 +144,8 @@ if __name__ == '__main__':
         init(degree * np.pi / 180)
         init_func()
         line_func = t
-        intersection = get_intersection()
+        intersection = manage_intersection_points(get_intersection())
         intersections.extend(intersection)
+        # show_plot(intersections)
     # show_plot(intersections)
     show_plot(intersections, True)
