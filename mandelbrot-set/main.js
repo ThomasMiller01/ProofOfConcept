@@ -63,8 +63,10 @@ function draw() {
 
       // --- coloring ---
       // let rgb = color_grey(n)
-      let rgb = color_rgb(n);
+      // let rgb = color_rgb(n);
       // let rgb = color_weird(n, a, b);
+      // let rgb = color_weird2(n, a);
+      let rgb = color_test(n);
 
       var pix = (x + y * w) * 4;
       pixels[pix + 0] = rgb.r;
