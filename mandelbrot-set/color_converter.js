@@ -1,3 +1,32 @@
+function hslToRgb(h, s, l) {
+  var r, g, b;
+
+  if (s == 0) {
+    r = g = b = l; // achromatic
+  } else {
+    var hue2rgb = function hue2rgb(p, q, t) {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    };
+
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1 / 3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1 / 3);
+  }
+
+  return {
+    r: Math.round(r * 255),
+    g: Math.round(g * 255),
+    b: Math.round(b * 255)
+  };
+}
+
 function HSBToRGB(_h, _s, _b) {
   var rgb = {};
   var h = Math.round(_h);
@@ -47,7 +76,7 @@ function HSBToRGB(_h, _s, _b) {
   return { r: Math.round(rgb.r), g: Math.round(rgb.g), b: Math.round(rgb.b) };
 }
 
-function HSVtoRGB(h, s, v) {
+function HSVtoRGB1(h, s, v) {
   var r, g, b, i, f, p, q, t;
   if (arguments.length === 1) {
     (s = h.s), (v = h.v), (h = h.h);
@@ -82,4 +111,29 @@ function HSVtoRGB(h, s, v) {
     g: Math.round(g * 255),
     b: Math.round(b * 255)
   };
+}
+
+function HSVtoRGB2(h, s, v) {
+  if (v > 1.0) v = 1.0;
+  var hp = h / 60.0;
+  var c = v * s;
+  var x = c * (1 - Math.abs((hp % 2) - 1));
+  var rgb = [0, 0, 0];
+
+  if (0 <= hp && hp < 1) rgb = [c, x, 0];
+  if (1 <= hp && hp < 2) rgb = [x, c, 0];
+  if (2 <= hp && hp < 3) rgb = [0, c, x];
+  if (3 <= hp && hp < 4) rgb = [0, x, c];
+  if (4 <= hp && hp < 5) rgb = [x, 0, c];
+  if (5 <= hp && hp < 6) rgb = [c, 0, x];
+
+  var m = v - c;
+  rgb[0] += m;
+  rgb[1] += m;
+  rgb[2] += m;
+
+  rgb[0] *= 255;
+  rgb[1] *= 255;
+  rgb[2] *= 255;
+  return { r: rgb[0], g: rgb[1], b: rgb[2] };
 }

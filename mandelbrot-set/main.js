@@ -1,7 +1,7 @@
 let minValue = -2;
 let maxValue = 2;
 
-let speed = 20;
+let speed = 10;
 
 let zoom = 100;
 
@@ -13,8 +13,8 @@ let yPos = -0.000000000000001657124692954186923258109619812791890265042901273757
 // let xPos = 0;
 // let yPos = 0;
 
-let maxIterations = 240;
-let escapeInterations = 16;
+let maxIterations = 100;
+let escapeInterations = 4;
 
 let w;
 let h;
@@ -45,34 +45,42 @@ function draw() {
       let ca = a;
       let cb = b;
 
-      let n = 0;
+      let n;
 
       for (n = 0; n < maxIterations; n++) {
-        let aa = a * a - b * b;
-        let bb = 2 * a * b;
+        let realComponent = a * a - b * b;
+        let imaginaryComponent = 2 * a * b;
 
-        a = aa + ca;
-        b = bb + cb;
+        a = realComponent + ca;
+        b = imaginaryComponent + cb;
 
-        if (abs(a - b) > escapeInterations) {
+        if (abs(realComponent - imaginaryComponent) > escapeInterations) {
           break;
         }
+      }
 
-        n++;
+      for (let e = 0; e < 4; e++) {
+        let realComponent = a * a - b * b;
+        let imaginaryComponent = 2 * a * b;
+
+        a = realComponent + ca;
+        b = imaginaryComponent + cb;
       }
 
       // --- coloring ---
-      // let rgb = color_grey(n)
+      // let rgb = color_grey(n);
       // let rgb = color_rgb(n);
+      let rgb = color_rgb_smooth(n, a * a, b * b);
       // let rgb = color_weird(n, a, b);
       // let rgb = color_weird2(n, a);
-      let rgb = color_test(n);
+      // let rgb = color_weird3(n, a * a, b * b);
+      // let rgb = color_test(n);
 
       var pix = (x + y * w) * 4;
       pixels[pix + 0] = rgb.r;
       pixels[pix + 1] = rgb.g;
       pixels[pix + 2] = rgb.b;
-      pixels[pix + 3] = 255;
+      pixels[pix + 3] = rgb.a;
     }
   }
   updatePixels();
