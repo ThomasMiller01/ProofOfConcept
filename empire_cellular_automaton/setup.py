@@ -1,20 +1,19 @@
 import asyncio
-import pygame
-
+import cv2
 import world_map
 import colony
 
-# [name, [r, g, b], population, [x, y]]
+# [name, [b, g, r], population, [y, x]]
 colonys = [
-    ['red', [255, 0, 0], 100, [675, 213]],
-    ['yellow', [255, 255, 0], 100, [506, 443]],
-    ['white', [255, 255, 255], 100, [138, 219]]
+    ['red', [0, 0, 255], 100, [200, 100]],
+    ['yellow', [0, 255, 255], 100, [400, 500]],
+    ['white', [255, 255, 255], 1000, [200, 700]]
 ]
 _colonys = []
 
 # get object of Map class
 _map = world_map.Map(
-    'empire_cellular_automaton/map.jpg', colonys)
+    'map.jpg', colonys)
 
 # foreach colony in colonys
 # create new Colony and append to _colonys
@@ -62,16 +61,9 @@ percentages = []
 for _colony in _colonys:
     percentages.append([_colony.name, _map.getColorPercentage(_colony.color)])
 i = 0
-clock = pygame.time.Clock()
 _map.updateMap()
 # while simulation is running
 while not isDone(percentages):
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            # quit pygame
-            pygame.quit()
-            # quit the program.
-            quit()
     print("---------------------")
     print("Generation: " + str(i + 1))
     print("---------------------")
@@ -93,7 +85,7 @@ while not isDone(percentages):
     i += 1
     # update map
     _map.updateMap()
-    clock.tick(1)
+    cv2.waitKey(0)
 # close loop
 loop.close()
 
@@ -101,7 +93,7 @@ loop.close()
 _map.updateMap()
 
 # quit pygame
-pygame.quit()
+cv2.destroyAllWindows()
 
 # quit the program.
 quit()
