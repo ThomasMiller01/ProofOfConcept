@@ -2,6 +2,7 @@ from random import randint
 import random
 from numpy import interp
 import disease
+from settings import *
 
 
 class Person:
@@ -14,7 +15,7 @@ class Person:
         self._strength = strength
         self._reproductionValue = reproductionValue
         self._old_reproductionValue = reproductionValue
-        self.reproductionThreshold = 118
+        self.reproductionThreshold = p_reproductionThreshold
         self._disease = disease
         self.x = x
         self.y = y
@@ -78,13 +79,15 @@ class Person:
                         if rndNmb == 0:
                             _disease = disease.disease()
                         else:
-                            _disease = None                        
+                            _disease = None
                     # return data, child person gets
                     return {'age': self._age, 'strength': mutation_strength, 'reproductionValue': mutation_reproductionsValue, 'disease': _disease, 'x': old_x, 'y': old_y}
                 else:
                     # if person only moves, set old place to empty place color
                     if self._setPixelColorBack:
-                        self._map.updatePixel(old_x, old_y, [5, 124, 0])
+                        # todo do it only if no other person from colony is on the place
+                        self._map.updatePixel(
+                            old_x, old_y, world_pixel['empty'])
                     return None
             else:
                 # person fights other colony

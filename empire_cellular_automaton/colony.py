@@ -2,6 +2,7 @@ from random import randint
 
 import person
 import disease
+from settings import *
 
 
 class Colony:
@@ -26,10 +27,11 @@ class Colony:
         # create person in range(0, population_nmb)
         for i in range(0, self.population):
             # init attributes
-            age = 0
-            strength = randint(0, 100)
-            reproductionValue = randint(0, 100)
-            if randint(0, 1) == 0:
+            age = p_age
+            strength = randint(p_strength[0], p_strength[1])
+            reproductionValue = randint(
+                p_reproductionValue[0], p_reproductionValue[1])
+            if randint(p_disease[0], p_disease[1]) == p_disease[2]:
                 _disease = disease.disease()
             else:
                 _disease = None
@@ -46,7 +48,7 @@ class Colony:
             # if person is dead, remove person and change pixel color
             if move == 'dead':
                 if _person._setPixelColorBack:
-                    self._map.updatePixel(_person.x, _person.y, [5, 124, 0])
+                    self._map.updatePixel(_person.x, _person.y, [0, 124, 5])
                 self.people.remove(_person)
             # if person needs to reproduce, create new person with given attributes
             elif move != None:

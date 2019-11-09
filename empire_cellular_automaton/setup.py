@@ -2,18 +2,13 @@ import asyncio
 import cv2
 import world_map
 import colony
+from settings import *
 
-# [name, [b, g, r], population, [y, x]]
-colonys = [
-    ['red', [0, 0, 255], 100, [200, 100]],
-    ['yellow', [0, 255, 255], 100, [400, 500]],
-    ['white', [255, 255, 255], 1000, [200, 700]]
-]
 _colonys = []
 
 # get object of Map class
-_map = world_map.Map(
-    'map.jpg', colonys)
+_map = world_map.Map(map_path, colonys)
+# cv2.waitKey(0)
 
 # foreach colony in colonys
 # create new Colony and append to _colonys
@@ -34,15 +29,15 @@ async def myTask(_c, count, generation):
 # create task for each colony
 async def main(generation):
     for _colony in _colonys:
-        asyncio.ensure_future(myTask(_colony, 100, generation))
+        asyncio.ensure_future(myTask(_colony, days_per_generation, generation))
 
 
 # check if simulation is done
 def isDone(percentage):
     _percentage = False
-    # if percentage of one colony is greater than 15, simulation is done
+    # if percentage of one colony is greater than ending_percentage, simulation is done
     for p in percentage:
-        if p[1] >= 15:
+        if p[1] >= ending_percentage:
             _percentage = True
     _c = []
     # if population of each colony is 0, simulation is done
@@ -85,7 +80,7 @@ while not isDone(percentages):
     i += 1
     # update map
     _map.updateMap()
-    cv2.waitKey(0)
+    cv2.waitKey(wait_time)
 # close loop
 loop.close()
 

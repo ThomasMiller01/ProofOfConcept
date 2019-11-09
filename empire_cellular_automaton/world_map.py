@@ -1,12 +1,14 @@
 import numpy
 from random import randint
 import cv2
+from settings import *
 
 
 class Map:
     def __init__(self, img, colonys):
         # init colorCodes for getPixelState()
-        self.colorCodes = {'[168, 0, 3]': 'water', '[0, 124, 5]': 'empty'}
+        self.colorCodes = {str(world_pixel['water']): 'water', str(
+            world_pixel['water']): 'empty'}
         # add foreach colony the colonys color code
         for colony in colonys:
             self.colorCodes[str(colony[1])] = colony[0]
@@ -25,13 +27,13 @@ class Map:
         nmb = 0
         for x in self._pixel_arr:
             for y in x:
-                if y.item(0) == 0 and y.item(1) == 124 and y.item(2) == 5:
+                if y.item(0) == world_pixel['empty'][0] and y.item(1) == world_pixel['empty'][1] and y.item(2) == world_pixel['empty'][2]:
                     nmb += 1
         self.land_pixel_nmb = nmb
         # show image
         self.updateMap()
 
-        cv2.setMouseCallback('Mouse', self.mouse_drawing)
+        cv2.setMouseCallback('Empire Cellular Automaton', self.mouse_drawing)
 
     def updateMap(self):
         cv2.imshow("Empire Cellular Automaton", self._pixel_arr)
@@ -76,7 +78,7 @@ class Map:
 
     def getPixel(self, x, y):
         # return pixel of x and y
-        return self._pixel_arr[x, y]
+        return self._pixel_arr[y, x]
 
     def getPixelState(self, pixel):
         # check pixel color in colorCodes
@@ -105,4 +107,3 @@ class Map:
         if event == cv2.EVENT_LBUTTONDOWN:
             print("Left click")
             print("x, y: ", x, y)
-            circles.append((x, y))
