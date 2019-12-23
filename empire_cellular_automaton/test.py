@@ -28,7 +28,7 @@ display_surface = pygame.display.set_mode((X, Y))
 pygame.display.set_caption('Image')
 
 # create a surface object, image is drawn on it.
-image = pygame.image.load("empire_cellular_automaton/map.jpg")
+image = pygame.image.load("map.jpg")
 
 i = 0
 j = 0
@@ -47,7 +47,7 @@ while True:
     # iterate over the list of Event objects
     # that was returned by pygame.event.get() method.
 
-    pixels = getPixelArray("empire_cellular_automaton/map.jpg")
+    pixels = getPixelArray("map.jpg")
     while True:
 
         pixels[i][j] = [255, 255, 255]

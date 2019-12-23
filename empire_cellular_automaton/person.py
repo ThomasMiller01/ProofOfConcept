@@ -107,7 +107,7 @@ class Person:
             else:
                 # else return new value
                 return _value
-        elif rnd_plus_minus == 1:
+        else:
             _value = value - rnd_amount
             # if rnd value is less than 0 return old value
             if _value < 0:
@@ -124,7 +124,7 @@ class Person:
             self._age += 1
             return None
         elif check == 'reproduction':
-            # if reproduction_value is bihher than reproduction_threshold, person needs to reproduce
+            # if reproduction_value is bigger than reproduction_threshold, person needs to reproduce
             if self._reproductionValue > self.reproductionThreshold:
                 self._reproductionValue = self._old_reproductionValue
                 return 'reproduction'

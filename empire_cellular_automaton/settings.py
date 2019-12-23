@@ -1,24 +1,11 @@
-# path to the map image
-map_path = 'map.jpg'
-
-# [name, [b, g, r], population, [y, x]]
-colonys = [
-    ['red', [0, 0, 255], 100, [464, 327]],
-    ['yellow', [0, 255, 255], 100, [139, 221]],
-    ['white', [255, 255, 255], 1000, [659, 201]]
-]
-
-# world pixel color
-world_pixel = {'water': [168, 0, 3], 'empty': [0, 124, 5]}
+# import what config you want to use
+# each config contains image_path and colonies
+from config1 import *
 
 days_per_generation = 100
 
 # percentage in %
 ending_percentage = 15
-
-# time between different frames
-# 0 = wait for key
-wait_time = 1000
 
 # person attributes
 p_age = 0
@@ -32,7 +19,7 @@ p_reproductionValue = [0, 100]
 # randint(p_disease[0], p_disease[1]) == p_disease[2]
 p_disease = [0, 1, 0]
 
-p_reproductionThreshold = 118
+p_reproductionThreshold = 100
 
 # different kinds of disease
 # 'Name': death rate

@@ -1,6 +1,6 @@
 import numpy
 from random import randint
-import cv2
+import pygame
 from settings import *
 
 
@@ -8,20 +8,30 @@ class Map:
     def __init__(self, img, colonys):
         # init colorCodes for getPixelState()
         self.colorCodes = {str(world_pixel['water']): 'water', str(
-            world_pixel['water']): 'empty'}
+            world_pixel['empty']): 'empty'}
         # add foreach colony the colonys color code
         for colony in colonys:
             self.colorCodes[str(colony[1])] = colony[0]
 
+        pygame.init()
+        pygame.font.init()
+
+        # font for stats
+        self.font = pygame.font.SysFont('Comic Sans MS', 20)
+
         # load image
-        self._image = cv2.imread(img)
+        self._image = pygame.image.load(img)
 
         # get 2d pixel array
-        self._pixel_arr = self._image
+        self._pixel_arr = pygame.surfarray.array3d(self._image)
 
         # set image dimensions
         self.h = self._pixel_arr.shape[0]
         self.w = self._pixel_arr.shape[1]
+
+        self.display_surface = pygame.display.set_mode((self.h, self.w))
+
+        pygame.display.set_caption('Empire Cellular Automaton ')
 
         # set earth pixel nmb for getColorPercentage()
         nmb = 0
@@ -30,13 +40,23 @@ class Map:
                 if y.item(0) == world_pixel['empty'][0] and y.item(1) == world_pixel['empty'][1] and y.item(2) == world_pixel['empty'][2]:
                     nmb += 1
         self.land_pixel_nmb = nmb
-        # show image
+
         self.updateMap()
 
-        cv2.setMouseCallback('Empire Cellular Automaton', self.mouse_drawing)
-
     def updateMap(self):
-        cv2.imshow("Empire Cellular Automaton", self._pixel_arr)
+        surface = pygame.surfarray.make_surface(self._pixel_arr)
+        self.display_surface.blit(surface, (0, 0))
+        pygame.display.update()
+
+    def updateStats(self, stats):
+        text = ['Gen: ' + str(stats['gen'])]
+        for i in range(0, len(stats['colonies'])):
+            text.append(str(stats['colonies'][i]._id) + ': ' +
+                        str(stats['colonies'][i].population))
+        surface = self.font.render(' - '.join(text), True, (255, 255, 255))
+        surface_rect = surface.get_rect()
+        self.display_surface.blit(surface, surface_rect)
+        pygame.display.update()
 
     def updatePixel(self, x, y, color):
         # set pixel color
@@ -78,7 +98,7 @@ class Map:
 
     def getPixel(self, x, y):
         # return pixel of x and y
-        return self._pixel_arr[y, x]
+        return self._pixel_arr[x, y]
 
     def getPixelState(self, pixel):
         # check pixel color in colorCodes
@@ -101,9 +121,3 @@ class Map:
         # calculate percentage
         percentage = allColorNmb / self.land_pixel_nmb * 100
         return round(percentage)
-
-    # method used for getting x and y value of mouse click
-    def mouse_drawing(self, event, x, y, flags, params):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            print("Left click")
-            print("x, y: ", x, y)
