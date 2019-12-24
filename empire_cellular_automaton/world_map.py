@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from random import randint
 import pygame
 from settings import *
@@ -47,7 +47,6 @@ class Map:
     def updateMap(self):
         surface = pygame.surfarray.make_surface(self._pixel_arr)
         self.display_surface.blit(surface, (0, 0))
-        pygame.display.update()
 
     def updateStats(self, stats):
         x = 5
@@ -57,6 +56,11 @@ class Map:
             'Generation: ' + str(stats['gen']), True, (255, 255, 255))
         self.display_surface.blit(surface, (x, y))
 
+        diseases = {}
+        all_people = 0
+        for disease in d_disease:
+            diseases[disease] = 0
+
         # render colony data
         for i in range(0, len(stats['colonies'])):
             surface = self.font.render('Colony ' + str(stats['colonies'][i]._id) + ': ' + str(
@@ -64,13 +68,30 @@ class Map:
             self.display_surface.blit(
                 surface, (x, 20 + y + self.font_size * i))
 
+            for disease in d_disease:
+                people_with_disease = [
+                    p for p in stats['colonies'][i].people if p._disease]
+                people_with_current_disease = [
+                    p for p in people_with_disease if p._disease.kind[0] == disease]
+                diseases[disease] += len(people_with_current_disease)
+
+            all_people += stats['colonies'][i].population
+
+        j = 0
+        for disease in diseases:
+            percentage = round(diseases[disease] /
+                               all_people * 100, 2)
+            surface = self.font.render(
+                disease + ': ' + str(diseases[disease]) + ', ' + str(percentage) + '%', True, (255, 255, 255))
+            self.display_surface.blit(
+                surface, (x, 40 + y + i * self.font_size + self.font_size * j))
+            j += 1
+
         pygame.display.update()
 
     def updatePixel(self, x, y, color):
         # set pixel color
-        self._pixel_arr[x, y].itemset(0, color[0])
-        self._pixel_arr[x, y].itemset(1, color[1])
-        self._pixel_arr[x, y].itemset(2, color[2])
+        self._pixel_arr[x, y] = color
 
     def getRandomNeighbour(self, pixel):
         x = -1
@@ -102,11 +123,7 @@ class Map:
             elif rnd == 7:  # oben links
                 x = pixel[0] - 1
                 y = pixel[1] + 1
-        return [[x, y], self.getPixel(x, y)]
-
-    def getPixel(self, x, y):
-        # return pixel of x and y
-        return self._pixel_arr[x, y]
+        return [[x, y], self._pixel_arr[x, y]]
 
     def getPixelState(self, pixel):
         # check pixel color in colorCodes

@@ -1,6 +1,6 @@
 # import what config you want to use
 # each config contains image_path and colonies
-from config1 import *
+from config2 import *
 
 days_per_generation = 100
 
@@ -14,12 +14,17 @@ p_age = 0
 p_strength = [0, 100]
 
 # randint(p_reproductionValue[0], p_reproductionValue[1])
-p_reproductionValue = [0, 100]
+p_reproductionValue = [0, 70]
 
+# probability for the person to get an disease
 # randint(p_disease[0], p_disease[1]) == p_disease[2]
-p_disease = [0, 1, 0]
+p_disease = [0, 10, 0]
 
-p_reproductionThreshold = 100
+# probability for the child to get the same disease
+# randint(p_child_disease[0], p_child_disease[1]) == p_child_disease[2]
+p_child_disease = [0, 10, 0]
+
+p_reproductionThreshold = 115
 
 # different kinds of disease
 # 'Name': death rate

@@ -26,14 +26,14 @@ class Person:
 
     def move(self, generation):
         # check if person needs to die / reproduce, increase age and reproduction_value
-        checkForAge = self.checkFor('age')
-        checkForReproduction = self.checkFor('reproduction')
-        checkForDisease = self.checkFor('disease')
-        checkForOwnTerritory = self.checkFor('ownTerritory')
-        # checkForAge = None
-        # checkForReproduction = None
-        # checkForDisease = None
-        # checkForOwnTerritory = None
+        # checkForAge = self.checkFor('age')
+        # checkForReproduction = self.checkFor('reproduction')
+        # checkForDisease = self.checkFor('disease')
+        # checkForOwnTerritory = self.checkFor('ownTerritory')
+        checkForAge = None
+        checkForReproduction = None
+        checkForDisease = None
+        checkForOwnTerritory = None
         # if person needs to die, return 'dead'
         if checkForAge == 'dead':
             return checkForAge
@@ -75,8 +75,9 @@ class Person:
                                 _disease = None
 
                     else:
-                        rndNmb = randint(0, 100)
-                        if rndNmb == 0:
+                        rndNmb = randint(
+                            p_child_disease[0], p_child_disease[1])
+                        if rndNmb == p_child_disease[2]:
                             _disease = disease.disease()
                         else:
                             _disease = None
@@ -140,7 +141,7 @@ class Person:
                     # get deathrate
                     deathRate = self._disease.getDeathRate() * 0.1
                     rndNmb = randint(0, 100)
-                    if rndNmb == deathRate:
+                    if rndNmb < deathRate:
                         return 'dead'
                     rate = self._disease.state * self._disease.strength * self._disease.getDeathRate()
                     _mapped = interp(rate, [0, 10000], [0, 1])
@@ -148,7 +149,6 @@ class Person:
                     self._age *= 1 + _mapped
                     return None
                 else:
-                    self._disease = None
                     return None
             else:
                 # person can get a disease here
@@ -174,7 +174,7 @@ class Person:
             # oben links
             xy.append([self.x - 1, self.y + 1])
             for _xy in xy:
-                if self._map.getPixelState([[], self._map.getPixel(_xy[0], _xy[1])]) != self._colonyName:
+                if self._map.getPixelState([[], self._map._pixel_arr[_xy[0], _xy[1]]]) != self._colonyName:
                     return None
             rnd = randint(0, 40)
             if rnd == 0:

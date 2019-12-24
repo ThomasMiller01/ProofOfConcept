@@ -17,7 +17,7 @@ class Colony:
         self.people = []
 
         # check if the colony start on land
-        if self._map.getPixelState([[self.x, self.y], self._map.getPixel(self.x, self.y)]) != 'empty':
+        if self._map.getPixelState([[self.x, self.y], self._map._pixel_arr[self.x, self.y]]) != 'empty':
             # colony would not start on empty land ...
             raise
         else:
@@ -35,7 +35,7 @@ class Colony:
                 _disease = disease.disease()
             else:
                 _disease = None
-            pixel = self._map.getPixel(self.x, self.y)
+            pixel = self._map._pixel_arr[self.x, self.y]
             self.people.append(person.Person(
                 i, self._id, self.name, age, strength, reproductionValue, _disease, self.x, self.y, self.color, self._map))
             self._map.updatePixel(self.x, self.y, self.color)

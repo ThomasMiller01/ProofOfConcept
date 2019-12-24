@@ -13,10 +13,10 @@ class disease:
         lowValue = 0
         self.kind = None
         for chance in self.allKinds:
-            if rndInt >= lowValue and rndInt <= lowValue + (self.allKinds[chance]):
+            if rndInt >= lowValue and rndInt <= lowValue + (100 - self.allKinds[chance]):
                 self.kind = [chance, self.allKinds[chance]]
                 break
-            lowValue += self.allKinds[chance]
+            lowValue += 100 - self.allKinds[chance]
         self.strength = randint(d_strength[0], d_strength[1])
         self.state = 0
 
