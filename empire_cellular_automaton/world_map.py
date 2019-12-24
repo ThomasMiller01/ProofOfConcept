@@ -17,7 +17,8 @@ class Map:
         pygame.font.init()
 
         # font for stats
-        self.font = pygame.font.SysFont('Comic Sans MS', 20)
+        self.font_size = 15
+        self.font = pygame.font.SysFont('calibri', self.font_size)
 
         # load image
         self._image = pygame.image.load(img)
@@ -31,7 +32,7 @@ class Map:
 
         self.display_surface = pygame.display.set_mode((self.h, self.w))
 
-        pygame.display.set_caption('Empire Cellular Automaton ')
+        pygame.display.set_caption('Empire Cellular Automaton')
 
         # set earth pixel nmb for getColorPercentage()
         nmb = 0
@@ -49,13 +50,20 @@ class Map:
         pygame.display.update()
 
     def updateStats(self, stats):
-        text = ['Gen: ' + str(stats['gen'])]
+        x = 5
+        y = 5
+        # render generation
+        surface = self.font.render(
+            'Generation: ' + str(stats['gen']), True, (255, 255, 255))
+        self.display_surface.blit(surface, (x, y))
+
+        # render colony data
         for i in range(0, len(stats['colonies'])):
-            text.append(str(stats['colonies'][i]._id) + ': ' +
-                        str(stats['colonies'][i].population))
-        surface = self.font.render(' - '.join(text), True, (255, 255, 255))
-        surface_rect = surface.get_rect()
-        self.display_surface.blit(surface, surface_rect)
+            surface = self.font.render('Colony ' + str(stats['colonies'][i]._id) + ': ' + str(
+                stats['colonies'][i].population) + ', ' + str(stats['percentage'][i][1]) + '%', True, (255, 255, 255))
+            self.display_surface.blit(
+                surface, (x, 20 + y + self.font_size * i))
+
         pygame.display.update()
 
     def updatePixel(self, x, y, color):

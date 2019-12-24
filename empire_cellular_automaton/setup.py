@@ -16,11 +16,6 @@ for i in range(0, colonys.__len__()):
 
 percentages = []
 
-# calculate percentages for stats
-for _colony in _colonys:
-    percentages.append(
-        [_colony.name, _map.getColorPercentage(_colony.color)])
-
 stats = {
     'gen': 0,
     'colonies': _colonys,

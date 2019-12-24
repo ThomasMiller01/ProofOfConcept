@@ -151,6 +151,7 @@ class Person:
                     self._disease = None
                     return None
             else:
+                # person can get a disease here
                 return None
         # check if person is surrounded by its own territory
         # if true delete person
