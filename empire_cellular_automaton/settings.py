@@ -1,11 +1,11 @@
 # import what config you want to use
 # each config contains image_path and colonies
-from config2 import *
+from config1 import *
 
 days_per_generation = 100
 
 # percentage in %
-ending_percentage = 15
+ending_percentage = 100
 
 # person attributes
 p_age = 0
