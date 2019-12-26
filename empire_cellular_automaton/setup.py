@@ -23,33 +23,24 @@ class setup:
 
         self.stats = {
             'gen': 0,
+            'day': 0,
             'colonies': self._colonies,
             'percentage': self.percentages
         }
 
-        # set loop
-        loop = asyncio.get_event_loop()
-
         # get starting percentage
-        for _colony in self._colonies:
-            self.percentages.append(
-                [_colony.name, self._map.getColorPercentage(_colony.color)])
+        self.getPercentages()
         i = 0
         self._map.updateMap()
+
         # while simulation is running
         while not self.isDone(self.percentages):
             self.stats['gen'] = i
             # init main task
-            loop.run_until_complete(self.main(i))
-            # clear percentage and append new percentage
-            self.percentages.clear()
-            for _colony in self._colonies:
-                self.percentages.append(
-                    [_colony.name, self._map.getColorPercentage(_colony.color)])
+            self.main(i)
+            self.getPercentages()
             # increase generation count
             i += 1
-        # close loop
-        loop.close()
 
         # update map
         self._map.updateMap()
@@ -58,10 +49,17 @@ class setup:
         pygame.quit()
         sys.exit(0)
 
+    # create task for each colony
+
+    def main(self, generation):
+        for _colony in self._colonies:
+            self.renderGeneration(_colony, days_per_generation, generation)
+
     # task for doing one generation with count=years
 
-    async def renderGeneration(self, _c, count, generation):
+    def renderGeneration(self, _c, count, generation):
         for i in range(0, count):
+            self.stats['day'] = i
             _c.update(generation)
             # update map
             self._map.updateMap()
@@ -76,13 +74,6 @@ class setup:
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit()
                         sys.exit(0)
-
-    # create task for each colony
-
-    async def main(self, generation):
-        for _colony in self._colonies:
-            asyncio.ensure_future(self.renderGeneration(
-                _colony, days_per_generation, generation))
 
     # check if simulation is done
 
@@ -100,6 +91,12 @@ class setup:
         if _c.__len__() == colonys.__len__() or _percentage:
             return True
         return False
+
+    def getPercentages(self):
+        self.percentages.clear()
+        for _colony in self._colonies:
+            self.percentages.append(
+                [_colony.name, self._map.getColorPercentage(_colony.color)])
 
 
 if __name__ == "__main__":

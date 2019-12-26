@@ -53,7 +53,7 @@ class Map:
         y = 5
         # render generation
         surface = self.font.render(
-            'Generation: ' + str(stats['gen']), True, (255, 255, 255))
+            'Generation: ' + str(stats['gen']) + ', Day: ' + str(stats['day']), True, (255, 255, 255))
         self.display_surface.blit(surface, (x, y))
 
         diseases = {}

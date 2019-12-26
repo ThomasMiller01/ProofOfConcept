@@ -26,14 +26,14 @@ class Person:
 
     def move(self, generation):
         # check if person needs to die / reproduce, increase age and reproduction_value
-        # checkForAge = self.checkFor('age')
-        # checkForReproduction = self.checkFor('reproduction')
-        # checkForDisease = self.checkFor('disease')
-        # checkForOwnTerritory = self.checkFor('ownTerritory')
-        checkForAge = None
-        checkForReproduction = None
-        checkForDisease = None
-        checkForOwnTerritory = None
+        checkForAge = self.checkFor('age')
+        checkForReproduction = self.checkFor('reproduction')
+        checkForDisease = self.checkFor('disease')
+        checkForOwnTerritory = self.checkFor('ownTerritory')
+        # checkForAge = None
+        # checkForReproduction = None
+        # checkForDisease = None
+        # checkForOwnTerritory = None
         # if person needs to die, return 'dead'
         if checkForAge == 'dead':
             return checkForAge
