@@ -7,7 +7,9 @@ import sys
 
 
 class setup:
-    def __init__(self):
+    def run(self, _settings):
+        self._settings = _settings
+
         self._colonies = []
 
         # get object of Map class
@@ -17,37 +19,24 @@ class setup:
         # create new Colony and append to self._colonies
         for i in range(0, colonys.__len__()):
             self._colonies.append(colony.Colony(
-                i, colonys[i][0], colonys[i][2], colonys[i][1], colonys[i][3][0], colonys[i][3][1], self._map))
+                i, colonys[i][0], colonys[i][2], colonys[i][1], colonys[i][3][0], colonys[i][3][1], self._map, self._settings))
 
-        self.percentages = []
+        self.stats = []
 
-        self.stats = {
-            'gen': 0,
-            'day': 0,
-            'colonies': self._colonies,
-            'percentage': self.percentages
-        }
-
-        # get starting percentage
-        self.getPercentages()
         i = 0
-        self._map.updateMap()
 
         # while simulation is running
-        while not self.isDone(self.percentages):
-            self.stats['gen'] = i
+        while not self.isDone():
+            self.stats.append({
+                'gen': i,
+                'data': []
+            })
             # init main task
             self.main(i)
-            self.getPercentages()
             # increase generation count
             i += 1
 
-        # update map
-        self._map.updateMap()
-
-        # quit the program.
-        pygame.quit()
-        sys.exit(0)
+        return self.stats
 
     # create task for each colony
 
@@ -59,45 +48,27 @@ class setup:
 
     def renderGeneration(self, _c, count, generation):
         for i in range(0, count):
-            self.stats['day'] = i
             _c.update(generation)
-            # update map
-            self._map.updateMap()
-            self._map.updateStats(self.stats)
-
-            # pygame events
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit(0)
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        sys.exit(0)
+            # update stats here
+            if [x for x in self.stats[generation]['data'] if x['day'] == i]:
+                self.stats[generation]['data'][i]['colonies'][_c._id] = {
+                    'people': _c.people}
+            else:
+                self.stats[generation]['data'].append({
+                    'day': i,
+                    'colonies': {
+                        _c._id: {
+                            'people': _c.people
+                        }
+                    }
+                })
 
     # check if simulation is done
 
-    def isDone(self, percentage):
-        _percentage = False
-        # if percentage of one colony is greater than ending_percentage, simulation is done
-        for p in percentage:
-            if p[1] >= ending_percentage:
-                _percentage = True
-        _c = []
-        # if population of each colony is 0, simulation is done
-        for _colony in self._colonies:
-            if _colony.population == 0:
-                _c.append([_colony.name, False])
-        if _c.__len__() == colonys.__len__() or _percentage:
+    def isDone(self):
+        if not self.stats:
+            return False
+        elif self.stats[len(self.stats) - 1]['gen'] == 3:
             return True
-        return False
-
-    def getPercentages(self):
-        self.percentages.clear()
-        for _colony in self._colonies:
-            self.percentages.append(
-                [_colony.name, self._map.getColorPercentage(_colony.color)])
-
-
-if __name__ == "__main__":
-    setup()
+        else:
+            return False

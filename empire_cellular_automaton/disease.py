@@ -4,7 +4,9 @@ from settings import *
 
 
 class disease:
-    def __init__(self):
+    def __init__(self, _settings):
+        self._settings = _settings
+
         self.allKinds = d_disease
         chances_Nmb = 0
         for _kind in self.allKinds:
@@ -17,16 +19,18 @@ class disease:
                 self.kind = [chance, self.allKinds[chance]]
                 break
             lowValue += 100 - self.allKinds[chance]
-        self.strength = randint(d_strength[0], d_strength[1])
+        self.strength = randint(
+            self._settings['d_strength'][0], self._settings['d_strength'][1])
         self.state = 0
 
     def getDeathRate(self):
         return self.kind[1]
 
     def update(self):
-        if self.state >= d_death:
+        if self.state >= self._settings['d_death']:
             return False
         else:
-            rnd = randint(d_rate[0], d_rate[1]) * 0.1
+            rnd = randint(self._settings['d_rate']
+                          [0], self._settings['d_rate'][1]) * 0.1
             self.state += rnd
             return True

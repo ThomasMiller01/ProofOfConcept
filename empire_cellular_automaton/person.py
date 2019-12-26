@@ -6,7 +6,9 @@ from settings import *
 
 
 class Person:
-    def __init__(self, _id, colonyID, colonyName, age, strength, reproductionValue, disease, x, y, color, _map):
+    def __init__(self, _id, colonyID, colonyName, age, strength, reproductionValue, disease, x, y, color, _map, _settings):
+        self._settings = _settings
+
         # set person attributes
         self._id = _id
         self._colonyID = colonyID
@@ -15,7 +17,7 @@ class Person:
         self._strength = strength
         self._reproductionValue = reproductionValue
         self._old_reproductionValue = reproductionValue
-        self.reproductionThreshold = p_reproductionThreshold
+        self.reproductionThreshold = self._settings['p_reproductionThreshold']
         self._disease = disease
         self.x = x
         self.y = y
@@ -30,10 +32,6 @@ class Person:
         checkForReproduction = self.checkFor('reproduction')
         checkForDisease = self.checkFor('disease')
         checkForOwnTerritory = self.checkFor('ownTerritory')
-        # checkForAge = None
-        # checkForReproduction = None
-        # checkForDisease = None
-        # checkForOwnTerritory = None
         # if person needs to die, return 'dead'
         if checkForAge == 'dead':
             return checkForAge
@@ -70,15 +68,15 @@ class Person:
                         else:
                             rndNmb = randint(0, 10)
                             if rndNmb == 0:
-                                _disease = disease.disease()
+                                _disease = disease.disease(self._settings)
                             else:
                                 _disease = None
 
                     else:
                         rndNmb = randint(
-                            p_child_disease[0], p_child_disease[1])
-                        if rndNmb == p_child_disease[2]:
-                            _disease = disease.disease()
+                            self._settings['p_child_disease'][0], self._settings['p_child_disease'][1])
+                        if rndNmb == self._settings['p_child_disease'][2]:
+                            _disease = disease.disease(self._settings)
                         else:
                             _disease = None
                     # return data, child person gets
