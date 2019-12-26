@@ -68,7 +68,7 @@ class setup:
     def isDone(self):
         if not self.stats:
             return False
-        elif self.stats[len(self.stats) - 1]['gen'] == 3:
+        elif self.stats[len(self.stats) - 1]['gen'] == self._settings['maxGen']:
             return True
         else:
             return False
