@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
+from matplotlib.animation import FFMpegWriter
 import numpy as np
 from numpy import ones, vstack
 from numpy.linalg import lstsq
 
 import figures
+
+fig, ax = plt.subplots(figsize=(20, 20))
 
 corner_pts = []
 corner_funcs = []
@@ -45,7 +48,7 @@ def show_plot(red_pts=None, red_pts_only=False):
             ptsY.append(corner[1])
             j = j + 1
             n.append(j)
-        plt.scatter(ptsX, ptsY, s=100)
+        plt.scatter(ptsX, ptsY, s=100, c='b')
         for i, txt in enumerate(n):
             plt.annotate(txt, (ptsX[i], ptsY[i]))
         i = 0
@@ -56,7 +59,7 @@ def show_plot(red_pts=None, red_pts_only=False):
         for rPt in red_pts:
             rPtsX.append(rPt[0])
             rPtsY.append(rPt[1])
-        plt.scatter(rPtsX, rPtsY, s=10)
+        plt.scatter(rPtsX, rPtsY, s=10, c='r')
 
     # show star lines
     if corner_funcs and not red_pts_only:
@@ -75,7 +78,7 @@ def show_plot(red_pts=None, red_pts_only=False):
 
     # plt.legend(loc='upper left')
     plt.gca().set_aspect("equal")
-    plt.show()
+    # plt.show()
 
 
 def get_intersection():
@@ -111,18 +114,26 @@ if __name__ == '__main__':
     init(degree * np.pi / 180)
     init_func()
     intersections = []
-    minX = np.amin(np.asarray(corner_pts), axis=0)[1]
-    maxX = np.amax(np.asarray(corner_pts), axis=0)[1]
-    timestamps = np.linspace(maxX, minX, 500)
+    minX = np.amin(np.asarray(corner_pts), axis=0)[0]
+    maxX = np.amax(np.asarray(corner_pts), axis=0)[0]
+    minY = np.amin(np.asarray(corner_pts), axis=0)[1]
+    maxY = np.amax(np.asarray(corner_pts), axis=0)[1]
+    timestamps = np.linspace(maxX, minX, 300)
     jump = 360 / timestamps.__len__()
-    for t in timestamps:
-        corner_pts.clear()
-        corner_funcs.clear()
-        degree = degree + jump
-        init(degree * np.pi / 180)
-        init_func()
-        line_func = t
-        intersection = get_intersection()
-        intersections.extend(intersection)
-    # show_plot(intersections)
-    show_plot(intersections, True)
+
+    writer = FFMpegWriter(fps=30)
+    with writer.saving(fig, 'rotated_octagonal_star.mp4', dpi=100):
+        for t in timestamps:
+            ax.clear()
+            plt.xlim(minX - 5, maxX + 5)
+            plt.ylim(minY - 5, maxY + 5)
+            corner_pts.clear()
+            corner_funcs.clear()
+            degree = degree + jump
+            init(degree * np.pi / 180)
+            init_func()
+            line_func = t
+            intersection = get_intersection()
+            intersections.extend(intersection)
+            show_plot(intersections, False)
+            writer.grab_frame()
