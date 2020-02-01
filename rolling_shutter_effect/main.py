@@ -158,7 +158,7 @@ if __name__ == '__main__':
 == =====
 
    writer = FFMpegWriter(fps=30)
-    with writer.saving(fig, 'rotated_octagonal_star.mp4', dpi=100):
+    with writer.saving(fig, 'videos/rotated_octagonal_star.mp4', dpi=100):
         for t in timestamps:
             ax.clear()
             plt.xlim(minX - 5, maxX + 5)
