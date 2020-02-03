@@ -3,9 +3,9 @@ import setup
 import couchdb
 from random import randint
 
-server = couchdb.Server('http://localhost:5984/')
+# server = couchdb.Server('http://localhost:5984/')
 
-db = server['dataset_test_1']
+# db = server['dataset_test_1']
 
 maxGen = 3
 
@@ -37,31 +37,31 @@ def getRandIntBiggerThanY(low, high, y):
 _setup = setup.setup()
 
 for i in range(5):
-    # settings = {
-    #     'p_strength': [0, 100],
-    #     'p_reproductionValue': [0, 70],
-    #     'p_disease': [0, 10, 0],
-    #     'p_child_disease': [0, 10, 0],
-    #     'p_reproductionThreshold': 115,
-    #     'd_strength': [0, 100],
-    #     'd_rate': [0, 10],
-    #     'd_death': 100,
-    #     'maxGen': 3
-    # }
-
-    reproduction_value = getRandIntXLessThanY(0, 100)
-
     settings = {
-        'p_strength': getRandIntXLessThanY(0, 100),
-        'p_reproductionValue': reproduction_value,
-        'p_disease': getRandIntXLessThanYAndZNotBiggerThanY(0, 100),
-        'p_child_disease': getRandIntXLessThanYAndZNotBiggerThanY(0, 100),
-        'p_reproductionThreshold': getRandIntBiggerThanY(0, 100, reproduction_value[1]),
-        'd_strength': getRandIntXLessThanY(0, 100),
-        'd_rate': getRandIntXLessThanY(0, 100),
-        'd_death': randint(0, 100),
-        'maxGen': maxGen
+        'p_strength': [0, 100],
+        'p_reproductionValue': [0, 70],
+        'p_disease': [0, 10, 0],
+        'p_child_disease': [0, 10, 0],
+        'p_reproductionThreshold': 115,
+        'd_strength': [0, 100],
+        'd_rate': [0, 10],
+        'd_death': 100,
+        'maxGen': 4
     }
+
+    # reproduction_value = getRandIntXLessThanY(0, 100)
+
+    # settings = {
+    #     'p_strength': getRandIntXLessThanY(0, 100),
+    #     'p_reproductionValue': reproduction_value,
+    #     'p_disease': getRandIntXLessThanYAndZNotBiggerThanY(0, 100),
+    #     'p_child_disease': getRandIntXLessThanYAndZNotBiggerThanY(0, 100),
+    #     'p_reproductionThreshold': getRandIntBiggerThanY(0, 100, reproduction_value[1]),
+    #     'd_strength': getRandIntXLessThanY(0, 100),
+    #     'd_rate': getRandIntXLessThanY(0, 100),
+    #     'd_death': randint(0, 100),
+    #     'maxGen': maxGen
+    # }
 
     print('-----------')
     print('[' + str(i) + ']')
@@ -90,5 +90,7 @@ for i in range(5):
     new_data = {'settings': settings, 'data': data}
 
     serialized_data = json.dumps(new_data, default=lambda o: o.__dict__)
-    db.save(json.loads(serialized_data))
+    # db.save(json.loads(serialized_data))
+    with open("test_data2.json", "w") as f:
+        json.dump(json.loads(serialized_data), f)
     print('[' + str(i) + '] saved')

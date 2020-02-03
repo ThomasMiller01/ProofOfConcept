@@ -4,6 +4,8 @@ import colony
 from settings import *
 import pygame
 import sys
+import copy
+import person
 
 
 class setup:
@@ -49,16 +51,17 @@ class setup:
     def renderGeneration(self, _c, count, generation):
         for i in range(0, count):
             _c.update(generation)
+
             # update stats here
             if [x for x in self.stats[generation]['data'] if x['day'] == i]:
                 self.stats[generation]['data'][i]['colonies'][_c._id] = {
-                    'people': _c.people}
+                    'people': [copy.deepcopy(person.Person(x._id, x._colonyID, x._colonyName, x._age, x._strength, x._reproductionValue, x._disease, x.x, x.y, x.color, None, x._settings)) for x in _c.people]}
             else:
                 self.stats[generation]['data'].append({
                     'day': i,
                     'colonies': {
                         _c._id: {
-                            'people': _c.people
+                            'people': [copy.deepcopy(person.Person(x._id, x._colonyID, x._colonyName, x._age, x._strength, x._reproductionValue, x._disease, x.x, x.y, x.color, None, x._settings)) for x in _c.people]
                         }
                     }
                 })

@@ -57,7 +57,8 @@ class Person:
                 # if person needs to reproduce
                 if checkForReproduction == 'reproduction':
                     # get mutation for strength and reproduction_value
-                    mutation_strength = self.getMutation(self._strength)
+                    _mutation_strength = self.getMutation(self._strength)
+                    mutation_strength = 100 if _mutation_strength > 100 else _mutation_strength
                     mutation_reproductionsValue = self.getMutation(
                         self._old_reproductionValue)
                     if self._disease != None:
