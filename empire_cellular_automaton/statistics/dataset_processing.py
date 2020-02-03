@@ -5,11 +5,43 @@ import numpy as np
 import os
 
 
-def population_pyramid_per_generation(data, file):
-    plt_size_x = int(np.ceil((len(data['data']) / 2) - 0.5))
-    plt_size_y = int(np.ceil(len(data['data']) / 2))
-    fig, axs = plt.subplots(plt_size_x, plt_size_y, figsize=(10, 10), dpi=300)
+def strength_distribution_per_generation(data, file):
+    plt_size_x = int(np.ceil(np.sqrt(len(data['data']))))
+    plt_size_y = int(np.ceil(np.sqrt(len(data['data'])) - 0.5))
+    fig, axs = plt.subplots(plt_size_x, plt_size_y, figsize=(10, 10))
     fig.tight_layout(pad=3.0)
+    fig.suptitle("strength distribution", fontsize=16)
+    i = 0
+    for ax_s in axs:
+        for ax in ax_s:
+            if i < len(data['data']):
+                gen = data['data'][i]
+                minified_data = gen['data'][len(
+                    gen['data']) - 1]['colonies']['0']['people']
+                x = np.arange(0, 100)
+                y = np.zeros(100)
+                for age in [a['_strength'] for a in minified_data]:
+                    y[int(np.ceil(age)) - 1] += 1
+
+                coeffs = np.polyfit(x, y, 3)
+                poly_eqn = np.poly1d(coeffs)
+                y_hat = poly_eqn(x)
+
+                ax.plot(x, y)
+                ax.plot(x, y_hat, label="average", c='r')
+                ax.set(xlabel='strength', ylabel='people',
+                       title="gen " + str(gen['gen']))
+                ax.grid()
+                i += 1
+    plt.savefig(file)
+
+
+def population_pyramid_per_generation(data, file):
+    plt_size_x = int(np.ceil(np.sqrt(len(data['data']))))
+    plt_size_y = int(np.ceil(np.sqrt(len(data['data'])) - 0.5))
+    fig, axs = plt.subplots(plt_size_x, plt_size_y, figsize=(10, 10))
+    fig.tight_layout(pad=3.0)
+    fig.suptitle("people-age distribution", fontsize=16)
     i = 0
     for ax_s in axs:
         for ax in ax_s:
@@ -96,7 +128,7 @@ def population_over_time(data, file):
 
 
 if __name__ == "__main__":
-    dataset_name = "dataset_02"
+    dataset_name = "dataset_04"
 
     file_name = 'statistics/' + dataset_name
 
@@ -117,6 +149,8 @@ if __name__ == "__main__":
     disease_over_time(data, file_name + "/pdf/disease_over_time.pdf")
     population_pyramid_per_generation(
         data, file_name + "/pdf/population_pyramid_per_generation.pdf")
+    strength_distribution_per_generation(
+        data, file_name + "/pdf/strength_distribution_per_generation.pdf")
 
     # save as png
     try:
@@ -131,3 +165,5 @@ if __name__ == "__main__":
     disease_over_time(data, file_name + "/png/disease_over_time.png")
     population_pyramid_per_generation(
         data, file_name + "/png/population_pyramid_per_generation.png")
+    strength_distribution_per_generation(
+        data, file_name + "/png/strength_distribution_per_generation.png")

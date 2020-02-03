@@ -46,7 +46,7 @@ for i in range(5):
         'd_strength': [0, 100],
         'd_rate': [0, 10],
         'd_death': 100,
-        'maxGen': 4
+        'maxGen': 3
     }
 
     # reproduction_value = getRandIntXLessThanY(0, 100)
