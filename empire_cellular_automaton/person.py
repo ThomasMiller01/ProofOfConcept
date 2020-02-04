@@ -26,10 +26,13 @@ class Person:
         # set pixel color back to empty if person moves or dies
         self._setPixelColorBack = True
 
-    def move(self, generation):
+    def move(self, generation, population):
         # check if person needs to die / reproduce, increase age and reproduction_value
         checkForAge = self.checkFor('age')
-        checkForReproduction = self.checkFor('reproduction')
+        if population <= population_upper_limit:
+            checkForReproduction = self.checkFor('reproduction')
+        else:
+            checkForReproduction = None
         checkForDisease = self.checkFor('disease')
         checkForOwnTerritory = self.checkFor('ownTerritory')
         # if person needs to die, return 'dead'

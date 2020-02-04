@@ -6,6 +6,7 @@ import pygame
 import sys
 import copy
 import person
+import time
 
 
 class setup:
@@ -27,16 +28,29 @@ class setup:
 
         i = 0
 
+        start_time = time.time()
+
         # while simulation is running
         while not self.isDone():
             self.stats.append({
                 'gen': i,
                 'data': []
             })
+            print("gen " + str(i) + " started calculating ..")
+            gen_start_time = time.time()
             # init main task
             self.main(i)
+            gen_end_time = time.time()
+            print("gen " + str(i) + " rendered in " +
+                  str(round(gen_end_time - gen_start_time, 4)))
+            print("***")
             # increase generation count
             i += 1
+
+        end_time = time.time()
+
+        print("- finished calculating ...")
+        print("- time elapsed: " + str(round(end_time - start_time, 4)))
 
         return self.stats
 
