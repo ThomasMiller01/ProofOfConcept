@@ -3,6 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import time
 
 
 def people_distribution_map(data, file):
@@ -12,61 +13,44 @@ def people_distribution_map(data, file):
     fig.suptitle("people distribution", fontsize=10)
     fig.tight_layout(pad=3.0)
     i = 0
+    s_all = ()
+    s_mapped_all = None
     for ax_s in axs:
         for ax in ax_s:
             if i < len(data['data']):
-                print(str(i))
                 gen = data['data'][i]
                 minified_data = [y['colonies']['0']['people']
                                  for y in gen['data']]
-                x_y_not_duplicated = []
-                x_y_not_duplicated_data = []
-                print("for loop 1")
+                all_people_list = []
                 for day in minified_data:
                     for person in day:
-                        x_y = (person['x'], person['y'])
-                        index = np.where(np.asarray(
-                            x_y_not_duplicated) == x_y)[0]
-                        if index.size == 0:
-                            x_y_not_duplicated.append(x_y)
-                            x_y_not_duplicated_data.append(1)
-                        else:
-                            x_y_not_duplicated_data[index[0]] += 1
+                        all_people_list.append((person['x'], person['y']))
+                unique, counts = np.unique(np.asarray(
+                    all_people_list), return_counts=True, axis=0)
 
-                x = []
-                y = []
-                print("for loop 2")
-                for x_y in x_y_not_duplicated:
-                    x.append(x_y[0])
-                    y.append(x_y[1])
+                x, y = zip(*unique)
 
-                s = np.asarray(x_y_not_duplicated_data)
+                if not s_all:
+                    s_all = (counts.min(), counts.max())
+                    s_mapped_all = np.interp(
+                        counts, (s_all[0], s_all[1]), (0, 100))
+                s_mapped = np.interp(
+                    counts, (counts.min(), counts.max()), (0, 100))
 
                 color_palett = [
                     '#d3ae1b', '#de6e3b', '#b54d47', '#8e321e', '#522a1a']
 
                 color_ranges = np.arange(
-                    s.min(), s.max(), (s.max() - s.min()) / len(color_palett))
-                colorsDict = {1: 'y', 5: 'c', 10: 'b',
-                              15: 'g', 20: 'm', 30: 'r', 50: 'k'}
+                    s_mapped_all.min(), s_mapped_all.max(), (s_mapped_all.max() - s_mapped_all.min()) / len(color_palett))
 
-                print("for loop 3")
-                colors = []
-                for n in s:
-                    found = False
-                    for color_range in color_ranges:
-                        if n < color_range:
-                            colors.append(
-                                color_palett[np.where(color_ranges == color_range)[0][0]])
-                            found = True
-                            break
-                    if not found:
-                        colors.append(
-                            color_palett[len(color_palett) - 1])
+                color_indices = [np.where(n < color_ranges)[0]
+                                 for n in s_mapped]
+                colors = [color_palett[c[0]] if c.size != 0 else color_palett[len(
+                    color_palett) - 1] for c in color_indices]
 
                 img = plt.imread("map.jpg")
 
-                ax.scatter(x, y, s=s, c=colors)
+                ax.scatter(x, y, s=s_mapped, c=colors)
                 ax_xlim = ax.get_xlim()
                 ax_ylim = ax.get_ylim()
                 ax.imshow(img, origin="lower")
@@ -91,30 +75,24 @@ def kind_of_disease_per_generation(data, file):
                 gen = data['data'][i]
                 minified_data = [y['colonies']['0']['people']
                                  for y in gen['data']]
-                disease_num = {}
-                diseased_people_ids = []
+                all_people_list = []
                 for day in minified_data:
                     for person in day:
-                        if person['_disease'] != None and np.where(np.asarray(diseased_people_ids) == (person['_id'], person['_disease']['kind'][0]))[0].size == 0:
-                            diseased_people_ids.append(
-                                (person['_id'], person['_disease']['kind'][0]))
-                            if person['_disease']['kind'][0] not in disease_num:
-                                disease_num[person['_disease']['kind'][0]] = 1
-                            else:
-                                disease_num[person['_disease']['kind'][0]] += 1
+                        all_people_list.append(
+                            [person['_id'], person['_disease']['kind'][0] if person['_disease'] != None else None])
+                all_people_list = np.asarray(all_people_list)
+                all_diseased_people_list = all_people_list[np.where(
+                    all_people_list[:, 1] != None)]
+                unique_all, counts_all = np.unique(
+                    all_diseased_people_list[:, 1], return_counts=True)
 
-                y_list_data = []
-                y_list_labels = []
-                for kind in disease_num:
-                    y_list_data.append(disease_num[kind])
-                    y_list_labels.append(kind)
-                x = np.arange(0, len(y_list_data))
-                y = np.asarray(y_list_data)
+                x = np.arange(0, counts_all.size)
+                y = np.asarray(counts_all)
 
                 ax.bar(x, y)
                 ax.set_xticks(x)
                 ax.set_yticks(y)
-                ax.set_xticklabels(y_list_labels)
+                ax.set_xticklabels(unique_all)
                 ax.set(title="gen " + str(gen['gen']))
                 i += 1
     plt.savefig(file)
@@ -126,7 +104,7 @@ def strength_distribution_per_generation(data, file):
     plt_size_y = int(np.ceil(np.sqrt(len(data['data'])) - 0.5))
     fig, axs = plt.subplots(plt_size_x, plt_size_y, figsize=(10, 10))
     fig.tight_layout(pad=3.0)
-    fig.suptitle("strength distribution", fontsize=16)
+    fig.suptitle("strength distribution", fontsize=12)
     i = 0
     for ax_s in axs:
         for ax in ax_s:
@@ -212,7 +190,7 @@ def avg_reproductionValue_over_time(data, file):
             [a['_reproductionValue'] for a in d['colonies']['0']['people']]) for d in minified_data])
         ax.plot(x, y, label=gen['gen'])
     ax.axhline(data['settings']['p_reproductionThreshold'],
-               c='r', linestyle=':', label='reproductionThreshold')
+               c='r', linestyle=':', label='rT')
     ax.set(xlabel='days', ylabel='reproductionValue',
            title='avg reproductionValue over time')
     ax.grid()
@@ -254,13 +232,22 @@ def population_over_time(data, file):
 
 
 def save_figs(dataset_name):
-    print("saving " + dataset_name + " ...")
+    start_all = time.time()
+    print("------")
+    print("saving " + dataset_name)
     file_name = './datasets/' + dataset_name
 
+    print("loading data ...")
+    start = time.time()
     # load data
     with open(file_name + '/' + dataset_name + '.json') as json_file:
         data = json.load(json_file)
+    end = time.time()
+    print("data loaded in " + str(round(end - start, 2)) + "s")
+    print("***")
 
+    start = time.time()
+    print("saving pdfs ...")
     # save as pdf
     try:
         os.mkdir(file_name + "/pdf")
@@ -281,6 +268,12 @@ def save_figs(dataset_name):
     people_distribution_map(
         data, file_name + "/pdf/people_distribution_map.pdf")
 
+    end = time.time()
+    print("pdfs saved in " + str(round(end - start, 2)) + "s")
+    print("***")
+    print("saving pngs ...")
+    start = time.time()
+
     # save as png
     try:
         os.mkdir(file_name + "/png")
@@ -300,10 +293,17 @@ def save_figs(dataset_name):
         data, file_name + "/png/kind_of_disease.png")
     people_distribution_map(
         data, file_name + "/png/people_distribution_map.png")
+    end = time.time()
+    print("pngs saved in " + str(round(end - start, 2)) + "s")
+    print("***")
+    end_all = time.time()
+    print("- " + dataset_name + " saved")
+    print("- time elapsed: " + str(round(end_all - start_all, 2)) + "s")
+    print("------")
 
 
 if __name__ == "__main__":
-    # for directory in os.listdir('./datasets'):
-    #     save_figs(directory)
-    save_figs("example_dataset_06")
+    for directory in os.listdir('./datasets'):
+        if "example" not in directory:
+            save_figs(directory)
     print("creating statistics done")

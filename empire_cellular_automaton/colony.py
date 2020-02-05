@@ -47,7 +47,7 @@ class Colony:
         # foreach person
         for _person in self.people:
             # call persons move() function
-            move = _person.move(generation, self.population)
+            move = _person.move(generation, self.people)
             # if person is dead, remove person and change pixel color
             if move == 'dead':
                 if _person._setPixelColorBack:

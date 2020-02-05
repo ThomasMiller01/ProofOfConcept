@@ -42,7 +42,7 @@ class setup:
             self.main(i)
             gen_end_time = time.time()
             print("gen " + str(i) + " rendered in " +
-                  str(round(gen_end_time - gen_start_time, 4)))
+                  str(round(gen_end_time - gen_start_time, 4)) + "s")
             print("***")
             # increase generation count
             i += 1
@@ -50,7 +50,7 @@ class setup:
         end_time = time.time()
 
         print("- finished calculating ...")
-        print("- time elapsed: " + str(round(end_time - start_time, 4)))
+        print("- time elapsed: " + str(round(end_time - start_time, 4)) + "s")
 
         return self.stats
 
@@ -85,7 +85,7 @@ class setup:
     def isDone(self):
         if not self.stats:
             return False
-        elif self.stats[len(self.stats) - 1]['gen'] == self._settings['maxGen']:
+        elif self.stats[len(self.stats) - 1]['gen'] + 1 == self._settings['maxGen']:
             return True
         else:
             return False

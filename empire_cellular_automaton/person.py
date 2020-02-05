@@ -1,6 +1,6 @@
 from random import randint
 import random
-from numpy import interp
+import numpy as np
 import disease
 from settings import *
 
@@ -26,12 +26,13 @@ class Person:
         # set pixel color back to empty if person moves or dies
         self._setPixelColorBack = True
 
-    def move(self, generation, population):
+    def move(self, generation, c_people):
         # check if person needs to die / reproduce, increase age and reproduction_value
         checkForAge = self.checkFor('age')
-        if population <= population_upper_limit:
+        if len(c_people) <= population_upper_limit:
             checkForReproduction = self.checkFor('reproduction')
         else:
+            self.checkFor('reproduction')
             checkForReproduction = None
         checkForDisease = self.checkFor('disease')
         checkForOwnTerritory = self.checkFor('ownTerritory')
@@ -57,6 +58,40 @@ class Person:
                 self.y = neighbour[0][1]
                 # update pixel of new place
                 self._map.updatePixel(self.x, self.y, self.color)
+
+                if generation > 1:
+                    # check, if other people are on the same place
+                    all_people_place = np.asarray(
+                        [(p.x, p.y) for p in c_people])
+                    people_same_place = np.unique(
+                        np.where(all_people_place == (self.x, self.y))[0]).size
+                    # if there are people on the same place
+                    if people_same_place != 0:
+                        _move = True if randint(0, 1) == 0 else False
+                        if _move:
+                            found = False
+                            for i in range(3):
+                                neighbour = self._map.getRandomNeighbour(
+                                    [self.x, self.y])
+                                # check if rnd place is water, empty, etc.
+                                neighbour_state = self._map.getPixelState(
+                                    neighbour)
+                                if neighbour_state == 'empty':
+                                    found = True
+                                    break
+                            if found:
+                                self.x = neighbour[0][0]
+                                self.y = neighbour[0][1]
+                                # update pixel of new place
+                                self._map.updatePixel(
+                                    self.x, self.y, self.color)
+                            else:
+                                self._age += int(np.interp(people_same_place,
+                                                           (0, all_people_place.size), (0, 3)))
+                        else:
+                            self._age += int(np.interp(people_same_place,
+                                                       (0, all_people_place.size), (0, 3)))
+
                 # if person needs to reproduce
                 if checkForReproduction == 'reproduction':
                     # get mutation for strength and reproduction_value
@@ -146,7 +181,7 @@ class Person:
                     if rndNmb < deathRate:
                         return 'dead'
                     rate = self._disease.state * self._disease.strength * self._disease.getDeathRate()
-                    _mapped = interp(rate, [0, 10000], [0, 1])
+                    _mapped = np.interp(rate, [0, 10000], [0, 1])
                     # map death rate between 0 and 1
                     self._age *= 1 + _mapped
                     return None
