@@ -113,3 +113,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 empire_cellular_automaton/datasets/example_dataset_06/example_dataset_06.json
+empire_cellular_automaton/datasets/example_dataset_09/example_dataset_09.json
