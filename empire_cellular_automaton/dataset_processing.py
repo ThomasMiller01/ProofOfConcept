@@ -15,30 +15,32 @@ def people_distribution_map(data, file):
     for ax_s in axs:
         for ax in ax_s:
             if i < len(data['data']):
+                print(str(i))
                 gen = data['data'][i]
                 minified_data = [y['colonies']['0']['people']
                                  for y in gen['data']]
-                x_y_data = []
-                for day in minified_data:
-                    for person in day:
-                        x_y_data.append((person['x'], person['y']))
-
                 x_y_not_duplicated = []
                 x_y_not_duplicated_data = []
-                for x_y in x_y_data:
-                    try:
-                        index = x_y_not_duplicated.index(x_y)
-                    except:
-                        index = None
-                    if index == None:
-                        x_y_not_duplicated.append(x_y)
-                        x_y_not_duplicated_data.append(1)
-                    else:
-                        x_y_not_duplicated_data[index] += 1
+                print("for loop 1")
+                for day in minified_data:
+                    for person in day:
+                        x_y = (person['x'], person['y'])
+                        index = np.where(np.asarray(
+                            x_y_not_duplicated) == x_y)[0]
+                        if index.size == 0:
+                            x_y_not_duplicated.append(x_y)
+                            x_y_not_duplicated_data.append(1)
+                        else:
+                            x_y_not_duplicated_data[index[0]] += 1
 
-                x, y = zip(*x_y_not_duplicated)
+                x = []
+                y = []
+                print("for loop 2")
+                for x_y in x_y_not_duplicated:
+                    x.append(x_y[0])
+                    y.append(x_y[1])
 
-                s = np.asarray([x for x in x_y_not_duplicated_data])
+                s = np.asarray(x_y_not_duplicated_data)
 
                 color_palett = [
                     '#d3ae1b', '#de6e3b', '#b54d47', '#8e321e', '#522a1a']
@@ -48,6 +50,7 @@ def people_distribution_map(data, file):
                 colorsDict = {1: 'y', 5: 'c', 10: 'b',
                               15: 'g', 20: 'm', 30: 'r', 50: 'k'}
 
+                print("for loop 3")
                 colors = []
                 for n in s:
                     found = False
@@ -88,17 +91,18 @@ def kind_of_disease_per_generation(data, file):
                 gen = data['data'][i]
                 minified_data = [y['colonies']['0']['people']
                                  for y in gen['data']]
-                diseased_people = []
+                disease_num = {}
+                diseased_people_ids = []
                 for day in minified_data:
                     for person in day:
-                        if person['_disease'] != None and not [x for x in diseased_people if person['_id'] == x['_id']]:
-                            diseased_people.append(person)
-                disease_num = {}
-                for person in diseased_people:
-                    if person['_disease']['kind'][0] not in disease_num:
-                        disease_num[person['_disease']['kind'][0]] = 1
-                    else:
-                        disease_num[person['_disease']['kind'][0]] += 1
+                        if person['_disease'] != None and np.where(np.asarray(diseased_people_ids) == (person['_id'], person['_disease']['kind'][0]))[0].size == 0:
+                            diseased_people_ids.append(
+                                (person['_id'], person['_disease']['kind'][0]))
+                            if person['_disease']['kind'][0] not in disease_num:
+                                disease_num[person['_disease']['kind'][0]] = 1
+                            else:
+                                disease_num[person['_disease']['kind'][0]] += 1
+
                 y_list_data = []
                 y_list_labels = []
                 for kind in disease_num:
@@ -299,6 +303,7 @@ def save_figs(dataset_name):
 
 
 if __name__ == "__main__":
-    for directory in os.listdir('./datasets'):
-        save_figs(directory)
+    # for directory in os.listdir('./datasets'):
+    #     save_figs(directory)
+    save_figs("example_dataset_06")
     print("creating statistics done")
