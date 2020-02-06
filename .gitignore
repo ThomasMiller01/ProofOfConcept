@@ -114,3 +114,4 @@ dmypy.json
 .pyre/
 empire_cellular_automaton/datasets/example_dataset_06/example_dataset_06.json
 empire_cellular_automaton/datasets/example_dataset_09/example_dataset_09.json
+empire_cellular_automaton/datasets/example_dataset_10/example_dataset_10.json
