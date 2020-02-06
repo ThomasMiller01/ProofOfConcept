@@ -26,7 +26,16 @@ class setup:
 
         self.stats = []
 
+        if display_map:
+            self._stats = {
+                'gen': 0,
+                'day': 0,
+                'colonies': self._colonies
+            }
+
         i = 0
+
+        self._map.updateMap()
 
         start_time = time.time()
 
@@ -36,6 +45,8 @@ class setup:
                 'gen': i,
                 'data': []
             })
+            if display_map:
+                self._stats['gen'] = i
             print("gen " + str(i) + " started calculating ..")
             gen_start_time = time.time()
             # init main task
@@ -43,7 +54,7 @@ class setup:
             gen_end_time = time.time()
             print("gen " + str(i) + " rendered in " +
                   str(round(gen_end_time - gen_start_time, 4)) + "s")
-            print("***")
+            print("******")
             # increase generation count
             i += 1
 
@@ -51,6 +62,9 @@ class setup:
 
         print("- finished calculating ...")
         print("- time elapsed: " + str(round(end_time - start_time, 4)) + "s")
+
+        if display_map:
+            pygame.quit()
 
         return self.stats
 
@@ -65,6 +79,21 @@ class setup:
     def renderGeneration(self, _c, count, generation):
         for i in range(0, count):
             _c.update(generation)
+
+            if display_map:
+                self._stats['day'] = i
+                self._map.updateMap()
+                self._map.updateStats(self._stats)
+
+                # pygame events
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit(0)
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            pygame.quit()
+                            sys.exit(0)
 
             # update stats here
             if [x for x in self.stats[generation]['data'] if x['day'] == i]:

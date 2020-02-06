@@ -68,9 +68,10 @@ class Person:
                     # if there are people on the same place
                     if people_same_place != 0:
                         if people_same_place > 10:
-                            self._age += int(np.interp(people_same_place, (0, all_people_place.size), (0, 10)))
+                            self._age += int(np.interp(people_same_place,
+                                                       (0, all_people_place.size), (0, 3)))
                         else:
-                            sel._age += 1
+                            pass
 
                 # if person needs to reproduce
                 if checkForReproduction == 'reproduction':
@@ -90,7 +91,6 @@ class Person:
                                 _disease = disease.disease(self._settings)
                             else:
                                 _disease = None
-
                     else:
                         rndNmb = randint(
                             self._settings['p_child_disease'][0], self._settings['p_child_disease'][1])

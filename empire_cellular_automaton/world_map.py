@@ -13,6 +13,15 @@ class Map:
         for colony in colonys:
             self.colorCodes[str(colony[1])] = colony[0]
 
+        if display_map:
+            # init pygame
+            pygame.init()
+            pygame.font.init()
+
+            # font for stats
+            self.font_size = 15
+            self.font = pygame.font.SysFont('calibri', self.font_size)
+
         # load image
         self._image = pygame.image.load(img)
 
@@ -22,6 +31,16 @@ class Map:
         # set image dimensions
         self.h = self._pixel_arr.shape[0]
         self.w = self._pixel_arr.shape[1]
+
+        if display_map:
+            # create display surface
+            self.display_surface = pygame.display.set_mode((self.h, self.w))
+
+            # set the pygame window name
+            pygame.display.set_caption('Empire - Cellular Automaton')
+
+            # completely fill the surface object with white color
+            self.display_surface.fill([255, 255, 255])
 
         # set earth pixel nmb for getColorPercentage()
         nmb = 0
@@ -34,12 +53,51 @@ class Map:
         self.updateMap()
 
     def updateMap(self):
-        # map
-        pass
+        if display_map:
+            surface = pygame.surfarray.make_surface(self._pixel_arr)
+            self.display_surface.blit(surface, (0, 0))
 
     def updateStats(self, stats):
-        # stats
-        pass
+        if display_map:
+            x = 5
+            y = 5
+            # render generation
+            surface = self.font.render(
+                'Generation: ' + str(stats['gen']) + ', Day: ' + str(stats['day']), True, (255, 255, 255))
+            self.display_surface.blit(surface, (x, y))
+
+            diseases = {}
+            all_people = 0
+            for disease in d_disease:
+                diseases[disease] = 0
+
+            # render colony data
+            for i in range(0, len(stats['colonies'])):
+                surface = self.font.render('Colony ' + str(stats['colonies'][i]._id) + ': ' + str(
+                    stats['colonies'][i].population), True, (255, 255, 255))
+                self.display_surface.blit(
+                    surface, (x, 20 + y + self.font_size * i))
+
+                for disease in d_disease:
+                    people_with_disease = [
+                        p for p in stats['colonies'][i].people if p._disease]
+                    people_with_current_disease = [
+                        p for p in people_with_disease if p._disease.kind[0] == disease]
+                    diseases[disease] += len(people_with_current_disease)
+
+                all_people += stats['colonies'][i].population
+
+            j = 0
+            for disease in diseases:
+                percentage = round(diseases[disease] /
+                                   all_people * 100, 2)
+                surface = self.font.render(
+                    disease + ': ' + str(diseases[disease]) + ', ' + str(percentage) + '%', True, (255, 255, 255))
+                self.display_surface.blit(
+                    surface, (x, 40 + y + i * self.font_size + self.font_size * j))
+                j += 1
+
+            pygame.display.update()
 
     def updatePixel(self, x, y, color):
         # set pixel color
