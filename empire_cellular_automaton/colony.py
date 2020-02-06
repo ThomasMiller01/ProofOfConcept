@@ -44,6 +44,10 @@ class Colony:
             self._map.updatePixel(self.x, self.y, self.color)
 
     def update(self, generation):
+        # natural disaster
+        if generation % 3 == 0:
+            # do natural disaster
+            pass
         # foreach person
         for _person in self.people:
             # call persons move() function

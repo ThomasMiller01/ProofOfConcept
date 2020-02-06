@@ -6,7 +6,7 @@ import setup
 
 
 random_values = False
-maxGen = 20
+maxGen = 15
 dataset_num = 1
 
 

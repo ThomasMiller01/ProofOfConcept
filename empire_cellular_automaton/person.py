@@ -67,30 +67,10 @@ class Person:
                         np.where(all_people_place == (self.x, self.y))[0]).size
                     # if there are people on the same place
                     if people_same_place != 0:
-                        _move = True if randint(0, 1) == 0 else False
-                        if _move:
-                            found = False
-                            for i in range(3):
-                                neighbour = self._map.getRandomNeighbour(
-                                    [self.x, self.y])
-                                # check if rnd place is water, empty, etc.
-                                neighbour_state = self._map.getPixelState(
-                                    neighbour)
-                                if neighbour_state == 'empty':
-                                    found = True
-                                    break
-                            if found:
-                                self.x = neighbour[0][0]
-                                self.y = neighbour[0][1]
-                                # update pixel of new place
-                                self._map.updatePixel(
-                                    self.x, self.y, self.color)
-                            else:
-                                self._age += int(np.interp(people_same_place,
-                                                           (0, all_people_place.size), (0, 3)))
+                        if people_same_place > 10:
+                            self._age += int(np.interp(people_same_place, (0, all_people_place.size), (0, 10)))
                         else:
-                            self._age += int(np.interp(people_same_place,
-                                                       (0, all_people_place.size), (0, 3)))
+                            sel._age += 1
 
                 # if person needs to reproduce
                 if checkForReproduction == 'reproduction':
