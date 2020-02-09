@@ -2,6 +2,7 @@ from random import randint
 
 import person
 import disease
+import disaster
 from settings import *
 
 
@@ -15,6 +16,7 @@ class Colony:
         self.y = y
         self._map = _map
         self.people = []
+        self.disaster = None
 
         self._settings = _settings
 
@@ -46,6 +48,8 @@ class Colony:
     def update(self, generation):
         # natural disaster
         if generation % 3 == 0:
+            if not disaster:
+                self.disaster = disaster.disaster(self._settings)
             # do natural disaster
             pass
         # foreach person
@@ -53,15 +57,17 @@ class Colony:
             # call persons move() function
             move = _person.move(generation, self.people)
             # if person is dead, remove person and change pixel color
-            if move == 'dead':
+            if move == PersonMoveOut.dead:
                 if _person._setPixelColorBack:
                     self._map.updatePixel(
                         _person.x, _person.y, world_pixel['empty'])
                 self.people.remove(_person)
             # if person needs to reproduce, create new person with given attributes
-            elif move != None and 'age' in move:
+            elif move != PersonMoveOut.null and 'age' in move:
                 _id = self.people[self.people.__len__() - 1]._id + 1
                 self.people.append(person.Person(_id, self._id, self.name,
                                                  0, move['strength'], move['reproductionValue'], move['disease'], move['x'], move['y'], self.color, self._map, self._settings))
                 self._map.updatePixel(move['x'], move['y'], self.color)
+        if self.disaster:
+            d_update = self.disaster.update()
         self.population = self.people.__len__()

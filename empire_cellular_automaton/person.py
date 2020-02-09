@@ -28,18 +28,18 @@ class Person:
 
     def move(self, generation, c_people):
         # check if person needs to die / reproduce, increase age and reproduction_value
-        checkForAge = self.checkFor('age')
+        checkForAge = self.checkFor(PersonMoveIn.age)
         if len(c_people) <= population_upper_limit:
-            checkForReproduction = self.checkFor('reproduction')
+            checkForReproduction = self.checkFor(PersonMoveIn.reproduction)
         else:
-            self.checkFor('reproduction')
-            checkForReproduction = None
-        checkForDisease = self.checkFor('disease')
-        checkForOwnTerritory = self.checkFor('ownTerritory')
+            self.checkFor(PersonMoveIn.reproduction)
+            checkForReproduction = PersonMoveOut.null
+        checkForDisease = self.checkFor(PersonMoveIn.disease)
+        checkForOwnTerritory = self.checkFor(PersonMoveIn.ownTerritory)
         # if person needs to die, return 'dead'
-        if checkForAge == 'dead':
+        if checkForAge == PersonMoveOut.dead:
             return checkForAge
-        if checkForOwnTerritory == None:
+        if checkForOwnTerritory == PersonMoveOut.null:
             # get rnd place around person
             neighbour = self._map.getRandomNeighbour([self.x, self.y])
             # check if rnd place is water, empty, etc.
@@ -47,7 +47,7 @@ class Person:
             # check what state the rnd place is
             if neighbour_state == 'water':
                 # if person wants to move to water, do nothing
-                return None
+                return PersonMoveOut.null
             elif neighbour_state == 'empty' or neighbour_state == self._colonyName:
                 # person wants to move to an empty place
                 # get old x and y values
@@ -74,7 +74,7 @@ class Person:
                             pass
 
                 # if person needs to reproduce
-                if checkForReproduction == 'reproduction':
+                if checkForReproduction == PersonMoveOut.reproduction:
                     # get mutation for strength and reproduction_value
                     _mutation_strength = self.getMutation(self._strength)
                     mutation_strength = 100 if _mutation_strength > 100 else _mutation_strength
@@ -106,12 +106,12 @@ class Person:
                         # todo do it only if no other person from colony is on the place
                         self._map.updatePixel(
                             old_x, old_y, world_pixel['empty'])
-                    return None
+                    return PersonMoveOut.null
             else:
                 # person fights other colony
-                return None
+                return PersonMoveOut.null
         else:
-            return None
+            return PersonMoveOut.null
 
     def getMutation(self, value):
         # get rnd +/- and rnd value [0;10]
@@ -135,22 +135,22 @@ class Person:
                 return _value
 
     def checkFor(self, check):
-        if check == 'age':
+        if check == PersonMoveIn.age:
             # if age is bigger than strength, person needs to die
             if self._age > self._strength:
-                return 'dead'
+                return PersonMoveOut.dead
             self._age += 1
-            return None
-        elif check == 'reproduction':
+            return PersonMoveOut.null
+        elif check == PersonMoveIn.reproduction:
             # if reproduction_value is bigger than reproduction_threshold, person needs to reproduce
             if self._reproductionValue > self.reproductionThreshold:
                 self._reproductionValue = self._old_reproductionValue
-                return 'reproduction'
+                return PersonMoveOut.reproduction
             else:
                 # else increase reproduction_value
                 self._reproductionValue += 1
-                return None
-        elif check == 'disease':
+                return PersonMoveOut.null
+        elif check == PersonMoveIn.disease:
             # if person has disease
             if self._disease != None:
                 # if person still has disease
@@ -159,20 +159,20 @@ class Person:
                     deathRate = self._disease.getDeathRate() * 0.1
                     rndNmb = randint(0, 100)
                     if rndNmb < deathRate:
-                        return 'dead'
+                        return PersonMoveOut.dead
                     rate = self._disease.state * self._disease.strength * self._disease.getDeathRate()
                     _mapped = np.interp(rate, [0, 10000], [0, 1])
                     # map death rate between 0 and 1
                     self._age *= 1 + _mapped
-                    return None
+                    return PersonMoveOut.null
                 else:
-                    return None
+                    return PersonMoveOut.null
             else:
                 # person can get a disease here
-                return None
+                return PersonMoveOut.null
         # check if person is surrounded by its own territory
         # if true delete person
-        elif check == 'ownTerritory':
+        elif check == PersonMoveIn.ownTerritory:
             xy = []
             # oben
             xy.append([self.x, self.y + 1])
@@ -192,12 +192,12 @@ class Person:
             xy.append([self.x - 1, self.y + 1])
             for _xy in xy:
                 if self._map.getPixelState([[], self._map._pixel_arr[_xy[0], _xy[1]]]) != self._colonyName:
-                    return None
+                    return PersonMoveOut.null
             rnd = randint(0, 40)
             if rnd == 0:
                 # return None
-                return 'ownTerritory'
+                return PersonMoveOut.ownTerritory
             else:
-                return None
+                return PersonMoveOut.null
         else:
-            return None
+            return PersonMoveOut.null
