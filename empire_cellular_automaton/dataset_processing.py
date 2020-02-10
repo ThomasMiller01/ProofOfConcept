@@ -7,8 +7,11 @@ import time
 
 
 def people_distribution_map(data, file):
-    plt_size_x = int(np.ceil(np.sqrt(len(data['data']))))
-    plt_size_y = int(np.ceil(np.sqrt(len(data['data'])) - 0.5))
+    unique, indices, counts = np.unique(
+        data[:, 0], return_index=True, return_counts=True)
+    generations = list(zip(unique, indices, counts))
+    plt_size_x = int(np.ceil(np.sqrt(len(generations))))
+    plt_size_y = int(np.ceil(np.sqrt(len(generations)) - 0.5))
     fig, axs = plt.subplots(plt_size_x, plt_size_y, figsize=(10, 10))
     fig.suptitle("people distribution", fontsize=10)
     fig.tight_layout(pad=3.0)
@@ -17,16 +20,17 @@ def people_distribution_map(data, file):
     s_mapped_all = None
     for ax_s in axs:
         for ax in ax_s:
-            if i < len(data['data']):
-                gen = data['data'][i]
-                minified_data = [y['colonies']['0']['people']
-                                 for y in gen['data']]
-                all_people_list = []
-                for day in minified_data:
+            if i < len(generations):
+                gen = generations[i]
+                minified_data = data[gen[1]:gen[1] + gen[2]]
+                all_people = np.zeros((0, 2)).astype('int')
+                for day in minified_data[:, 2]:
                     for person in day:
-                        all_people_list.append((person['x'], person['y']))
-                unique, counts = np.unique(np.asarray(
-                    all_people_list), return_counts=True, axis=0)
+                        if person[5] != 0:
+                            all_people = np.append(all_people, np.asarray(
+                                [[person[6], person[7]]]), axis=0)
+                unique, counts = np.unique(
+                    all_people, return_counts=True, axis=0)
 
                 x, y = zip(*unique)
 
@@ -56,66 +60,76 @@ def people_distribution_map(data, file):
                 ax.imshow(img, origin="lower")
                 ax.set_xlim(ax_xlim)
                 ax.set_ylim(ax_ylim[::-1])
-                ax.set(title="gen " + str(gen['gen']))
+                ax.set(title="gen " + str(gen[0]))
                 i += 1
     plt.savefig(file)
     plt.close(fig=fig)
 
 
 def kind_of_disease_per_generation(data, file):
-    plt_size_x = int(np.ceil(np.sqrt(len(data['data']))))
-    plt_size_y = int(np.ceil(np.sqrt(len(data['data'])) - 0.5))
+    unique, indices, counts = np.unique(
+        data[:, 0], return_index=True, return_counts=True)
+    generations = list(zip(unique, indices, counts))
+    plt_size_x = int(np.ceil(np.sqrt(len(generations))))
+    plt_size_y = int(np.ceil(np.sqrt(len(generations)) - 0.5))
     fig, axs = plt.subplots(plt_size_x, plt_size_y, figsize=(10, 10))
     fig.suptitle("kind of disease", fontsize=16)
     fig.tight_layout(pad=3.0)
     i = 0
     for ax_s in axs:
         for ax in ax_s:
-            if i < len(data['data']):
-                gen = data['data'][i]
-                minified_data = [y['colonies']['0']['people']
-                                 for y in gen['data']]
-                all_people_list = []
-                for day in minified_data:
+            if i < len(generations):
+                gen = generations[i]
+                minified_data = data[gen[1]:gen[1] + gen[2]]
+                all_diseased_people = np.zeros((0, 2)).astype('int')
+                for day in minified_data[:, 2]:
                     for person in day:
-                        all_people_list.append(
-                            [person['_id'], person['_disease']['kind'][0] if person['_disease'] != None else None])
-                all_people_list = np.asarray(all_people_list)
-                all_diseased_people_list = all_people_list[np.where(
-                    all_people_list[:, 1] != None)]
-                unique_all, counts_all = np.unique(
-                    all_diseased_people_list[:, 1], return_counts=True)
+                        if person[5] != 0:
+                            all_diseased_people = np.append(all_diseased_people, np.asarray(
+                                [[person[0], person[5]]]), axis=0)
 
-                x = np.arange(0, counts_all.size)
-                y = np.asarray(counts_all)
+                disease_all = np.zeros((0, 2)).astype('int')
+
+                for disease_kind in np.unique(all_diseased_people[:, 1]):
+                    people_disease_kind = all_diseased_people[np.where(
+                        all_diseased_people[:, 1] == disease_kind)[0]]
+                    unique_disease_kind, counts_disease_kind = np.unique(
+                        all_diseased_people, return_counts=True)
+                    disease_all = np.append(disease_all, np.asarray(
+                        [[disease_kind, len(unique_disease_kind)]]), axis=0)
+
+                x = np.arange(0, len(disease_all))
+                y = disease_all[:, 1]
 
                 ax.bar(x, y)
                 ax.set_xticks(x)
                 ax.set_yticks(y)
-                ax.set_xticklabels(unique_all)
-                ax.set(title="gen " + str(gen['gen']))
+                ax.set_xticklabels(disease_all[:, 0])
+                ax.set(title="gen " + str(gen[0]))
                 i += 1
     plt.savefig(file)
     plt.close(fig=fig)
 
 
 def strength_distribution_per_generation(data, file):
-    plt_size_x = int(np.ceil(np.sqrt(len(data['data']))))
-    plt_size_y = int(np.ceil(np.sqrt(len(data['data'])) - 0.5))
+    unique, indices, counts = np.unique(
+        data[:, 0], return_index=True, return_counts=True)
+    generations = list(zip(unique, indices, counts))
+    plt_size_x = int(np.ceil(np.sqrt(len(generations))))
+    plt_size_y = int(np.ceil(np.sqrt(len(generations)) - 0.5))
     fig, axs = plt.subplots(plt_size_x, plt_size_y, figsize=(10, 10))
     fig.tight_layout(pad=3.0)
     fig.suptitle("strength distribution", fontsize=12)
     i = 0
     for ax_s in axs:
         for ax in ax_s:
-            if i < len(data['data']):
-                gen = data['data'][i]
-                minified_data = gen['data'][len(
-                    gen['data']) - 1]['colonies']['0']['people']
+            if i < len(generations):
+                gen = generations[i]
+                minified_data = data[gen[1]:gen[1] + gen[2]]
                 x = np.arange(0, 100)
                 y = np.zeros(100)
-                for age in [a['_strength'] for a in minified_data]:
-                    y[int(np.ceil(age)) - 1] += 1
+                for strength in minified_data[:, 2][len(minified_data) - 1][:, 3]:
+                    y[int(np.ceil(strength)) - 1] += 1
 
                 coeffs = np.polyfit(x, y, 3)
                 poly_eqn = np.poly1d(coeffs)
@@ -124,7 +138,7 @@ def strength_distribution_per_generation(data, file):
                 ax.plot(x, y)
                 ax.plot(x, y_hat, label="average", c='r')
                 ax.set(xlabel='strength', ylabel='people',
-                       title="gen " + str(gen['gen']))
+                       title="gen " + str(gen[0]))
                 ax.grid()
                 i += 1
     plt.savefig(file)
@@ -132,21 +146,23 @@ def strength_distribution_per_generation(data, file):
 
 
 def age_distribution_per_generation(data, file):
-    plt_size_x = int(np.ceil(np.sqrt(len(data['data']))))
-    plt_size_y = int(np.ceil(np.sqrt(len(data['data'])) - 0.5))
+    unique, indices, counts = np.unique(
+        data[:, 0], return_index=True, return_counts=True)
+    generations = list(zip(unique, indices, counts))
+    plt_size_x = int(np.ceil(np.sqrt(len(generations))))
+    plt_size_y = int(np.ceil(np.sqrt(len(generations)) - 0.5))
     fig, axs = plt.subplots(plt_size_x, plt_size_y, figsize=(10, 10))
     fig.tight_layout(pad=3.0)
     fig.suptitle("age distribution", fontsize=16)
     i = 0
     for ax_s in axs:
         for ax in ax_s:
-            if i < len(data['data']):
-                gen = data['data'][i]
-                minified_data = gen['data'][len(
-                    gen['data']) - 1]['colonies']['0']['people']
+            if i < len(unique):
+                gen = generations[i]
+                minified_data = data[gen[1]:gen[1] + gen[2]]
                 x = np.arange(0, 100)
                 y = np.zeros(100)
-                for age in [a['_age'] for a in minified_data]:
+                for age in minified_data[:, 2][len(minified_data) - 1][:, 2]:
                     if age > 100:
                         age = 100
                     y[int(np.ceil(age)) - 1] += 1
@@ -158,7 +174,7 @@ def age_distribution_per_generation(data, file):
                 ax.plot(x, y)
                 ax.plot(x, y_hat, label="average", c='r')
                 ax.set(xlabel='age', ylabel='people',
-                       title="gen " + str(gen['gen']))
+                       title="gen " + str(gen[0]))
                 ax.grid()
                 i += 1
     plt.savefig(file)
@@ -167,12 +183,14 @@ def age_distribution_per_generation(data, file):
 
 def disease_over_time(data, file):
     fig, ax = plt.subplots()
-    for gen in data['data']:
-        minified_data = gen['data']
+    unique, indices, counts = np.unique(
+        data[:, 0], return_index=True, return_counts=True)
+    for gen in zip(unique, indices, counts):
+        minified_data = data[gen[1]:gen[1] + gen[2]]
         x = np.arange(0, len(minified_data))
-        y = np.asarray([np.sum(
-            [1 if a['_disease'] else 0 for a in d['colonies']['0']['people']]) for d in minified_data])
-        ax.plot(x, y, label=gen['gen'])
+        y = np.asarray([np.sum(x) for x in [a[:, 5]
+                                            for a in minified_data[:, 2]]])
+        ax.plot(x, y, label=gen[0])
     ax.set(xlabel='days', ylabel='disease',
            title='disease over time')
     ax.grid()
@@ -181,15 +199,17 @@ def disease_over_time(data, file):
     plt.close(fig=fig)
 
 
-def avg_reproductionValue_over_time(data, file):
+def avg_reproductionValue_over_time(data, file, settings):
     fig, ax = plt.subplots()
-    for gen in data['data']:
-        minified_data = gen['data']
+    unique, indices, counts = np.unique(
+        data[:, 0], return_index=True, return_counts=True)
+    for gen in zip(unique, indices, counts):
+        minified_data = data[gen[1]:gen[1] + gen[2]]
         x = np.arange(0, len(minified_data))
-        y = np.asarray([np.average(
-            [a['_reproductionValue'] for a in d['colonies']['0']['people']]) for d in minified_data])
-        ax.plot(x, y, label=gen['gen'])
-    ax.axhline(data['settings']['p_reproductionThreshold'],
+        y = np.asarray(np.asarray([np.average(a[:, 4])
+                                   for a in minified_data[:, 2]]))
+        ax.plot(x, y, label=gen[0])
+    ax.axhline(settings['p_reproductionThreshold'],
                c='r', linestyle=':', label='rT')
     ax.set(xlabel='days', ylabel='reproductionValue',
            title='avg reproductionValue over time')
@@ -201,12 +221,14 @@ def avg_reproductionValue_over_time(data, file):
 
 def avg_age_over_time(data, file):
     fig, ax = plt.subplots()
-    for gen in data['data']:
-        minified_data = gen['data']
+    unique, indices, counts = np.unique(
+        data[:, 0], return_index=True, return_counts=True)
+    for gen in zip(unique, indices, counts):
+        minified_data = data[gen[1]:gen[1] + gen[2]]
         x = np.arange(0, len(minified_data))
-        y = np.asarray([np.average(
-            [a['_age'] for a in d['colonies']['0']['people']]) for d in minified_data])
-        ax.plot(x, y, label=gen['gen'])
+        y = np.asarray(np.asarray([np.average(a[:, 2])
+                                   for a in minified_data[:, 2]]))
+        ax.plot(x, y, label=gen[0])
     ax.set(xlabel='days', ylabel='age',
            title='avg age over time')
     ax.grid()
@@ -217,12 +239,13 @@ def avg_age_over_time(data, file):
 
 def population_over_time(data, file):
     fig, ax = plt.subplots()
-    for gen in data['data']:
-        minified_data = gen['data']
+    unique, indices, counts = np.unique(
+        data[:, 0], return_index=True, return_counts=True)
+    for gen in zip(unique, indices, counts):
+        minified_data = data[gen[1]:gen[1] + gen[2]]
         x = np.arange(0, len(minified_data))
-        y = np.asarray([len(d['colonies']['0']['people'])
-                        for d in minified_data])
-        ax.plot(x, y, label=gen['gen'])
+        y = np.asarray([len(a) for a in minified_data[:, 2]])
+        ax.plot(x, y, label=gen[0])
     ax.set(xlabel='days', ylabel='population',
            title='population over time')
     ax.grid()
@@ -240,8 +263,10 @@ def save_figs(dataset_name):
     print("loading data ...")
     start = time.time()
     # load data
-    with open(file_name + '/' + dataset_name + '.json') as json_file:
-        data = json.load(json_file)
+    with open(file_name + '/' + dataset_name + '_settings.json') as json_file:
+        settings = json.load(json_file)
+    data = np.load(file_name + '/' + dataset_name +
+                   '_data.npy', allow_pickle=True)
     end = time.time()
     print("data loaded in " + str(round(end - start, 2)) + "s")
     print("***")
@@ -257,7 +282,7 @@ def save_figs(dataset_name):
     population_over_time(data, file_name + "/pdf/population_over_time.pdf")
     avg_age_over_time(data, file_name + "/pdf/avg_age_over_time.pdf")
     avg_reproductionValue_over_time(
-        data, file_name + "/pdf/avg_reproductionValue_over_time.pdf")
+        data, file_name + "/pdf/avg_reproductionValue_over_time.pdf", settings)
     disease_over_time(data, file_name + "/pdf/disease_over_time.pdf")
     age_distribution_per_generation(
         data, file_name + "/pdf/age_distribution_per_generation.pdf")
@@ -283,7 +308,7 @@ def save_figs(dataset_name):
     population_over_time(data, file_name + "/png/population_over_time.png")
     avg_age_over_time(data, file_name + "/png/avg_age_over_time.png")
     avg_reproductionValue_over_time(
-        data, file_name + "/png/avg_reproductionValue_over_time.png")
+        data, file_name + "/png/avg_reproductionValue_over_time.png", settings)
     disease_over_time(data, file_name + "/png/disease_over_time.png")
     age_distribution_per_generation(
         data, file_name + "/png/age_distribution_per_generation.png")

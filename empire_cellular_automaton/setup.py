@@ -28,7 +28,7 @@ class setup:
                 [[c_id, colony[0], colony[1]]]), axis=0)
             for i in range(colony[2]):
                 self.people = np.append(self.people, np.array([[p_id, c_id, 0, np.random.randint(self._settings['p_strength'][0], self._settings['p_strength'][1]), np.random.randint(
-                    self._settings['p_reproductionValue'][0], self._settings['p_reproductionValue'][1]), np.random.randint(0, 1), colony[3][0], colony[3][1]]]), axis=0)
+                    self._settings['p_reproductionValue'][0], self._settings['p_reproductionValue'][1]), np.random.randint(2), colony[3][0], colony[3][1]]]), axis=0)
                 p_id += 1
             c_id += 1
 
@@ -102,7 +102,7 @@ class setup:
 
             # update self.stats
             self.stats = np.append(
-                self.stats, [[gen, i, copy.deepcopy(self.people)]])
+                self.stats, [[gen, i, copy.deepcopy(self.people)]], axis=0)
 
             if settings.display_map:
                 self._stats['day'] = i
@@ -124,8 +124,8 @@ class setup:
         # age
         if person[2] > person[3]:
             self.set_pixel_color_back(person[6], person[7], person[0])
-            index = np.where(self.people[:, 0] == person[0])[0][0]
-            self.people = np.delete(self.people, index, axis=0)
+            self.people = np.delete(self.people, np.where(
+                self.people[:, 0] == person[0])[0][0], axis=0)
             return
         else:
             person[2] += 1
@@ -134,9 +134,9 @@ class setup:
         if person[4] > self._settings['p_reproductionThreshold']:
             # person reproduces
             # do mutations
-            child = [-1, person[1], 0, person[3],
-                     0, person[5], person[6], person[7]]
-            self.people = np.append(self.people, np.asarray([child]), axis=0)
+            self.people = np.append(self.people, np.asarray([[self.people[len(
+                self.people) - 1][0] + 1, person[1], 0, person[3], 0, person[5], person[6], person[7]]]), axis=0)
+            person[4] = 0
         else:
             person[4] += 1
 

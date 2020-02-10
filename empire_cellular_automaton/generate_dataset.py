@@ -2,16 +2,23 @@ import couchdb
 import json
 from random import randint
 import os
+import numpy as np
 import setup
 
 
 random_values = False
-maxGen = 50
+maxGen = 10
 dataset_num = 1
 
 
 # server = couchdb.Server('http://localhost:5984/')
 # db = server['dataset_test_1']
+
+
+def numpy_converter(o):
+    if isinstance(o, np.int32):
+        return int(o)
+
 
 def getRandIntXLessThanY(low, high):
     while True:
@@ -57,7 +64,7 @@ for i in range(dataset_num):
             'p_reproductionValue': [0, 70],
             'p_disease': [0, 10, 0],
             'p_child_disease': [0, 10, 0],
-            'p_reproductionThreshold': 115,
+            'p_reproductionThreshold': 30,
             'd_strength': [0, 100],
             'd_rate': [0, 10],
             'd_death': 100,
@@ -75,19 +82,19 @@ for i in range(dataset_num):
     # run simulation
     data = _setup.run()
 
-    # new_data = {'settings': settings, 'data': data}
+    try:
+        os.mkdir("datasets/dataset_" + str(i))
+    except:
+        pass
 
-    # try:
-    #     os.mkdir("datasets/dataset_" + str(i))
-    # except:
-    #     pass
-
-    # serialized_data = json.dumps(new_data, default=lambda o: o.__dict__)
-    # # db.save(json.loads(serialized_data))
-    # print('saving dataset_' + str(i) + ' ...')
-    # with open("datasets/dataset_" + str(i) + "/dataset_" + str(i) + ".json", "w") as f:
-    #     json.dump(json.loads(serialized_data), f)
-    # print('[' + str(i) + '] saved')
+    serialized_data = json.dumps(settings, default=lambda o: o.__dict__)
+    # db.save(json.loads(serialized_data))
+    print('saving dataset_' + str(i) + ' ...')
+    with open("datasets/dataset_" + str(i) + "/dataset_" + str(i) + "_settings.json", "w") as f:
+        json.dump(json.loads(serialized_data), f)
+    np.save("datasets/dataset_" + str(i) +
+            "/dataset_" + str(i) + "_data.npy", data)
+    print('[' + str(i) + '] saved')
     print('-----------')
 
 print("all datasets saved")
