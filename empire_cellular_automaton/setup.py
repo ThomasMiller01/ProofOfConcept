@@ -1,89 +1,114 @@
-import asyncio
-import world_map
-import colony
-from settings import *
 import pygame
-import sys
-import copy
-import person
+import numpy as np
 import time
+import copy
+import sys
+import settings
 
 
 class setup:
-    def run(self, _settings):
+    def __init__(self, _settings):
         self._settings = _settings
 
-        self._colonies = []
+        # [gen, day, people]
+        self.stats = np.zeros((0, 3)).astype('int')
 
-        # get object of Map class
-        self._map = world_map.Map(map_path, colonys)
+        # init people and colonies array
+        # [id, colony_id, age, strength, reproduction_value, disease, x, y]
+        self.people = np.zeros((0, 8)).astype('int')
+        # [id, name, color]
+        self.colonies = np.zeros((0, 3)).astype('int')
 
-        # foreach colony in colonys
-        # create new Colony and append to self._colonies
-        for i in range(0, colonys.__len__()):
-            self._colonies.append(colony.Colony(
-                i, colonys[i][0], colonys[i][2], colonys[i][1], colonys[i][3][0], colonys[i][3][1], self._map, self._settings))
+        c_id = 0
+        p_id = 0
 
-        self.stats = []
+        # init people and colonies
+        for colony in settings.colonies:
+            self.colonies = np.append(self.colonies, np.array(
+                [[c_id, colony[0], colony[1]]]), axis=0)
+            for i in range(colony[2]):
+                self.people = np.append(self.people, np.array([[p_id, c_id, 0, np.random.randint(self._settings['p_strength'][0], self._settings['p_strength'][1]), np.random.randint(
+                    self._settings['p_reproductionValue'][0], self._settings['p_reproductionValue'][1]), np.random.randint(0, 1), colony[3][0], colony[3][1]]]), axis=0)
+                p_id += 1
+            c_id += 1
 
-        if display_map:
+        if settings.display_map:
+            # init pygame
+            pygame.init()
+            pygame.font.init()
+
+            # font for stats
+            self.font_size = 15
+            self.font = pygame.font.SysFont('calibri', self.font_size)
+
+        # load image
+        self._image = pygame.image.load(settings.map_path)
+
+        # get 3d pixel array
+        self._pixel_arr = pygame.surfarray.array3d(self._image)
+
+        # set image dimensions
+        self.h = self._pixel_arr.shape[0]
+        self.w = self._pixel_arr.shape[1]
+
+        if settings.display_map:
+            # create display surface
+            self.display_surface = pygame.display.set_mode((self.h, self.w))
+
+            # set the pygame window name
+            pygame.display.set_caption('Empire - Cellular Automaton')
+
+            # completely fill the surface object with white color
+            self.display_surface.fill([255, 255, 255])
+            self.updateMap()
+
             self._stats = {
                 'gen': 0,
                 'day': 0,
-                'colonies': self._colonies
+                'people': self.people
             }
 
-        i = 0
-
-        self._map.updateMap()
-
+    def run(self):
         start_time = time.time()
 
-        # while simulation is running
-        while not self.isDone():
-            self.stats.append({
-                'gen': i,
-                'data': []
-            })
-            if display_map:
-                self._stats['gen'] = i
-            print("gen " + str(i) + " started calculating ..")
+        for g in range(self._settings['maxGen']):
+            print("gen " + str(g) + " started calculating ..")
             gen_start_time = time.time()
-            # init main task
-            self.main(i)
+
+            # render gen
+            self.render_gen(g)
+
             gen_end_time = time.time()
-            print("gen " + str(i) + " rendered in " +
+            print("gen " + str(g) + " rendered in " +
                   str(round(gen_end_time - gen_start_time, 4)) + "s")
             print("******")
-            # increase generation count
-            i += 1
 
         end_time = time.time()
 
         print("- finished calculating ...")
         print("- time elapsed: " + str(round(end_time - start_time, 4)) + "s")
 
-        if display_map:
-            pygame.quit()
-
         return self.stats
 
-    # create task for each colony
+    def render_gen(self, gen):
+        if settings.display_map:
+            self._stats['gen'] = gen
+        # foreach day
+        for i in range(settings.days_per_generation):
+            # foreach person
+            for person in self.people:
+                self.render_person(person, np.where(
+                    self.people[:, 0] == person[0])[0][0])
 
-    def main(self, generation):
-        for _colony in self._colonies:
-            self.renderGeneration(_colony, days_per_generation, generation)
+            # update self.stats
+            self.stats = np.append(
+                self.stats, [[gen, i, copy.deepcopy(self.people)]])
 
-    # task for doing one generation with count=years
-
-    def renderGeneration(self, _c, count, generation):
-        for i in range(0, count):
-            _c.update(generation)
-
-            if display_map:
+            if settings.display_map:
                 self._stats['day'] = i
-                self._map.updateMap()
-                self._map.updateStats(self._stats)
+                self._stats['people'] = self.people
+                self.updateMap()
+                self.updateStats(self._stats)
 
                 # pygame events
                 for event in pygame.event.get():
@@ -95,26 +120,117 @@ class setup:
                             pygame.quit()
                             sys.exit(0)
 
-            # update stats here
-            if [x for x in self.stats[generation]['data'] if x['day'] == i]:
-                self.stats[generation]['data'][i]['colonies'][_c._id] = {
-                    'people': [copy.deepcopy(person.Person(x._id, x._colonyID, x._colonyName, x._age, x._strength, x._reproductionValue, x._disease, x.x, x.y, x.color, None, x._settings)) for x in _c.people]}
-            else:
-                self.stats[generation]['data'].append({
-                    'day': i,
-                    'colonies': {
-                        _c._id: {
-                            'people': [copy.deepcopy(person.Person(x._id, x._colonyID, x._colonyName, x._age, x._strength, x._reproductionValue, x._disease, x.x, x.y, x.color, None, x._settings)) for x in _c.people]
-                        }
-                    }
-                })
-
-    # check if simulation is done
-
-    def isDone(self):
-        if not self.stats:
-            return False
-        elif self.stats[len(self.stats) - 1]['gen'] + 1 == self._settings['maxGen']:
-            return True
+    def render_person(self, person, p_index):
+        # age
+        if person[2] > person[3]:
+            self.set_pixel_color_back(person[6], person[7], person[0])
+            index = np.where(self.people[:, 0] == person[0])[0][0]
+            self.people = np.delete(self.people, index, axis=0)
+            return
         else:
-            return False
+            person[2] += 1
+
+        # reproduction
+        if person[4] > self._settings['p_reproductionThreshold']:
+            # person reproduces
+            # do mutations
+            child = [-1, person[1], 0, person[3],
+                     0, person[5], person[6], person[7]]
+            self.people = np.append(self.people, np.asarray([child]), axis=0)
+        else:
+            person[4] += 1
+
+        # disease
+        # here
+
+        # moving
+        neighbour_found = False
+        while not neighbour_found:
+            # get rnd neighbour
+            neighbour = self.getRandomNeighbour((person[6], person[7]))
+
+            # check if neighbour is water
+            if not np.array_equal(self._pixel_arr[neighbour[0], neighbour[1]], settings.world_pixel['water']):
+                neighbour_found = True
+
+        # check if neighbour field is empty
+        indices_all = np.where(
+            np.all(self.people[:, 6:] == neighbour, axis=1))[0]
+        indices = np.unique(indices_all, return_index=True)[1]
+
+        if indices.size == 0:
+            self.set_pixel_color_back(person[6], person[7], person[0])
+            self.updatePixel(neighbour[0], neighbour[1],
+                             self.colonies[person[1]][2])
+            person[6] = neighbour[0]
+            person[7] = neighbour[1]
+        else:
+            own_colony = False
+            for index in indices:
+                if self.people[indices_all[index]][1] == person[1]:
+                    self.set_pixel_color_back(person[6], person[7], person[0])
+                    person[6] = neighbour[0]
+                    person[7] = neighbour[1]
+                    own_colony = True
+                    break
+            if not own_colony:
+                # fight
+                pass
+        self.people[p_index] = person
+
+    def set_pixel_color_back(self, x, y, p_id):
+        # check if somebody remains on the other field, if not, color it empty
+        old_indices_all = np.where(
+            np.all(self.people[:, 6:] == [x, y], axis=1))[0]
+        old_indices = np.unique(old_indices_all, return_index=True)[1]
+
+        if old_indices.size == 1 and self.people[old_indices_all[old_indices[0]]][0] == p_id:
+            # color field empty
+            self.updatePixel(x, y, settings.world_pixel['empty'])
+
+    def getRandomNeighbour(self, pixel):
+        positions = [
+            (pixel[0], pixel[1] + 1),  # oben
+            (pixel[0] + 1, pixel[1] + 1),  # oben rechts
+            (pixel[0] + 1, pixel[1]),  # rechts
+            (pixel[0] + 1, pixel[1] - 1),  # unten rechts
+            (pixel[0], pixel[1] - 1),  # unten
+            (pixel[0] - 1, pixel[1] - 1),  # unten links
+            (pixel[0] - 1, pixel[1]),  # link
+            (pixel[0] - 1, pixel[1] + 1)  # oben links
+        ]
+        valid_pos = False
+        pos = (-1, -1)
+        while not valid_pos:
+            pos = positions[np.random.randint(len(positions))]
+            if not (pos[0] <= 0 or pos[0] >= self.w and pos[1] <= 0 or pos[1] >= self.h):
+                valid_pos = True
+        return pos
+
+    def updateMap(self):
+        surface = pygame.surfarray.make_surface(self._pixel_arr)
+        self.display_surface.blit(surface, (0, 0))
+
+    def updateStats(self, stats):
+        x = 5
+        y = 5
+        # render generation
+        surface = self.font.render(
+            'Generation: ' + str(stats['gen']) + ', Day: ' + str(stats['day']), True, (255, 255, 255))
+
+        self.display_surface.blit(surface, (x, y))
+
+        # render colony data
+        for i in range(0, len(self.colonies)):
+            c_people = np.where(stats['people'][:, 1]
+                                == self.colonies[i][0])[0]
+            surface = self.font.render(
+                'Colony ' + str(self.colonies[i][0]) + ': ' + str(len(c_people)), True, (255, 255, 255))
+            self.display_surface.blit(
+                surface, (x, 20 + y + self.font_size * i))
+
+        pygame.display.update()
+
+    def updatePixel(self, x, y, color):
+        # set pixel color
+        self._pixel_arr[x, y] = color

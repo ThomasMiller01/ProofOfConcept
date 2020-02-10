@@ -6,7 +6,7 @@ import setup
 
 
 random_values = False
-maxGen = 5
+maxGen = 50
 dataset_num = 1
 
 
@@ -36,8 +36,6 @@ def getRandIntBiggerThanY(low, high, y):
         if x > y:
             return x
 
-
-_setup = setup.setup()
 
 for i in range(dataset_num):
     if random_values:
@@ -71,38 +69,25 @@ for i in range(dataset_num):
     print("settings:")
     print(settings)
 
+    # init simulation
+    _setup = setup.setup(settings)
+
     # run simulation
-    data = _setup.run(settings)
+    data = _setup.run()
 
-    # remove unwanted data
-    for gen in data:
-        for day in gen['data']:
-            for colony in day['colonies']:
-                for person in day['colonies'][colony]['people']:
-                    if hasattr(person, 'color'):
-                        del person.color
-                        del person._map
-                        del person._setPixelColorBack
-                        del person._settings
-                        del person._colonyName
-                        del person._colonyID
-                        if person._disease:
-                            del person._disease._settings
-                            del person._disease.allKinds
+    # new_data = {'settings': settings, 'data': data}
 
-    new_data = {'settings': settings, 'data': data}
+    # try:
+    #     os.mkdir("datasets/dataset_" + str(i))
+    # except:
+    #     pass
 
-    try:
-        os.mkdir("datasets/dataset_" + str(i))
-    except:
-        pass
-
-    serialized_data = json.dumps(new_data, default=lambda o: o.__dict__)
-    # db.save(json.loads(serialized_data))
-    print('saving dataset_' + str(i) + ' ...')
-    with open("datasets/dataset_" + str(i) + "/dataset_" + str(i) + ".json", "w") as f:
-        json.dump(json.loads(serialized_data), f)
-    print('[' + str(i) + '] saved')
+    # serialized_data = json.dumps(new_data, default=lambda o: o.__dict__)
+    # # db.save(json.loads(serialized_data))
+    # print('saving dataset_' + str(i) + ' ...')
+    # with open("datasets/dataset_" + str(i) + "/dataset_" + str(i) + ".json", "w") as f:
+    #     json.dump(json.loads(serialized_data), f)
+    # print('[' + str(i) + '] saved')
     print('-----------')
 
 print("all datasets saved")
