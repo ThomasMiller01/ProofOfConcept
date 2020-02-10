@@ -140,51 +140,43 @@ class setup:
         else:
             person[4] += 1
 
-        # disease
-        # here
+        # --------------------
+        # disease <-- here -->
+        # --------------------
 
         # moving
-        neighbour_found = False
-        while not neighbour_found:
-            # get rnd neighbour
-            neighbour = self.getRandomNeighbour((person[6], person[7]))
+        # get rnd neighbour
+        neighbour = self.getRandomNeighbour((person[6], person[7]))
 
-            # check if neighbour is water
-            if not np.array_equal(self._pixel_arr[neighbour[0], neighbour[1]], settings.world_pixel['water']):
-                neighbour_found = True
+        # check if neighbour is water
+        if not np.array_equal(self._pixel_arr[neighbour[0], neighbour[1]], settings.world_pixel['water']):
+            # check if neighbour field is empty
+            indices = np.where(
+                np.all(self.people[:, 6:] == neighbour, axis=1))[0]
 
-        # check if neighbour field is empty
-        indices_all = np.where(
-            np.all(self.people[:, 6:] == neighbour, axis=1))[0]
-        indices = np.unique(indices_all, return_index=True)[1]
-
-        if indices.size == 0:
-            self.set_pixel_color_back(person[6], person[7], person[0])
-            self.updatePixel(neighbour[0], neighbour[1],
-                             self.colonies[person[1]][2])
-            person[6] = neighbour[0]
-            person[7] = neighbour[1]
-        else:
-            own_colony = False
-            for index in indices:
-                if self.people[indices_all[index]][1] == person[1]:
-                    self.set_pixel_color_back(person[6], person[7], person[0])
+            if indices.size == 0:
+                # if field is empty, move
+                self.set_pixel_color_back(person[6], person[7], person[0])
+                self.updatePixel(neighbour[0], neighbour[1],
+                                 self.colonies[person[1]][2])
+                person[6] = neighbour[0]
+                person[7] = neighbour[1]
+            else:
+                if self.people[indices[0]][1] == person[1]:
+                    # person on field is from own colony
+                    self.set_pixel_color_back(
+                        person[6], person[7], person[0])
                     person[6] = neighbour[0]
                     person[7] = neighbour[1]
-                    own_colony = True
-                    break
-            if not own_colony:
-                # fight
-                pass
+                else:
+                    # fight
+                    pass
         self.people[p_index] = person
 
     def set_pixel_color_back(self, x, y, p_id):
         # check if somebody remains on the other field, if not, color it empty
-        old_indices_all = np.where(
-            np.all(self.people[:, 6:] == [x, y], axis=1))[0]
-        old_indices = np.unique(old_indices_all, return_index=True)[1]
-
-        if old_indices.size == 1 and self.people[old_indices_all[old_indices[0]]][0] == p_id:
+        old_indices = np.where(np.all(self.people[:, 6:] == [x, y], axis=1))[0]
+        if old_indices.size == 1 and self.people[old_indices[0]][0] == p_id:
             # color field empty
             self.updatePixel(x, y, settings.world_pixel['empty'])
 
@@ -199,17 +191,18 @@ class setup:
             (pixel[0] - 1, pixel[1]),  # link
             (pixel[0] - 1, pixel[1] + 1)  # oben links
         ]
-        valid_pos = False
         pos = (-1, -1)
+        valid_pos = False
         while not valid_pos:
             pos = positions[np.random.randint(len(positions))]
+            # if pos not exceeds the map
             if not (pos[0] <= 0 or pos[0] >= self.w and pos[1] <= 0 or pos[1] >= self.h):
                 valid_pos = True
         return pos
 
     def updateMap(self):
-        surface = pygame.surfarray.make_surface(self._pixel_arr)
-        self.display_surface.blit(surface, (0, 0))
+        self.display_surface.blit(
+            pygame.surfarray.make_surface(self._pixel_arr), (0, 0))
 
     def updateStats(self, stats):
         x = 5
