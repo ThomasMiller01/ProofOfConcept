@@ -9,7 +9,7 @@ settings = {
     'p_reproductionValue': [0, 70],
     'p_disease': [0, 10, 0],
     'p_child_disease': [0, 10, 0],
-    'p_reproductionThreshold': 115,
+    'p_reproductionThreshold': 50,
     'd_strength': [0, 100],
     'd_rate': [0, 10],
     'd_death': 100,

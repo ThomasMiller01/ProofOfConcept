@@ -1,12 +1,11 @@
 import couchdb
 import json
-from random import randint
 import os
 import numpy as np
 import setup
 
 
-random_values = False
+random_values = True
 maxGen = 10
 dataset_num = 1
 
@@ -20,26 +19,30 @@ def numpy_converter(o):
         return int(o)
 
 
+def getRandInt(low, high):
+    return np.random.randint(low, high)
+
+
 def getRandIntXLessThanY(low, high):
     while True:
-        x = randint(low, high)
-        y = randint(low, high)
+        x = np.random.randint(low, high)
+        y = np.random.randint(low, high)
         if x < y:
             return [x, y]
 
 
 def getRandIntXLessThanYAndZNotBiggerThanY(low, high):
     while True:
-        x = randint(low, high)
-        y = randint(low, high)
-        z = randint(low, high)
+        x = np.random.randint(low, high)
+        y = np.random.randint(low, high)
+        z = np.random.randint(low, high)
         if x < y and z < y and z > x:
             return [x, y, z]
 
 
 def getRandIntBiggerThanY(low, high, y):
     while True:
-        x = randint(low, high)
+        x = np.random.randint(low, high)
         if x > y:
             return x
 
@@ -55,7 +58,7 @@ for i in range(dataset_num):
             'p_reproductionThreshold': getRandIntBiggerThanY(0, 100, reproduction_value[1]),
             'd_strength': getRandIntXLessThanY(0, 100),
             'd_rate': getRandIntXLessThanY(0, 100),
-            'd_death': randint(0, 100),
+            'd_death': getRandInt(0, 100),
             'maxGen': maxGen
         }
     else:
@@ -64,7 +67,7 @@ for i in range(dataset_num):
             'p_reproductionValue': [0, 70],
             'p_disease': [0, 10, 0],
             'p_child_disease': [0, 10, 0],
-            'p_reproductionThreshold': 30,
+            'p_reproductionThreshold': 50,
             'd_strength': [0, 100],
             'd_rate': [0, 10],
             'd_death': 100,
