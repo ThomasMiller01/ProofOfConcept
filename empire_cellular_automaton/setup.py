@@ -97,8 +97,9 @@ class setup:
         for i in range(settings.days_per_generation):
             # foreach person
             for person in self.people:
-                self.render_person(person, np.where(
-                    self.people[:, 0] == person[0])[0][0])
+                p_index = np.where(self.people[:, 0] == person[0])[0]
+                if len(p_index) != 0:
+                    self.render_person(person, p_index[0])
 
             # update self.stats
             self.stats = np.append(
@@ -172,6 +173,7 @@ class setup:
                     # fight
                     avg_enemie_strength = np.average(
                         np.sum(self.people[indices][:, 3]))
+                    # if enemie strength is bigger than person strength
                     if avg_enemie_strength > person[3]:
                         # person dies
                         self.set_pixel_color_back(
@@ -186,6 +188,10 @@ class setup:
                             enemie[6], enemie[7], enemie[0])
                         self.people = np.delete(self.people, np.where(
                             self.people[:, 0] == enemie[0])[0][0], axis=0)
+                        self.updatePixel(
+                            neighbour[0], neighbour[1], self.colonies[person[1]][2])
+                        person[6] = neighbour[0]
+                        person[7] = neighbour[1]
         self.people[p_index] = person
 
     def set_pixel_color_back(self, x, y, p_id):

@@ -5,7 +5,7 @@ import numpy as np
 import setup
 
 
-random_values = True
+random_values = False
 maxGen = 10
 dataset_num = 1
 
