@@ -1,7 +1,7 @@
 map_path = 'map.jpg'
 
 colonies = [
-    ['white', [255, 255, 255], 100, [500, 400]]
+    ['white', [255, 255, 255], 1000, [500, 400]]
 ]
 
 days_per_generation = 100
