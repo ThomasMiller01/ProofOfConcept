@@ -170,7 +170,22 @@ class setup:
                     person[7] = neighbour[1]
                 else:
                     # fight
-                    pass
+                    avg_enemie_strength = np.average(
+                        np.sum(self.people[indices][:, 3]))
+                    if avg_enemie_strength > person[3]:
+                        # person dies
+                        self.set_pixel_color_back(
+                            person[6], person[7], person[0])
+                        self.people = np.delete(self.people, np.where(
+                            self.people[:, 0] == person[0])[0][0], axis=0)
+                        return
+                    else:
+                        # enemie dies
+                        enemie = self.people[indices[0]]
+                        self.set_pixel_color_back(
+                            enemie[6], enemie[7], enemie[0])
+                        self.people = np.delete(self.people, np.where(
+                            self.people[:, 0] == enemie[0])[0][0], axis=0)
         self.people[p_index] = person
 
     def set_pixel_color_back(self, x, y, p_id):
