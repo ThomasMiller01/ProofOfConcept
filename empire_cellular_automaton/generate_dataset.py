@@ -6,7 +6,7 @@ import setup
 
 
 random_values = False
-maxGen = 10
+maxGen = 1000
 dataset_num = 1
 
 
@@ -31,15 +31,6 @@ def getRandIntXLessThanY(low, high):
             return [x, y]
 
 
-def getRandIntXLessThanYAndZNotBiggerThanY(low, high):
-    while True:
-        x = np.random.randint(low, high)
-        y = np.random.randint(low, high)
-        z = np.random.randint(low, high)
-        if x < y and z < y and z > x:
-            return [x, y, z]
-
-
 def getRandIntBiggerThanY(low, high, y):
     while True:
         x = np.random.randint(low, high)
@@ -53,24 +44,14 @@ for i in range(dataset_num):
         settings = {
             'p_strength': getRandIntXLessThanY(0, 100),
             'p_reproductionValue': reproduction_value,
-            'p_disease': getRandIntXLessThanYAndZNotBiggerThanY(0, 100),
-            'p_child_disease': getRandIntXLessThanYAndZNotBiggerThanY(0, 100),
             'p_reproductionThreshold': getRandIntBiggerThanY(0, 100, reproduction_value[1]),
-            'd_strength': getRandIntXLessThanY(0, 100),
-            'd_rate': getRandIntXLessThanY(0, 100),
-            'd_death': getRandInt(0, 100),
             'maxGen': maxGen
         }
     else:
         settings = {
             'p_strength': [0, 100],
             'p_reproductionValue': [0, 70],
-            'p_disease': [0, 10, 0],
-            'p_child_disease': [0, 10, 0],
             'p_reproductionThreshold': 50,
-            'd_strength': [0, 100],
-            'd_rate': [0, 10],
-            'd_death': 100,
             'maxGen': maxGen
         }
 

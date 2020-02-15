@@ -19,18 +19,19 @@ class setup:
         # [id, name, color]
         self.colonies = np.zeros((0, 3)).astype('int')
 
-        c_id = 0
-        p_id = 0
+        self.c_id = 0
+        self.p_id = 0
 
         # init people and colonies
         for colony in settings.colonies:
             self.colonies = np.append(self.colonies, np.array(
-                [[c_id, colony[0], colony[1]]]), axis=0)
+                [[self.c_id, colony[0], colony[1]]]), axis=0)
             for i in range(colony[2]):
-                self.people = np.append(self.people, np.array([[p_id, c_id, 0, np.random.randint(self._settings['p_strength'][0], self._settings['p_strength'][1]), np.random.randint(
+                self.people = np.append(self.people, np.array([[self.p_id, self.c_id, 0, np.random.randint(self._settings['p_strength'][0], self._settings['p_strength'][1]), np.random.randint(
                     self._settings['p_reproductionValue'][0], self._settings['p_reproductionValue'][1]), np.random.randint(2), colony[3][0], colony[3][1]]]), axis=0)
-                p_id += 1
-            c_id += 1
+                self.p_id += 1
+            self.c_id += 1
+        self.p_id += 1
 
         if settings.display_map:
             # init pygame
@@ -52,8 +53,12 @@ class setup:
         self.w = self._pixel_arr.shape[1]
 
         if settings.display_map:
+            self.scale = 0
+            self.zoom_dim = [(0, self.h), (0, self.w)]
+
             # create display surface
-            self.display_surface = pygame.display.set_mode((self.h, self.w))
+            self.display_surface = pygame.display.set_mode(
+                (self.zoom_dim[0][1] - self.zoom_dim[0][0], self.zoom_dim[1][1] - self.zoom_dim[1][0]))
 
             # set the pygame window name
             pygame.display.set_caption('Empire - Cellular Automaton')
@@ -120,23 +125,42 @@ class setup:
                         if event.key == pygame.K_ESCAPE:
                             pygame.quit()
                             sys.exit(0)
+                        elif event.key == pygame.K_w:
+                            self.zoom_dim = [(self.zoom_dim[0][0] + 20, self.zoom_dim[0][1] - 20),
+                                             (self.zoom_dim[1][0] + 14, self.zoom_dim[1][1] - 14)]
+                            self.scale += 1
+                        elif event.key == pygame.K_s:
+                            self.zoom_dim = [(self.zoom_dim[0][0] - 20, self.zoom_dim[0][1] + 20),
+                                             (self.zoom_dim[1][0] - 14, self.zoom_dim[1][1] + 14)]
+                            self.scale -= 1
+                        elif event.key == pygame.K_UP:
+                            self.zoom_dim = [
+                                (self.zoom_dim[0][0], self.zoom_dim[0][1]), (self.zoom_dim[1][0] - 20 / self.scale, self.zoom_dim[1][1] - 20 / self.scale)]
+                        elif event.key == pygame.K_DOWN:
+                            self.zoom_dim = [
+                                (self.zoom_dim[0][0], self.zoom_dim[0][1]), (self.zoom_dim[1][0] + 20 / self.scale, self.zoom_dim[1][1] + 20 / self.scale)]
+                        elif event.key == pygame.K_LEFT:
+                            self.zoom_dim = [
+                                (self.zoom_dim[0][0] - 20 / self.scale, self.zoom_dim[0][1] - 20 / self.scale), (self.zoom_dim[1][0], self.zoom_dim[1][1])]
+                        elif event.key == pygame.K_RIGHT:
+                            self.zoom_dim = [
+                                (self.zoom_dim[0][0] + 20 / self.scale, self.zoom_dim[0][1] + 20 / self.scale), (self.zoom_dim[1][0], self.zoom_dim[1][1])]
 
     def render_person(self, person, p_index):
+        delete_person = 0
         # age
         if person[2] > person[3]:
             self.set_pixel_color_back(person[6], person[7], person[0])
-            self.people = np.delete(self.people, np.where(
-                self.people[:, 0] == person[0])[0][0], axis=0)
-            return
+            delete_person = 1
         else:
             person[2] += 1
 
         # reproduction
         if person[4] > self._settings['p_reproductionThreshold']:
             # person reproduces
-            # do mutations
-            self.people = np.append(self.people, np.asarray([[self.people[len(
-                self.people) - 1][0] + 1, person[1], 0, person[3], 0, person[5], person[6], person[7]]]), axis=0)
+            self.people = np.append(self.people, np.asarray(
+                [[self.p_id, person[1], 0, person[3], 0, person[5], person[6], person[7]]]), axis=0)
+            self.p_id += 1
             person[4] = 0
         else:
             person[4] += 1
@@ -145,31 +169,17 @@ class setup:
         # disease <-- here -->
         # --------------------
 
-        # moving
         # get rnd neighbour
         neighbour = self.getRandomNeighbour((person[6], person[7]))
 
         # check if neighbour is water
-        if not np.array_equal(self._pixel_arr[neighbour[0], neighbour[1]], settings.world_pixel['water']):
+        if delete_person == 0 and not np.array_equal(self._pixel_arr[neighbour[0], neighbour[1]], settings.world_pixel['water']):
             # check if neighbour field is empty
             indices = np.where(
                 np.all(self.people[:, 6:] == neighbour, axis=1))[0]
 
-            if indices.size == 0:
-                # if field is empty, move
-                self.set_pixel_color_back(person[6], person[7], person[0])
-                self.updatePixel(neighbour[0], neighbour[1],
-                                 self.colonies[person[1]][2])
-                person[6] = neighbour[0]
-                person[7] = neighbour[1]
-            else:
-                if self.people[indices[0]][1] == person[1]:
-                    # person on field is from own colony
-                    self.set_pixel_color_back(
-                        person[6], person[7], person[0])
-                    person[6] = neighbour[0]
-                    person[7] = neighbour[1]
-                else:
+            if indices.size != 0:
+                if self.people[indices[0]][1] != person[1]:
                     # fight
                     avg_enemie_strength = np.average(
                         np.sum(self.people[indices][:, 3]))
@@ -178,21 +188,33 @@ class setup:
                         # person dies
                         self.set_pixel_color_back(
                             person[6], person[7], person[0])
-                        self.people = np.delete(self.people, np.where(
-                            self.people[:, 0] == person[0])[0][0], axis=0)
-                        return
+                        delete_person = 0
                     else:
                         # enemie dies
                         enemie = self.people[indices[0]]
-                        self.set_pixel_color_back(
-                            enemie[6], enemie[7], enemie[0])
-                        self.people = np.delete(self.people, np.where(
-                            self.people[:, 0] == enemie[0])[0][0], axis=0)
-                        self.updatePixel(
-                            neighbour[0], neighbour[1], self.colonies[person[1]][2])
-                        person[6] = neighbour[0]
-                        person[7] = neighbour[1]
-        self.people[p_index] = person
+                        delete_person = -1
+                        if len(np.where(np.all(self.people[:, 6:] == neighbour, axis=1))[0]) == 0:
+                            self.set_pixel_color_back(
+                                person[6], person[7], person[0])
+                            self.updatePixel(
+                                neighbour[0], neighbour[1], self.colonies[person[1]][2])
+                            person[6] = neighbour[0]
+                            person[7] = neighbour[1]
+            # if field is empty, move
+            self.set_pixel_color_back(person[6], person[7], person[0])
+            self.updatePixel(neighbour[0], neighbour[1],
+                             self.colonies[person[1]][2])
+            person[6] = neighbour[0]
+            person[7] = neighbour[1]
+
+        if delete_person == 0:
+            self.people[p_index] = person
+        elif delete_person == 1:
+            self.people = np.delete(self.people, np.where(
+                self.people[:, 0] == person[0])[0][0], axis=0)
+        elif delete_person == -1:
+            self.people = np.delete(self.people, np.where(
+                self.people[:, 0] == enemie[0])[0][0], axis=0)
 
     def set_pixel_color_back(self, x, y, p_id):
         # check if somebody remains on the other field, if not, color it empty
@@ -222,8 +244,9 @@ class setup:
         return pos
 
     def updateMap(self):
+        dim_x = (self.zoom_dim)
         self.display_surface.blit(
-            pygame.surfarray.make_surface(self._pixel_arr), (0, 0))
+            pygame.transform.smoothscale(pygame.surfarray.make_surface(self._pixel_arr[int(self.zoom_dim[0][0]):int(self.zoom_dim[0][1]), int(self.zoom_dim[1][0]):int(self.zoom_dim[1][1])]), (self.h, self.w)), (0, 0))
 
     def updateStats(self, stats):
         x = 5
@@ -239,7 +262,7 @@ class setup:
             c_people = np.where(stats['people'][:, 1]
                                 == self.colonies[i][0])[0]
             surface = self.font.render(
-                'Colony ' + str(self.colonies[i][0]) + ': ' + str(len(c_people)), True, (255, 255, 255))
+                'Colony ' + str(self.colonies[i][1]) + ': ' + str(len(c_people)), True, (255, 255, 255))
             self.display_surface.blit(
                 surface, (x, 20 + y + self.font_size * i))
 
