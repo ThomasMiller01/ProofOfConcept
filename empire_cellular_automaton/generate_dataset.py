@@ -2,7 +2,7 @@ import couchdb
 import json
 import os
 import numpy as np
-import setup
+import main
 
 
 random_values = False
@@ -51,7 +51,7 @@ for i in range(dataset_num):
         settings = {
             'p_strength': [0, 100],
             'p_reproductionValue': [0, 70],
-            'p_reproductionThreshold': 50,
+            'p_reproductionThreshold': 40,
             'maxGen': maxGen
         }
 
@@ -61,7 +61,7 @@ for i in range(dataset_num):
     print(settings)
 
     # init simulation
-    _setup = setup.setup(settings)
+    _setup = main.setup(settings)
 
     # run simulation
     data = _setup.run()

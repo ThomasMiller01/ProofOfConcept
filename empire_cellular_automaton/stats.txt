@@ -1,0 +1,28 @@
+Sat Feb 15 16:23:14 2020    restats
+
+         25066877 function calls in 160.294 seconds
+
+   Ordered by: internal time, cumulative time
+   List reduced from 58 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+  2435563   61.234    0.000   61.234    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+   815220   35.158    0.000  148.883    0.000 e:\GitHub\Repositorys\Workspace\Experiments\empire_cellular_automaton\main.py:149(render_person)
+   814176   25.028    0.000   60.602    0.000 e:\GitHub\Repositorys\Workspace\Experiments\empire_cellular_automaton\main.py:221(set_pixel_color_back)
+        5    7.599    1.520  160.292   32.058 e:\GitHub\Repositorys\Workspace\Experiments\empire_cellular_automaton\main.py:98(render_gen)
+   809725    5.069    0.000   10.656    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:2551(array_equal)
+   815220    4.058    0.000    6.134    0.000 e:\GitHub\Repositorys\Workspace\Experiments\empire_cellular_automaton\main.py:228(getRandomNeighbour)
+  1623836    4.024    0.000   64.453    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\fromnumeric.py:69(_wrapreduction)
+  1621834    3.362    0.000   67.803    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\fromnumeric.py:2171(all)
+  2447062    2.559    0.000    2.559    0.000 {built-in method numpy.where}
+   815220    2.007    0.000    2.007    0.000 {method 'randint' of 'mtrand.RandomState' objects}
+  1306917    1.980    0.000    1.980    0.000 e:\GitHub\Repositorys\Workspace\Experiments\empire_cellular_automaton\main.py:273(updatePixel)
+  2476059    1.876    0.000    1.876    0.000 {built-in method numpy.array}
+      500    1.476    0.003    1.476    0.003 {built-in method pygame.pixelcopy.make_surface}
+   809725    1.100    0.000    3.090    0.000 {method 'all' of 'numpy.ndarray' objects}
+  1623836    0.738    0.000    0.738    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\fromnumeric.py:70(<dictcomp>)
+  2457862    0.685    0.000    2.554    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:469(asarray)
+      500    0.576    0.001    0.576    0.001 {built-in method pygame.transform.smoothscale}
+     3000    0.344    0.000    0.344    0.000 {method 'blit' of 'pygame.Surface' objects}
+   809725    0.262    0.000    1.990    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\_methods.py:45(_all)
+      500    0.229    0.000    2.604    0.005 e:\GitHub\Repositorys\Workspace\Experiments\empire_cellular_automaton\main.py:248(updateMap)
