@@ -8,7 +8,7 @@ settings = {
     'p_strength': [0, 100],
     'p_reproductionValue': [0, 70],
     'p_reproductionThreshold': 40,
-    'maxGen': 5
+    'maxGen': 4
 }
 
 _setup = main.setup(settings)

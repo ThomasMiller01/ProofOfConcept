@@ -125,16 +125,21 @@ class setup:
 
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_w]:
-                    self.zoom_dim = [(self.zoom_dim[0][0] + 20, self.zoom_dim[0][1] - 20),
-                                     (self.zoom_dim[1][0] + 14, self.zoom_dim[1][1] - 14)]
+                    old_zoom_dim = self.zoom_dim
+                    self.zoom_dim = [(self.zoom_dim[0][0] + 10, self.zoom_dim[0][1] - 10),
+                                     (self.zoom_dim[1][0] + 7, self.zoom_dim[1][1] - 7)]
                     self.scale += 0.5
+                    if self.zoom_dim[0][0] > self.zoom_dim[0][1] or self.zoom_dim[1][0] > self.zoom_dim[1][1] or self.zoom_dim[0][0] == self.zoom_dim[0][1] or self.zoom_dim[1][0] == self.zoom_dim[1][1]:
+                        self.zoom_dim = old_zoom_dim
                     if self.zoom_dim[0][0] <= 0 or self.zoom_dim[0][1] >= self.w and self.zoom_dim[1][0] <= 0 or self.zoom_dim[1][1] >= self.h:
                         self.zoom_dim = [(0, self.h), (0, self.w)]
                         self.scale = 1
                 elif keys[pygame.K_s]:
-                    self.zoom_dim = [(self.zoom_dim[0][0] - 20, self.zoom_dim[0][1] + 20),
-                                     (self.zoom_dim[1][0] - 14, self.zoom_dim[1][1] + 14)]
+                    self.zoom_dim = [(self.zoom_dim[0][0] - 10, self.zoom_dim[0][1] + 10),
+                                     (self.zoom_dim[1][0] - 7, self.zoom_dim[1][1] + 7)]
                     self.scale -= 0.5
+                    if self.zoom_dim[0][0] > self.zoom_dim[0][1] or self.zoom_dim[1][0] > self.zoom_dim[1][1] or self.zoom_dim[0][0] == self.zoom_dim[0][1] or self.zoom_dim[1][0] == self.zoom_dim[1][1]:
+                        self.zoom_dim = old_zoom_dim
                     if self.zoom_dim[0][0] <= 0 or self.zoom_dim[0][1] >= self.w and self.zoom_dim[1][0] <= 0 or self.zoom_dim[1][1] >= self.h:
                         self.zoom_dim = [(0, self.h), (0, self.w)]
                         self.scale = 1
@@ -179,6 +184,10 @@ class setup:
 
         # reproduction
         if person[4] > self._settings['p_reproductionThreshold']:
+            # --------------------
+            # mutations <-- here -->
+            # --------------------
+
             # person reproduces
             self.people = np.append(self.people, np.asarray(
                 [[self.p_id, person[1], 0, person[3], 0, person[5], person[6], person[7]]]), axis=0)
@@ -192,7 +201,9 @@ class setup:
         # --------------------
 
         # get rnd neighbour
-        neighbour = self.getRandomNeighbour((person[6], person[7]))
+        neighbour_dir = self.getRandomNeighbour()
+        neighbour = (person[6] + neighbour_dir[0],
+                     person[7] + neighbour_dir[1])
 
         # check if neighbour is water
         if delete_person == 0 and not np.array_equal(self._pixel_arr[neighbour[0], neighbour[1]], settings.world_pixel['water']) and neighbour != (-1, -1):
@@ -216,9 +227,10 @@ class setup:
                         if len(np.where(np.all(self.people[:, 6:] == neighbour, axis=1))[0]) == 0:
                             person[6] = neighbour[0]
                             person[7] = neighbour[1]
-            # if field is empty, move
-            person[6] = neighbour[0]
-            person[7] = neighbour[1]
+            if delete_person != -1:
+                # if field is empty, move
+                person[6] = neighbour[0]
+                person[7] = neighbour[1]
 
         if delete_person == 0:
             self.updatePixel(person[6], person[7], self.colonies[person[1]][2])
@@ -230,25 +242,21 @@ class setup:
             self.people = np.delete(self.people, np.where(
                 self.people[:, 0] == enemie[0])[0][0], axis=0)
 
-    def getRandomNeighbour(self, pixel):
+    def getRandomNeighbour(self):
         positions = [
-            (pixel[0], pixel[1] + 1),  # oben
-            (pixel[0] + 1, pixel[1] + 1),  # oben rechts
-            (pixel[0] + 1, pixel[1]),  # rechts
-            (pixel[0] + 1, pixel[1] - 1),  # unten rechts
-            (pixel[0], pixel[1] - 1),  # unten
-            (pixel[0] - 1, pixel[1] - 1),  # unten links
-            (pixel[0] - 1, pixel[1]),  # link
-            (pixel[0] - 1, pixel[1] + 1)  # oben links
+            (0, 1),  # oben
+            (1, 0),  # rechts
+            (0, -1),  # unten
+            (-1, 0),  # link
         ]
         pos = positions[np.random.randint(len(positions))]
-        # if pos not exceeds the map
-        if pos[0] <= 0 or pos[0] >= self.w and pos[1] <= 0 or pos[1] >= self.h:
-            return (-1, -1)
         return pos
 
+    def updatePixel(self, x, y, color):
+        # set pixel color
+        self._pixel_arr[x, y] = color
+
     def updateMap(self):
-        dim_x = (self.zoom_dim)
         self.display_surface.blit(
             pygame.transform.smoothscale(pygame.surfarray.make_surface(self._pixel_arr[int(self.zoom_dim[0][0]):int(self.zoom_dim[0][1]), int(self.zoom_dim[1][0]):int(self.zoom_dim[1][1])]), (self.h, self.w)), (0, 0))
 
@@ -276,7 +284,3 @@ class setup:
         self.display_surface.blit(surface, (self.h - 50, 5))
 
         pygame.display.update()
-
-    def updatePixel(self, x, y, color):
-        # set pixel color
-        self._pixel_arr[x, y] = color

@@ -10,10 +10,6 @@ maxGen = 1000
 dataset_num = 1
 
 
-# server = couchdb.Server('http://localhost:5984/')
-# db = server['dataset_test_1']
-
-
 def numpy_converter(o):
     if isinstance(o, np.int32):
         return int(o)
@@ -51,7 +47,7 @@ for i in range(dataset_num):
         settings = {
             'p_strength': [0, 100],
             'p_reproductionValue': [0, 70],
-            'p_reproductionThreshold': 40,
+            'p_reproductionThreshold': 50,
             'maxGen': maxGen
         }
 
@@ -71,11 +67,10 @@ for i in range(dataset_num):
     except:
         pass
 
-    serialized_data = json.dumps(settings, default=lambda o: o.__dict__)
-    # db.save(json.loads(serialized_data))
     print('saving dataset_' + str(i) + ' ...')
     with open("datasets/dataset_" + str(i) + "/dataset_" + str(i) + "_settings.json", "w") as f:
-        json.dump(json.loads(serialized_data), f)
+        json.dump(json.loads(json.dumps(
+            settings, default=lambda o: o.__dict__)), f)
     np.save("datasets/dataset_" + str(i) +
             "/dataset_" + str(i) + "_data.npy", data)
     print('[' + str(i) + '] saved')
