@@ -1,120 +1,97 @@
-import asyncio
 import pygame
-import multiprocessing as mp
-import world_map
-import colony
+import sys
+import random
+import main
 
 
-def main(generation):
-    print('---------------------')
-    print('Rendering ...')
-    print('---------------------')
-    pool = mp.Pool(mp.cpu_count())
+def draw_map():
+    display_surface.blit(pygame.surfarray.make_surface(_pixel_arr), (0, 0))
 
-    results = pool.starmap(
-        myTask, [(_colony, 100, generation) for _colony in _colonys])
-    print(results)
-    print('---------------------')
-    for _colony in results:
-        print('.....................')
-        print('Colony: ' + _colony[0])
-        print('Population: ' + str(_colony[1]))
-        print('.....................')
-    print('---------------------')
+    surface = font_2.render("Placing Colonies ...", True, (255, 255, 255))
+    display_surface.blit(surface, (_pixel_arr.shape[0] / 2 - 40, 10))
+
+    surface = font_1.render("Press Enter to start ..", True, (255, 255, 255))
+    display_surface.blit(surface, (_pixel_arr.shape[0] / 2 - 33, 30))
+
+    for colony in colonies:
+        surface = font_3.render(colony[0], True, colony[1])
+        display_surface.blit(surface, (colony[3][0], colony[3][1] - 10))
+
+    pygame.display.update()
 
 
-# task for doing one generation with count=years
-def myTask(_c, count, generation):
-    print("task called")
-    for i in range(0, count):
-        _c.update(generation)
-    return [_c.name, _c.population]
+display_map = True
+map_path = 'map.jpg'
+world_pixel = {'water': [3, 0, 168], 'empty': [5, 124, 0]}
+colonies = []
 
+# init pygame
+pygame.init()
+pygame.font.init()
 
-# check if simulation is done
-def isDone(percentage):
-    _percentage = False
-    # if percentage of one colony is greater than 15, simulation is done
-    for p in percentage:
-        if p[1] >= 15:
-            _percentage = True
-    _c = []
-    # if population of each colony is 0, simulation is done
-    for _colony in _colonys:
-        if _colony.population == 0:
-            _c.append([_colony.name, False])
-    if _c.__len__() == colonys.__len__() or _percentage:
-        return True
-    return False
+clock = pygame.time.Clock()
 
+# font for stats
+font_1 = pygame.font.SysFont('calibri', 15)
+font_2 = pygame.font.SysFont('calibri', 20)
+font_3 = pygame.font.SysFont('calibri', 10)
 
-if __name__ == "__main__":
+# load image
+_image = pygame.image.load(map_path)
 
-    # [name, [r, g, b], population, [x, y]]
-    colonys = [
-        ['red', [255, 0, 0], 100, [675, 213]],
-        ['yellow', [255, 255, 0], 100, [506, 443]],
-        ['white', [255, 255, 255], 100, [138, 219]]
-    ]
-    _colonys = []
+# get 3d pixel array
+_pixel_arr = pygame.surfarray.array3d(_image)
 
-    # get object of Map class and Map_Utilities class
-    _map = world_map.Map(
-        'empire_cellular_automaton/map.jpg', colonys)
-    _map_utilities = _map.map_utilities
+# create display surface
+display_surface = pygame.display.set_mode(
+    (_pixel_arr.shape[0], _pixel_arr.shape[1]))
 
-    # foreach colony in colonys
-    # create new Colony and append to _colonys
-    for i in range(0, colonys.__len__()):
-        _colonys.append(colony.Colony(
-            i, colonys[i][0], colonys[i][2], colonys[i][1], colonys[i][3][0], colonys[i][3][1], _map_utilities))
+# set the pygame window name
+pygame.display.set_caption('Empire - Cellular Automaton')
+pygame.mouse.set_cursor(*pygame.cursors.broken_x)
 
-    percentages = []
-    # get starting percentage
-    for _colony in _colonys:
-        percentages.append(
-            [_colony.name, _map.getColorPercentage(_colony.color)])
-    i = 0
-    clock = pygame.time.Clock()
-    _map.updateMap()
+draw_map()
 
-    # while simulation is running
-    while not isDone(percentages):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                # quit pygame
+# main loop for interacting with the world
+start = False
+while not start:
+    # pygame events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit(0)
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
                 pygame.quit()
-                # quit the program.
-                quit()
-        print("---------------------")
-        print("Generation: " + str(i + 1))
-        print("---------------------")
-        # init main task
-        main(i)
-        print("---------------------")
-        print("Rendered all colonys")
-        print("---------------------")
-        # clear percentage and append new percentage
-        percentages.clear()
-        for _colony in _colonys:
-            percentages.append(
-                [_colony.name, _map.getColorPercentage(_colony.color)])
-        print("---------------------")
-        print("Percentage:")
-        print(percentages)
-        print("---------------------")
-        # increase generation count
-        i += 1
-        # update map
-        _map.updateMap()
-        clock.tick(1000)
-    # close loop
+                sys.exit(0)
+            elif event.key == pygame.K_RETURN:
+                if colonies:
+                    start = True
+                else:
+                    print("[Error] missing colonies ...")
+        elif event.type == pygame.MOUSEBUTTONUP:
+            pos = pygame.mouse.get_pos()
+            c_color = [random.randint(0, 255), random.randint(
+                0, 255), random.randint(0, 255)]
+            _pixel_arr[pos[0], pos[1]] = c_color
+            colonies.append([str(len(colonies)),
+                             c_color, 100, [pos[0], pos[1]]])
+            draw_map()
 
-    # update map
-    _map.updateMap()
+pygame.mouse.set_cursor(*pygame.cursors.arrow)
 
-    # quit pygame
-    pygame.quit()
+settings = {
+    'p_strength': [0, 100],
+    'p_reproductionValue': [0, 70],
+    'p_reproductionThreshold': 50,
+    'maxGen': 100,
+    'display_map': display_map,
+    'colonies': colonies,
+    'world_pixel': world_pixel,
+    'days_per_generation': 100,
+    'map_path': map_path
+}
 
-    # quit the program.
-    quit()
+_setup = main.setup(settings)
+
+_setup.run()
