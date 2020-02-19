@@ -3,7 +3,6 @@ import numpy as np
 import time
 import copy
 import sys
-import settings
 
 
 class setup:
@@ -23,7 +22,7 @@ class setup:
         self.p_id = 0
 
         # init people and colonies
-        for colony in settings.colonies:
+        for colony in self._settings['colonies']:
             self.colonies = np.append(self.colonies, np.array(
                 [[self.c_id, colony[0], colony[1]]]), axis=0)
             for i in range(colony[2]):
@@ -33,7 +32,7 @@ class setup:
             self.c_id += 1
         self.p_id += 1
 
-        if settings.display_map:
+        if self._settings['display_map']:
             # init pygame
             pygame.init()
             pygame.font.init()
@@ -45,7 +44,7 @@ class setup:
             self.font = pygame.font.SysFont('calibri', self.font_size)
 
         # load image
-        self._image = pygame.image.load(settings.map_path)
+        self._image = pygame.image.load(self._settings['map_path'])
 
         # get 3d pixel array
         self._pixel_arr = pygame.surfarray.array3d(self._image)
@@ -55,7 +54,7 @@ class setup:
         self.h = self._pixel_arr.shape[0]
         self.w = self._pixel_arr.shape[1]
 
-        if settings.display_map:
+        if self._settings['display_map']:
             self.scale = 1
             self.zoom_dim = [(0, self.h), (0, self.w)]
 
@@ -99,10 +98,10 @@ class setup:
         return self.stats
 
     def render_gen(self, gen):
-        if settings.display_map:
+        if self._settings['display_map']:
             self._stats['gen'] = gen
         # foreach day
-        for i in range(settings.days_per_generation):
+        for i in range(self._settings['days_per_generation']):
             # reset world pixels
             self._pixel_arr = copy.deepcopy(self._pixel_arr_copy)
 
@@ -119,7 +118,7 @@ class setup:
             self.stats = np.append(
                 self.stats, [[gen, i, copy.deepcopy(self.people)]], axis=0)
 
-            if settings.display_map:
+            if self._settings['display_map']:
                 self.clock.tick(60)
                 self._stats['day'] = i
                 self._stats['people'] = self.people
@@ -212,7 +211,7 @@ class setup:
                      person[7] + neighbour_dir[1])
 
         # check if neighbour is water
-        if delete_person == 0 and not np.array_equal(self._pixel_arr[neighbour[0], neighbour[1]], settings.world_pixel['water']) and neighbour != (-1, -1):
+        if delete_person == 0 and not np.array_equal(self._pixel_arr[neighbour[0], neighbour[1]], self._settings['world_pixel']['water']) and neighbour != (-1, -1):
             # check if neighbour field is empty
             indices = np.where(
                 np.all(self.people[:, 6:8] == neighbour, axis=1))[0]
@@ -283,7 +282,7 @@ class setup:
             c_people = np.where(stats['people'][:, 1]
                                 == self.colonies[i][0])[0]
             surface = self.font.render(
-                'Colony ' + str(self.colonies[i][1]) + ': ' + str(len(c_people)), True, (255, 255, 255))
+                'Colony ' + str(self.colonies[i][1]) + ': ' + str(len(c_people)), True, self.colonies[i][2])
             self.display_surface.blit(
                 surface, (x, 20 + y + self.font_size * i))
 

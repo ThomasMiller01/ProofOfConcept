@@ -5,9 +5,20 @@ import numpy as np
 import main
 
 
+display_map = True
 random_values = False
 maxGen = 1000
 dataset_num = 1
+
+map_path = 'map.jpg'
+
+world_pixel = {'water': [3, 0, 168], 'empty': [5, 124, 0]}
+colonies = [
+    ['red', [255, 0, 0], 100, [500, 400]],
+    ['white', [255, 255, 255], 100, [520, 400]],
+    ['black', [0, 0, 0], 100, [520, 420]],
+    ['yellow', [255, 255, 0], 100, [500, 420]]
+]
 
 
 def numpy_converter(o):
@@ -41,14 +52,24 @@ for i in range(dataset_num):
             'p_strength': getRandIntXLessThanY(0, 100),
             'p_reproductionValue': reproduction_value,
             'p_reproductionThreshold': getRandIntBiggerThanY(0, 100, reproduction_value[1]),
-            'maxGen': maxGen
+            'maxGen': maxGen,
+            'display_map': display_map,
+            'colonies': colonies,
+            'world_pixel': world_pixel,
+            'days_per_generation': 100,
+            'map_path': map_path
         }
     else:
         settings = {
             'p_strength': [0, 100],
             'p_reproductionValue': [0, 70],
             'p_reproductionThreshold': 50,
-            'maxGen': maxGen
+            'maxGen': maxGen,
+            'display_map': display_map,
+            'colonies': colonies,
+            'world_pixel': world_pixel,
+            'days_per_generation': 100,
+            'map_path': map_path
         }
 
     print('-----------')
