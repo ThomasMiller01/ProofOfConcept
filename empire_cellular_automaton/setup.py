@@ -17,10 +17,12 @@ def draw_map():
 
     y = 0
     for colony in colonies:
-        y += 10
-        surface = font_1.render(
-            'Colony ' + colony[0] + ', [' + str(colony[3][0]) + ', ' + str(colony[3][1]) + ']', True, colony[1])
+        y += 15
+        text = 'Colony ' + colony[0] + ', ' + str(colony[3])
+        surface = font_1.render(text, True, (255, 255, 255))
         display_surface.blit(surface, (10, y))
+        c_surface = font_1.render('Color', True, colony[1])
+        display_surface.blit(c_surface, (len(text) * 7, y))
 
     pygame.display.update()
 
@@ -142,7 +144,7 @@ pygame.mouse.set_cursor(*pygame.cursors.arrow)
 settings = {
     'p_strength': [0, 100],
     'p_reproductionValue': [0, 70],
-    'p_reproductionThreshold': 50,
+    'p_reproductionThreshold': 48,
     'maxGen': 100,
     'display_map': display_map,
     'colonies': colonies,

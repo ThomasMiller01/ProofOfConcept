@@ -281,10 +281,14 @@ class setup:
         for i in range(0, len(self.colonies)):
             c_people = np.where(stats['people'][:, 1]
                                 == self.colonies[i][0])[0]
-            surface = self.font.render(
-                'Colony ' + str(self.colonies[i][1]) + ': ' + str(len(c_people)), True, self.colonies[i][2])
+            text = 'Colony ' + \
+                str(self.colonies[i][1]) + ': ' + str(len(c_people))
+            surface = self.font.render(text, True, (255, 255, 255))
             self.display_surface.blit(
                 surface, (x, 20 + y + self.font_size * i))
+            c_surface = self.font.render('Color', True, self.colonies[i][2])
+            self.display_surface.blit(
+                c_surface, (len(text) * 8, 20 + y + self.font_size * i))
 
         # draw fps
         surface = self.font.render(
