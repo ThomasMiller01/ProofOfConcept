@@ -44,54 +44,55 @@ def getRandIntBiggerThanY(low, high, y):
             return x
 
 
-for i in range(dataset_num):
-    if random_values:
-        reproduction_value = getRandIntXLessThanY(0, 100)
-        settings = {
-            'p_strength': getRandIntXLessThanY(0, 100),
-            'p_reproductionValue': reproduction_value,
-            'p_reproductionThreshold': getRandIntBiggerThanY(0, 100, reproduction_value[1]),
-            'maxGen': maxGen,
-            'colonies': colonies,
-            'world_pixel': world_pixel,
-            'days_per_generation': 100,
-            'map_path': map_path
-        }
-    else:
-        settings = {
-            'p_strength': [0, 100],
-            'p_reproductionValue': [0, 70],
-            'p_reproductionThreshold': 50,
-            'maxGen': maxGen,
-            'colonies': colonies,
-            'world_pixel': world_pixel,
-            'days_per_generation': 100,
-            'map_path': map_path
-        }
+if __name__ == '__main__':
+    for i in range(dataset_num):
+        if random_values:
+            reproduction_value = getRandIntXLessThanY(0, 100)
+            settings = {
+                'p_strength': getRandIntXLessThanY(0, 100),
+                'p_reproductionValue': reproduction_value,
+                'p_reproductionThreshold': getRandIntBiggerThanY(0, 100, reproduction_value[1]),
+                'maxGen': maxGen,
+                'colonies': colonies,
+                'world_pixel': world_pixel,
+                'days_per_generation': 100,
+                'map_path': map_path
+            }
+        else:
+            settings = {
+                'p_strength': [0, 100],
+                'p_reproductionValue': [0, 70],
+                'p_reproductionThreshold': 50,
+                'maxGen': maxGen,
+                'colonies': colonies,
+                'world_pixel': world_pixel,
+                'days_per_generation': 100,
+                'map_path': map_path
+            }
 
-    print('-----------')
-    print('[' + str(i) + ']')
-    print("settings:")
-    print(settings)
+        print('-----------')
+        print('[' + str(i) + ']')
+        print("settings:")
+        print(settings)
 
-    # init simulation
-    _setup = main.setup(settings)
+        # init simulation
+        _setup = main.setup(settings)
 
-    # run simulation
-    data = _setup.run()
+        # run simulation
+        data = _setup.run()
 
-    try:
-        os.mkdir("datasets/dataset_" + str(i))
-    except:
-        pass
+        try:
+            os.mkdir("datasets/dataset_" + str(i))
+        except:
+            pass
 
-    print('saving dataset_' + str(i) + ' ...')
-    with open("datasets/dataset_" + str(i) + "/dataset_" + str(i) + "_settings.json", "w") as f:
-        json.dump(json.loads(json.dumps(
-            settings, default=lambda o: o.__dict__)), f)
-    np.save("datasets/dataset_" + str(i) +
-            "/dataset_" + str(i) + "_data.npy", data)
-    print('[' + str(i) + '] saved')
-    print('-----------')
+        print('saving dataset_' + str(i) + ' ...')
+        with open("datasets/dataset_" + str(i) + "/dataset_" + str(i) + "_settings.json", "w") as f:
+            json.dump(json.loads(json.dumps(
+                settings, default=lambda o: o.__dict__)), f)
+        np.save("datasets/dataset_" + str(i) +
+                "/dataset_" + str(i) + "_data.npy", data)
+        print('[' + str(i) + '] saved')
+        print('-----------')
 
-print("all datasets saved")
+    print("all datasets saved")

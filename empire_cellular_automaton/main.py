@@ -1,9 +1,11 @@
-import pygame
-import numpy as np
-import time
-import copy
-import sys
 import multiprocessing as mp
+import sys
+import copy
+import time
+import numpy as np
+import pygame
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 
 class setup:
@@ -64,14 +66,12 @@ class setup:
         return self.stats
 
     def render_gen(self, gen):
-        pool = mp.Pool(mp.cpu_count())
-
+        pool = mp.Pool(processes=mp.cpu_count())
         # foreach day
         for i in range(self._settings['days_per_generation']):
-            results = pool.map(self.render_person, self.people)
-            # foreach person
-            # for person in self.people:
-            #     self.render_person(person)
+            print(i)
+
+            pool.map_async(self.render_person, self.people)
 
             # remove dead people
             dead_people_index = np.where(self.people[:, 8])[0]
@@ -81,6 +81,7 @@ class setup:
             # update self.stats
             self.stats = np.append(
                 self.stats, [[gen, i, copy.deepcopy(self.people)]], axis=0)
+        pool.close()
 
     def render_person(self, person):
         if person[8]:
