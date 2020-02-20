@@ -5,7 +5,6 @@ import numpy as np
 import main
 
 
-display_map = True
 random_values = False
 maxGen = 1000
 dataset_num = 1
@@ -53,7 +52,6 @@ for i in range(dataset_num):
             'p_reproductionValue': reproduction_value,
             'p_reproductionThreshold': getRandIntBiggerThanY(0, 100, reproduction_value[1]),
             'maxGen': maxGen,
-            'display_map': display_map,
             'colonies': colonies,
             'world_pixel': world_pixel,
             'days_per_generation': 100,
@@ -65,7 +63,6 @@ for i in range(dataset_num):
             'p_reproductionValue': [0, 70],
             'p_reproductionThreshold': 50,
             'maxGen': maxGen,
-            'display_map': display_map,
             'colonies': colonies,
             'world_pixel': world_pixel,
             'days_per_generation': 100,

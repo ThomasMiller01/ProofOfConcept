@@ -3,6 +3,7 @@ import numpy as np
 import time
 import copy
 import sys
+import multiprocessing as mp
 
 
 class setup:
@@ -32,48 +33,13 @@ class setup:
             self.c_id += 1
         self.p_id += 1
 
-        if self._settings['display_map']:
-            # init pygame
-            pygame.init()
-            pygame.font.init()
-
-            self.clock = pygame.time.Clock()
-
-            # font for stats
-            self.font_size = 15
-            self.font = pygame.font.SysFont('calibri', self.font_size)
-
-        # load image
-        self._image = pygame.image.load(self._settings['map_path'])
-
         # get 3d pixel array
-        self._pixel_arr = pygame.surfarray.array3d(self._image)
-        self._pixel_arr_copy = copy.deepcopy(self._pixel_arr)
+        self._pixel_arr = pygame.surfarray.array3d(
+            pygame.image.load(self._settings['map_path']))
 
         # set image dimensions
         self.h = self._pixel_arr.shape[0]
         self.w = self._pixel_arr.shape[1]
-
-        if self._settings['display_map']:
-            self.scale = 1
-            self.zoom_dim = [(0, self.h), (0, self.w)]
-
-            # create display surface
-            self.display_surface = pygame.display.set_mode(
-                (self.zoom_dim[0][1] - self.zoom_dim[0][0], self.zoom_dim[1][1] - self.zoom_dim[1][0]))
-
-            # set the pygame window name
-            pygame.display.set_caption('Empire - Cellular Automaton')
-
-            # completely fill the surface object with white color
-            self.display_surface.fill([255, 255, 255])
-            self.updateMap()
-
-            self._stats = {
-                'gen': 0,
-                'day': 0,
-                'people': copy.deepcopy(self.people)
-            }
 
     def run(self):
         start_time = time.time()
@@ -98,16 +64,14 @@ class setup:
         return self.stats
 
     def render_gen(self, gen):
-        if self._settings['display_map']:
-            self._stats['gen'] = gen
+        pool = mp.Pool(mp.cpu_count())
+
         # foreach day
         for i in range(self._settings['days_per_generation']):
-            # reset world pixels
-            self._pixel_arr = copy.deepcopy(self._pixel_arr_copy)
-
+            results = pool.map(self.render_person, self.people)
             # foreach person
-            for person in self.people:
-                self.render_person(person)
+            # for person in self.people:
+            #     self.render_person(person)
 
             # remove dead people
             dead_people_index = np.where(self.people[:, 8])[0]
@@ -117,64 +81,6 @@ class setup:
             # update self.stats
             self.stats = np.append(
                 self.stats, [[gen, i, copy.deepcopy(self.people)]], axis=0)
-
-            if self._settings['display_map']:
-                self.clock.tick(60)
-                self._stats['day'] = i
-                self._stats['people'] = self.people
-                self.updateMap()
-                self.updateStats(self._stats)
-
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_w]:
-                    old_zoom_dim = self.zoom_dim
-                    self.zoom_dim = [(self.zoom_dim[0][0] + 10, self.zoom_dim[0][1] - 10),
-                                     (self.zoom_dim[1][0] + 7, self.zoom_dim[1][1] - 7)]
-                    self.scale += 0.5
-                    if self.zoom_dim[0][0] > self.zoom_dim[0][1] or self.zoom_dim[1][0] > self.zoom_dim[1][1] or self.zoom_dim[0][0] == self.zoom_dim[0][1] or self.zoom_dim[1][0] == self.zoom_dim[1][1]:
-                        self.zoom_dim = old_zoom_dim
-                    if self.zoom_dim[0][0] <= 0 or self.zoom_dim[0][1] >= self.w and self.zoom_dim[1][0] <= 0 or self.zoom_dim[1][1] >= self.h:
-                        self.zoom_dim = [(0, self.h), (0, self.w)]
-                        self.scale = 1
-                elif keys[pygame.K_s]:
-                    self.zoom_dim = [(self.zoom_dim[0][0] - 10, self.zoom_dim[0][1] + 10),
-                                     (self.zoom_dim[1][0] - 7, self.zoom_dim[1][1] + 7)]
-                    self.scale -= 0.5
-                    if self.zoom_dim[0][0] > self.zoom_dim[0][1] or self.zoom_dim[1][0] > self.zoom_dim[1][1] or self.zoom_dim[0][0] == self.zoom_dim[0][1] or self.zoom_dim[1][0] == self.zoom_dim[1][1]:
-                        self.zoom_dim = old_zoom_dim
-                    if self.zoom_dim[0][0] <= 0 or self.zoom_dim[0][1] >= self.w and self.zoom_dim[1][0] <= 0 or self.zoom_dim[1][1] >= self.h:
-                        self.zoom_dim = [(0, self.h), (0, self.w)]
-                        self.scale = 1
-                elif keys[pygame.K_UP]:
-                    self.zoom_dim = [
-                        (self.zoom_dim[0][0], self.zoom_dim[0][1]), (self.zoom_dim[1][0] - 20 / self.scale, self.zoom_dim[1][1] - 20 / self.scale)]
-                    if self.zoom_dim[0][0] <= 0 or self.zoom_dim[0][1] >= self.w and self.zoom_dim[1][0] <= 0 or self.zoom_dim[1][1] >= self.h:
-                        self.zoom_dim = [(0, self.h), (0, self.w)]
-                elif keys[pygame.K_DOWN]:
-                    self.zoom_dim = [
-                        (self.zoom_dim[0][0], self.zoom_dim[0][1]), (self.zoom_dim[1][0] + 20 / self.scale, self.zoom_dim[1][1] + 20 / self.scale)]
-                    if self.zoom_dim[0][0] <= 0 or self.zoom_dim[0][1] >= self.w and self.zoom_dim[1][0] <= 0 or self.zoom_dim[1][1] >= self.h:
-                        self.zoom_dim = [(0, self.h), (0, self.w)]
-                elif keys[pygame.K_LEFT]:
-                    self.zoom_dim = [
-                        (self.zoom_dim[0][0] - 20 / self.scale, self.zoom_dim[0][1] - 20 / self.scale), (self.zoom_dim[1][0], self.zoom_dim[1][1])]
-                    if self.zoom_dim[0][0] <= 0 or self.zoom_dim[0][1] >= self.w and self.zoom_dim[1][0] <= 0 or self.zoom_dim[1][1] >= self.h:
-                        self.zoom_dim = [(0, self.h), (0, self.w)]
-                elif keys[pygame.K_RIGHT]:
-                    self.zoom_dim = [
-                        (self.zoom_dim[0][0] + 20 / self.scale, self.zoom_dim[0][1] + 20 / self.scale), (self.zoom_dim[1][0], self.zoom_dim[1][1])]
-                    if self.zoom_dim[0][0] <= 0 or self.zoom_dim[0][1] >= self.w and self.zoom_dim[1][0] <= 0 or self.zoom_dim[1][1] >= self.h:
-                        self.zoom_dim = [(0, self.h), (0, self.w)]
-
-                # pygame events
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit(0)
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            pygame.quit()
-                            sys.exit(0)
 
     def render_person(self, person):
         if person[8]:
@@ -239,11 +145,7 @@ class setup:
                 person[6] = neighbour[0]
                 person[7] = neighbour[1]
 
-        if delete_person == 0:
-            self.updatePixel(person[6], person[7], self.colonies[person[1]][2])
-            self.people[np.where(self.people[:, 0] == person[0])[
-                0][0]] = person
-        elif delete_person == 1:
+        if delete_person == 0 or delete_person == 1:
             self.people[np.where(self.people[:, 0] == person[0])[
                 0][0]] = person
         elif delete_person == -1:
@@ -259,36 +161,3 @@ class setup:
         ]
         pos = positions[np.random.randint(len(positions))]
         return pos
-
-    def updatePixel(self, x, y, color):
-        # set pixel color
-        self._pixel_arr[x, y] = color
-
-    def updateMap(self):
-        self.display_surface.blit(
-            pygame.transform.smoothscale(pygame.surfarray.make_surface(self._pixel_arr[int(self.zoom_dim[0][0]):int(self.zoom_dim[0][1]), int(self.zoom_dim[1][0]):int(self.zoom_dim[1][1])]), (self.h, self.w)), (0, 0))
-
-    def updateStats(self, stats):
-        x = 5
-        y = 5
-        # render generation
-        surface = self.font.render(
-            'Generation: ' + str(stats['gen']) + ', Day: ' + str(stats['day']) + ', Population: ' + str(len(self.people)), True, (255, 255, 255))
-
-        self.display_surface.blit(surface, (x, y))
-
-        # render colony data
-        for i in range(0, len(self.colonies)):
-            c_people = np.where(stats['people'][:, 1]
-                                == self.colonies[i][0])[0]
-            surface = self.font.render(
-                'Colony ' + str(self.colonies[i][1]) + ': ' + str(len(c_people)), True, self.colonies[i][2])
-            self.display_surface.blit(
-                surface, (x, 20 + y + self.font_size * i))
-
-        # draw fps
-        surface = self.font.render(
-            'FPS: ' + str(int(self.clock.get_fps())), True, (255, 255, 255))
-        self.display_surface.blit(surface, (self.h - 50, 5))
-
-        pygame.display.update()
