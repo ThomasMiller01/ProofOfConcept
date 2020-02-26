@@ -216,6 +216,7 @@ class setup:
             indices = np.where(
                 np.all(self.people[:, 6:8] == neighbour, axis=1))[0]
 
+            # if neighbour field is not empty
             if indices.size != 0:
                 if self.people[indices[0]][1] != person[1]:
                     # fight
@@ -234,13 +235,40 @@ class setup:
                         if len(np.where(np.all(self.people[:, 6:8] == neighbour, axis=1))[0]) == 0:
                             person[6] = neighbour[0]
                             person[7] = neighbour[1]
-            if delete_person != -1:
+                            self.updatePixel(
+                                person[6], person[7], (211, 174, 27))
+                # if person is from own colony
+                else:
+                    num = indices.size
+
+                    # increase age based on num
+                    # new_age = np.interp(num, (0, len(self.people)), (0, 100))
+                    # person[2] += new_age
+
+                    # move
+                    person[6] = neighbour[0]
+                    person[7] = neighbour[1]
+
+                    # coloring based on people count on field
+                    num_mapped = np.interp(
+                        num, (0, len(self.people)), (0, 5))
+
+                    color_palett = [(211, 174, 27), (222, 110, 59),
+                                    (181, 77, 71), (142, 50, 30), (82, 42, 26)]
+
+                    color_ranges = np.arange(0, len(self.people), len(
+                        self.people) / len(color_palett))
+
+                    color_index = np.where(num_mapped < color_ranges)[0][0]
+                    color = color_palett[color_index]
+                    self.updatePixel(person[6], person[7], color)
+            else:
+                self.updatePixel(person[6], person[7], (211, 174, 27))
                 # if field is empty, move
                 person[6] = neighbour[0]
                 person[7] = neighbour[1]
-
         if delete_person == 0:
-            self.updatePixel(person[6], person[7], self.colonies[person[1]][2])
+            # self.updatePixel(person[6], person[7], self.colonies[person[1]][2])
             self.people[np.where(self.people[:, 0] == person[0])[
                 0][0]] = person
         elif delete_person == 1:
