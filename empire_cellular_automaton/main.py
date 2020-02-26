@@ -5,6 +5,7 @@ import time
 import numpy as np
 import pygame
 import os
+import ctypes
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 
@@ -15,25 +16,30 @@ class setup:
         # [gen, day, people]
         self.stats = np.zeros((0, 3)).astype('int')
 
-        # [id, colony_id, age, strength, reproduction_value, disease, x, y, dead]
-        self.people = np.zeros((0, 9)).astype('int')
+        self.shared_people = mp.Array(ctypes.c_int, 0)
 
-        # [id, name, color]
-        self.colonies = np.zeros((0, 3)).astype('int')
+        with self.shared_people.get_lock():
+            # [id, colony_id, age, strength, reproduction_value, disease, x, y, dead]
+            self.people = np.frombuffer(
+                self.shared_people.get_obj()).reshape((-1, 9)).astype('int')
+            # self.people = np.zeros((0, 9)).astype('int')
 
-        self.c_id = 0
-        self.p_id = 0
+            # [id, name, color]
+            self.colonies = np.zeros((0, 3)).astype('int')
 
-        # init people and colonies
-        for colony in self._settings['colonies']:
-            self.colonies = np.append(self.colonies, np.array(
-                [[self.c_id, colony[0], colony[1]]]), axis=0)
-            for i in range(colony[2]):
-                self.people = np.append(self.people, np.array([[self.p_id, self.c_id, 0, np.random.randint(self._settings['p_strength'][0], self._settings['p_strength'][1]), np.random.randint(
-                    self._settings['p_reproductionValue'][0], self._settings['p_reproductionValue'][1]), np.random.randint(2), colony[3][0], colony[3][1], False]]), axis=0)
-                self.p_id += 1
-            self.c_id += 1
-        self.p_id += 1
+            self.c_id = 0
+            self.p_id = 0
+
+            # init people and colonies
+            for colony in self._settings['colonies']:
+                self.colonies = np.append(self.colonies, np.array(
+                    [[self.c_id, colony[0], colony[1]]]), axis=0)
+                for i in range(colony[2]):
+                    self.people = np.append(self.people, np.array([[self.p_id, self.c_id, 0, np.random.randint(self._settings['p_strength'][0], self._settings['p_strength'][1]), np.random.randint(
+                        self._settings['p_reproductionValue'][0], self._settings['p_reproductionValue'][1]), np.random.randint(2), colony[3][0], colony[3][1], False]]), axis=0)
+                    self.p_id += 1
+                self.c_id += 1
+            self.p_id += 1
 
         # get 3d pixel array
         self._pixel_arr = pygame.surfarray.array3d(
@@ -66,12 +72,23 @@ class setup:
         return self.stats
 
     def render_gen(self, gen):
-        pool = mp.Pool(processes=mp.cpu_count())
+        # pool = mp.Pool(processes=mp.cpu_count())
         # foreach day
         for i in range(self._settings['days_per_generation']):
-            print(i)
+            # pool.starmap(self.render_person, self.people)
 
-            pool.map_async(self.render_person, self.people)
+            procs = [mp.Process(target=self.render_person, args=(person,))
+                     for person in self.people]
+
+            for p in procs:
+                p.start()
+            for p in procs:
+                p.join()
+
+            # set new people arr
+            # with self.shared_people.get_lock():
+            #     self.people = np.frombuffer(
+            #         self.shared_people.get_obj()).reshape((-1, 9)).astype('int')
 
             # remove dead people
             dead_people_index = np.where(self.people[:, 8])[0]
@@ -81,9 +98,13 @@ class setup:
             # update self.stats
             self.stats = np.append(
                 self.stats, [[gen, i, copy.deepcopy(self.people)]], axis=0)
-        pool.close()
+        # pool.close()
 
     def render_person(self, person):
+        with self.shared_people.get_lock():
+            self.people = np.frombuffer(self.shared_people.get_obj()).reshape(
+                (-1, 9)).astype('int')
+        print(self.people)
         if person[8]:
             return
         delete_person = 0
@@ -152,6 +173,7 @@ class setup:
         elif delete_person == -1:
             self.people[np.where(self.people[:, 0] == enemie[0])[
                 0][0]] = enemie
+        print(str(person[0]) + " rendered")
 
     def getRandomNeighbour(self):
         positions = [

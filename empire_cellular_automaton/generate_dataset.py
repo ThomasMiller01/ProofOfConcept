@@ -2,6 +2,7 @@ import couchdb
 import json
 import os
 import numpy as np
+import multiprocessing as mp
 import main
 
 
@@ -45,6 +46,7 @@ def getRandIntBiggerThanY(low, high, y):
 
 
 if __name__ == '__main__':
+    mp.freeze_support()
     for i in range(dataset_num):
         if random_values:
             reproduction_value = getRandIntXLessThanY(0, 100)
