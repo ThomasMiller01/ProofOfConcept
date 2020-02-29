@@ -17,7 +17,7 @@ settings = {
     'p_strength': [0, 100],
     'p_reproductionValue': [0, 70],
     'p_reproductionThreshold': 50,
-    'maxGen': 4,
+    'maxGen': 10,
     'display_map': display_map,
     'colonies': colonies,
     'world_pixel': world_pixel,

@@ -144,8 +144,8 @@ pygame.mouse.set_cursor(*pygame.cursors.arrow)
 settings = {
     'p_strength': [0, 100],
     'p_reproductionValue': [0, 70],
-    'p_reproductionThreshold': 48,
-    'maxGen': 100,
+    'p_reproductionThreshold': 49,
+    'maxGen': 1000,
     'display_map': display_map,
     'colonies': colonies,
     'world_pixel': world_pixel,

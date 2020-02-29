@@ -189,13 +189,14 @@ class setup:
 
         # reproduction
         if person[4] > self._settings['p_reproductionThreshold']:
-            # --------------------
+            # ----------------------
             # mutations <-- here -->
-            # --------------------
+            # ----------------------
+            mutations = self.getRandomMutations()
 
             # person reproduces
             self.people = np.append(self.people, np.asarray(
-                [[self.p_id, person[1], 0, person[3], 0, person[5], person[6], person[7], False]]), axis=0)
+                [[self.p_id, person[1], 0, person[3] + mutations[0], 0, person[5], person[6], person[7], False]]), axis=0)
             self.p_id += 1
             person[4] = 0
         else:
@@ -211,7 +212,7 @@ class setup:
                      person[7] + neighbour_dir[1])
 
         # check if neighbour is water
-        if delete_person == 0 and not np.array_equal(self._pixel_arr[neighbour[0], neighbour[1]], self._settings['world_pixel']['water']) and neighbour != (-1, -1):
+        if delete_person == 0 and not np.all(np.equal(self._pixel_arr[neighbour[0], neighbour[1]], self._settings['world_pixel']['water'])) and neighbour != (-1, -1):
             # check if neighbour field is empty
             indices = np.where(
                 np.all(self.people[:, 6:8] == neighbour, axis=1))[0]
@@ -239,36 +240,53 @@ class setup:
                                 person[6], person[7], (255, 255, 255))
                 # if person is from own colony
                 else:
-                    num = indices.size
-
-                    # increase age based on num
-                    # new_age = np.interp(num, (0, len(self.people)), (0, 100))
-                    # person[2] += new_age
-
                     # move
                     person[6] = neighbour[0]
                     person[7] = neighbour[1]
 
-                    # coloring based on people count on field
-                    num_mapped = np.interp(
-                        num, (1, len(self.people)), (0, 255))
-                    self.updatePixel(
-                        person[6], person[7], (num_mapped, num_mapped, num_mapped))
+                    # num = indices.size
+
+                    # # increase age based on num
+                    # new_age = np.interp(num, (0, len(self.people)), (0, 100))
+                    # person[2] += new_age
+
+                    # # coloring based on people count on field
+                    # if num < 2:
+                    #     color = (120, 120, 120)
+                    # elif num < 5:
+                    #     color = (80, 80, 80)
+                    # elif num < 10:
+                    #     color = (50, 50, 50)
+                    # elif num < 15:
+                    #     color = (20, 20, 20)
+                    # else:
+                    #     color = (0, 0, 0)
+                    # self.updatePixel(person[6], person[7], color)
             else:
-                self.updatePixel(person[6], person[7], (255, 255, 255))
+                # self.updatePixel(person[6], person[7], (255, 255, 255))
+
                 # if field is empty, move
                 person[6] = neighbour[0]
                 person[7] = neighbour[1]
-        if delete_person == 0:
-            # self.updatePixel(person[6], person[7], self.colonies[person[1]][2])
-            self.people[np.where(self.people[:, 0] == person[0])[
-                0][0]] = person
-        elif delete_person == 1:
-            self.people[np.where(self.people[:, 0] == person[0])[
-                0][0]] = person
-        elif delete_person == -1:
+        self.people[np.where(self.people[:, 0] == person[0])[0][0]] = person
+        if delete_person == -1:
+            # enemie dead
             self.people[np.where(self.people[:, 0] == enemie[0])[
                 0][0]] = enemie
+        elif delete_person == 0:
+            # person alive
+            self.updatePixel(person[6], person[7], self.colonies[person[1]][2])
+
+    def getRandomMutations(self):
+        return [0]
+        # 10% chance for mutation
+        rnd_chance = np.random.randint(0, 10) == 0
+        if rnd_chance:
+            # get strength mutation
+            strength_mutation = np.random.randint(-10, 10)
+            return [strength_mutation]
+        # [strength]
+        return [0]
 
     def getRandomNeighbour(self):
         positions = [

@@ -1,0 +1,51 @@
+Fri Feb 28 10:02:39 2020    restats_pure_numpy
+
+         5312969 function calls in 33.879 seconds
+
+   Ordered by: internal time, cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   240195   13.668    0.000   30.574    0.000 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:179(render_person)
+   477426    5.152    0.000    5.152    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+   237933    3.144    0.000    6.625    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:2551(array_equal)
+       10    1.687    0.169   33.871    3.387 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:100(render_gen)
+     2000    1.437    0.001    1.437    0.001 {method '__deepcopy__' of 'numpy.ndarray' objects}
+   237891    1.294    0.000    5.735    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\fromnumeric.py:69(_wrapreduction)
+   243966    1.198    0.000    1.198    0.000 {method 'randint' of 'mtrand.RandomState' objects}
+   237891    1.127    0.000    6.863    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\fromnumeric.py:2171(all)
+   723291    1.124    0.000    1.124    0.000 {built-in method numpy.array}
+   237933    0.855    0.000    0.855    0.000 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:300(updatePixel)
+   239535    0.745    0.000    1.970    0.000 {method 'all' of 'numpy.ndarray' objects}
+   479086    0.724    0.000    0.724    0.000 {built-in method numpy.where}
+   240195    0.514    0.000    1.753    0.000 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:290(getRandomNeighbour)
+   718846    0.427    0.000    1.548    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:469(asarray)
+   237891    0.268    0.000    0.268    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\fromnumeric.py:70(<dictcomp>)
+   239535    0.160    0.000    1.225    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\_methods.py:45(_all)
+   237891    0.087    0.000    0.087    0.000 {method 'items' of 'dict' objects}
+      801    0.063    0.000    0.089    0.000 C:\Program Files\Python36\lib\site-packages\numpy\lib\function_base.py:4220(delete)
+   240195    0.058    0.000    0.058    0.000 {built-in method builtins.len}
+     4445    0.057    0.000    0.057    0.000 {built-in method numpy.concatenate}
+     2000    0.030    0.000    1.481    0.001 C:\Program Files\Python36\lib\copy.py:132(deepcopy)
+     4445    0.017    0.000    0.080    0.000 C:\Program Files\Python36\lib\site-packages\numpy\lib\function_base.py:4641(append)
+     2000    0.009    0.000    0.010    0.000 C:\Program Files\Python36\lib\copy.py:252(_keep_alive)
+       32    0.007    0.000    0.007    0.000 {built-in method builtins.print}
+     3445    0.006    0.000    0.023    0.000 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:280(getRandomMutations)
+      801    0.004    0.000    0.004    0.000 {built-in method numpy.copyto}
+     4445    0.003    0.000    0.006    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:541(asanyarray)
+      801    0.003    0.000    0.003    0.000 {built-in method numpy.empty}
+      801    0.002    0.000    0.009    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:175(ones)
+      801    0.002    0.000    0.002    0.000 {built-in method numpy.can_cast}
+     4000    0.002    0.000    0.002    0.000 {method 'get' of 'dict' objects}
+     6000    0.002    0.000    0.002    0.000 {built-in method builtins.id}
+     1602    0.001    0.000    0.001    0.000 {built-in method builtins.isinstance}
+     2000    0.001    0.000    0.001    0.000 {built-in method builtins.getattr}
+      801    0.001    0.000    0.001    0.000 {built-in method numpy.core._multiarray_umath.normalize_axis_index}
+     2000    0.001    0.000    0.001    0.000 {built-in method builtins.issubclass}
+        1    0.001    0.001   33.878   33.878 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:78(run)
+        1    0.000    0.000   33.879   33.879 {built-in method builtins.exec}
+       11    0.000    0.000    0.000    0.000 {built-in method builtins.round}
+        1    0.000    0.000   33.879   33.879 <string>:1(<module>)
+       22    0.000    0.000    0.000    0.000 {built-in method time.time}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python36\lib\re.py:286(_compile)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python36\lib\re.py:231(compile)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
