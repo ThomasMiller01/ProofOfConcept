@@ -3,15 +3,10 @@ import os
 
 
 def run_request(url, proxy):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
-    }
     session = requests.Session()
     session.proxies = {
         "http": "http://" + proxy,
-        # "https": "https://" + proxy
     }
-    # session.headers = headers
     try:
         data = session.get(url, timeout=2)
     except Exception as e:
