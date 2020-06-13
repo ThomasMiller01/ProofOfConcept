@@ -22,7 +22,7 @@ def verify_proxy(proxy):
     try:
         ip = response.json()["ip"]
     except Exception as e:
-        return "Error"
+        return "Json-Parse-Error"
     return ip
 
 
@@ -34,8 +34,8 @@ verified_proxies = []
 print("------------ verifying proxy ... ------------")
 for proxy in proxy_list:
     ip = verify_proxy(proxy)
-    if ip == "Error":
-        print(proxy + ": [Error]")
+    if "Error" in ip:
+        print(proxy + ": [" + ip + "]")
     else:
         verified = True if ip == proxy.split(":")[0] else False
         if verified:
