@@ -6,52 +6,73 @@ class TestProxies:
     def __init__(self, proxies):
         self.proxies = proxies
 
+        self.attemps = 2
         self.timeout = 3
 
-    def test_proxies(self):
-        print("------------ thomasmiller.info ------------")
+    def test(self):
+        print("------------ testing proxies ------------")
         for proxy in self.proxies:
-            self.run_request_thomasmiller_info(proxy)
-        print("")
+            print(proxy[0] + " [" + proxy[1] + "]:")
+            resThomasmillerInfo = self.run_test_attemps(
+                self.run_request_thomasmiller_info, proxy)
+            print("  - thomasmiller.info: [" + resThomasmillerInfo + "]")
+            resGoogle = self.run_test_attemps(self.run_request_google, proxy)
+            print("  - google: [" + resGoogle + "]")
+            resEbaykleinanzeigen = self.run_test_attemps(
+                self.run_request_ebay_kleinanzeigen, proxy)
+            print("  - EbayKleinanzeigen: [" + resEbaykleinanzeigen + "]")
+            resEmp = self.run_test_attemps(
+                self.run_request_emp, proxy)
+            print("  - Emp: [" + resEmp + "]")
 
-        print("------------ google ------------")
-        for proxy in self.proxies:
-            self.run_request_google(proxy)
-        print("")
-
-        print("------------ ebay_kleinanzeigen ------------")
-        for proxy in self.proxies:
-            self.run_request_ebay_kleinanzeigen(proxy)
-        print("")
+    def run_test_attemps(self, method, proxy):
+        tested_positiv_tmp = False
+        for i in range(self.attemps):
+            response = method(proxy)
+            if "Error" not in response:
+                tested_positiv = True if response == '+' else False
+                if tested_positiv:
+                    verified_tmp = True
+                    break
+        return response
 
     def run_request_thomasmiller_info(self, proxy):
         response = self.test_proxy(
             "://api.thomasmiller.info/", proxy[0], proxy[1])
         if 'Error' in response:
-            print(proxy[0] + ": [" + response + "]")
+            return response
         elif response.text == "api test index.html":
-            print(proxy[0] + ": [+]")
+            return "+"
         else:
-            print(proxy[0] + ": [-]")
+            return "-"
 
     def run_request_google(self, proxy):
         response = self.test_proxy("://google.com", proxy[0], proxy[1])
         if "Error" in response:
-            print(proxy[0] + ": [" + response + "]")
-        elif response.status_code != 200:
-            print(proxy[0] + ": [-]")
+            return response
+        elif response.status_code == 200:
+            return "+"
         else:
-            print(proxy[0] + ": [+]")
+            return "-"
 
     def run_request_ebay_kleinanzeigen(self, proxy):
         response = self.test_proxy(
             "://www.ebay-kleinanzeigen.de/", proxy[0], proxy[1])
         if "Error" in response:
-            print(proxy[0] + ": [" + response + "]")
+            return response
         elif "Access denied" in response.text or response.status_code != 200:
-            print(proxy[0] + ": [-] (" + response.reason + ")")
+            return "-"
         else:
-            print(proxy[0] + ": [+]")
+            return "+"
+
+    def run_request_emp(self, proxy):
+        response = self.test_proxy("://www.emp.de/", proxy[0], proxy[1])
+        if "Error" in response:
+            return response
+        elif response.status_code == 200:
+            return "+"
+        else:
+            return "-"
 
     def test_proxy(self, url, proxy, proxy_type):
         if proxy_type == None or proxy_type == 'None' or proxy_type.lower() == 'http' or 'http ' in proxy_type.lower():

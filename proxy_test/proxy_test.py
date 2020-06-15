@@ -5,8 +5,8 @@ from test_proxies import TestProxies
 
 files = [
     (
-        "./proxies/spys-socks-proxy-list.csv",
-        "./verified_proxies/spys-socks-proxy-list_verified.csv"
+        "./proxies/spys-anonymous-proxy-list.csv",
+        "./verified_proxies/spys-anonymous-proxy-list_verified.csv"
     ),
 ]
 
@@ -18,15 +18,13 @@ for proxy_file in files:
 
     if verify:
         verifyProxies.verify()
-
-    print("... results saved!")
+        print("... results saved!")
 
     if test:
         proxies = verifyProxies.get_proxies_formated(proxy_file[1])
         testProxies = TestProxies(proxies)
-        testProxies.test_proxies()
-
-    print("... tests done!")
+        testProxies.test()
+        print("... tests done!")
 
 
 print("")
