@@ -1,0 +1,64 @@
+Fri Feb 28 10:07:16 2020    restats_pygame
+
+         20712280 function calls in 254.586 seconds
+
+   Ordered by: internal time, cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   938624  102.702    0.000  236.218    0.000 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:179(render_person)
+  1864264   85.152    0.000   85.152    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+   932171   12.025    0.000   25.729    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:2551(array_equal)
+     1000    5.873    0.006    5.873    0.006 {built-in method pygame.pixelcopy.make_surface}
+       10    5.593    0.559  254.574   25.457 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:100(render_gen)
+   930435    5.246    0.000   87.423    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\fromnumeric.py:69(_wrapreduction)
+   954448    4.969    0.000    4.969    0.000 {method 'randint' of 'mtrand.RandomState' objects}
+  1871059    4.688    0.000    4.688    0.000 {built-in method numpy.where}
+   930435    4.478    0.000   91.901    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\fromnumeric.py:2171(all)
+  2827983    4.450    0.000    4.450    0.000 {built-in method numpy.array}
+   932171    3.564    0.000    3.564    0.000 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:300(updatePixel)
+   933829    2.807    0.000    7.784    0.000 {method 'all' of 'numpy.ndarray' objects}
+   938624    2.055    0.000    7.187    0.000 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:290(getRandomNeighbour)
+     1000    1.989    0.002    1.989    0.002 {built-in method pygame.transform.smoothscale}
+  2812577    1.582    0.000    6.023    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:469(asarray)
+     5000    1.456    0.000    1.456    0.000 {method 'blit' of 'pygame.Surface' objects}
+     2000    1.391    0.001    1.391    0.001 {method '__deepcopy__' of 'numpy.ndarray' objects}
+   930435    1.056    0.000    1.056    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\fromnumeric.py:70(<dictcomp>)
+     1000    0.841    0.001   10.104    0.010 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:304(updateMap)
+     1000    0.739    0.001    0.739    0.001 {built-in method pygame.display.update}
+   933829    0.592    0.000    4.977    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\_methods.py:45(_all)
+   930435    0.354    0.000    0.354    0.000 {method 'items' of 'dict' objects}
+    15406    0.238    0.000    0.238    0.000 {built-in method numpy.concatenate}
+   942624    0.238    0.000    0.238    0.000 {built-in method builtins.len}
+     4000    0.120    0.000    0.120    0.000 {method 'render' of 'pygame.font.Font' objects}
+     1000    0.083    0.000    1.027    0.001 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:308(updateStats)
+      829    0.081    0.000    0.107    0.000 C:\Program Files\Python36\lib\site-packages\numpy\lib\function_base.py:4220(delete)
+    15406    0.052    0.000    0.308    0.000 C:\Program Files\Python36\lib\site-packages\numpy\lib\function_base.py:4641(append)
+     2000    0.042    0.000    1.451    0.001 C:\Program Files\Python36\lib\copy.py:132(deepcopy)
+    14406    0.024    0.000    0.096    0.000 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:280(getRandomMutations)
+     1000    0.020    0.000    0.020    0.000 {built-in method pygame.event.get}
+     1000    0.013    0.000    5.887    0.006 C:\Program Files\Python36\lib\site-packages\pygame\_numpysurfarray.py:84(make_surface)
+     2000    0.012    0.000    0.013    0.000 C:\Program Files\Python36\lib\copy.py:252(_keep_alive)
+       32    0.010    0.000    0.010    0.000 {built-in method builtins.print}
+    15406    0.009    0.000    0.018    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:541(asanyarray)
+     1000    0.009    0.000    0.009    0.000 {method 'tick' of 'Clock' objects}
+     1000    0.005    0.000    0.005    0.000 {built-in method pygame.key.get_pressed}
+     1000    0.005    0.000    5.892    0.006 C:\Program Files\Python36\lib\site-packages\pygame\surfarray.py:247(make_surface)
+      829    0.004    0.000    0.004    0.000 {built-in method numpy.copyto}
+      829    0.003    0.000    0.003    0.000 {built-in method numpy.empty}
+     6000    0.002    0.000    0.002    0.000 {built-in method builtins.id}
+     4000    0.002    0.000    0.002    0.000 {method 'get' of 'dict' objects}
+      829    0.002    0.000    0.009    0.000 C:\Program Files\Python36\lib\site-packages\numpy\core\numeric.py:175(ones)
+      829    0.002    0.000    0.002    0.000 {built-in method numpy.can_cast}
+     2658    0.002    0.000    0.002    0.000 {built-in method builtins.isinstance}
+     2000    0.001    0.000    0.001    0.000 {built-in method builtins.getattr}
+     2000    0.001    0.000    0.001    0.000 {built-in method builtins.issubclass}
+      829    0.001    0.000    0.001    0.000 {built-in method numpy.core._multiarray_umath.normalize_axis_index}
+     1000    0.001    0.000    0.001    0.000 {method 'get_fps' of 'Clock' objects}
+        1    0.001    0.001  254.585  254.585 d:\GitHub\Workspace\Experiments\empire_cellular_automaton\main.py:78(run)
+        1    0.000    0.000  254.586  254.586 {built-in method builtins.exec}
+       11    0.000    0.000    0.000    0.000 {built-in method builtins.round}
+        1    0.000    0.000  254.585  254.585 <string>:1(<module>)
+       22    0.000    0.000    0.000    0.000 {built-in method time.time}
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python36\lib\re.py:286(_compile)
+        1    0.000    0.000    0.000    0.000 C:\Program Files\Python36\lib\re.py:231(compile)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}

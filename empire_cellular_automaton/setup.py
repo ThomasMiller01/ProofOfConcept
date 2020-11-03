@@ -1,107 +1,158 @@
-import asyncio
 import pygame
-
-import world_map
-import colony
-
-# [name, [r, g, b], population, [x, y]]
-colonys = [
-    ['red', [255, 0, 0], 100, [675, 213]],
-    ['yellow', [255, 255, 0], 100, [506, 443]],
-    ['white', [255, 255, 255], 100, [138, 219]]
-]
-_colonys = []
-
-# get object of Map class
-_map = world_map.Map(
-    'empire_cellular_automaton/map.jpg', colonys)
-
-# foreach colony in colonys
-# create new Colony and append to _colonys
-for i in range(0, colonys.__len__()):
-    _colonys.append(colony.Colony(
-        i, colonys[i][0], colonys[i][2], colonys[i][1], colonys[i][3][0], colonys[i][3][1], _map))
+import sys
+import random
+import numpy as np
+import main
 
 
-# task for doing one generation with count=years
-async def myTask(_c, count, generation):
-    print("Rendering Colony: '" + _c.name + "'")
-    for i in range(0, count):
-        _c.update(generation)
-    print("Population: " + str(_c.population))
-    print("---------------------")
+def draw_map():
+    display_surface.blit(pygame.transform.smoothscale(pygame.surfarray.make_surface(_pixel_arr[int(zoom_dim[0][0]):int(
+        zoom_dim[0][1]), int(zoom_dim[1][0]):int(zoom_dim[1][1])]), (_pixel_arr.shape[0], _pixel_arr.shape[1])), (0, 0))
+
+    surface = font_2.render("Placing Colonies ...", True, (255, 255, 255))
+    display_surface.blit(surface, (_pixel_arr.shape[0] / 2 - 40, 10))
+
+    surface = font_1.render("Press Enter to start ..", True, (255, 255, 255))
+    display_surface.blit(surface, (_pixel_arr.shape[0] / 2 - 33, 30))
+
+    y = 0
+    for colony in colonies:
+        y += 15
+        text = 'Colony ' + colony[0] + ', ' + str(colony[3])
+        surface = font_1.render(text, True, (255, 255, 255))
+        display_surface.blit(surface, (10, y))
+        c_surface = font_1.render('Color', True, colony[1])
+        display_surface.blit(c_surface, (len(text) * 7, y))
+
+    pygame.display.update()
 
 
-# create task for each colony
-async def main(generation):
-    for _colony in _colonys:
-        asyncio.ensure_future(myTask(_colony, 100, generation))
+display_map = True
+map_path = 'map.jpg'
+world_pixel = {'water': [3, 0, 168], 'empty': [5, 124, 0]}
+colonies = []
 
+# init pygame
+pygame.init()
+pygame.font.init()
 
-# check if simulation is done
-def isDone(percentage):
-    _percentage = False
-    # if percentage of one colony is greater than 15, simulation is done
-    for p in percentage:
-        if p[1] >= 15:
-            _percentage = True
-    _c = []
-    # if population of each colony is 0, simulation is done
-    for _colony in _colonys:
-        if _colony.population == 0:
-            _c.append([_colony.name, False])
-    if _c.__len__() == colonys.__len__() or _percentage:
-        return True
-    return False
-
-
-# set loop
-loop = asyncio.get_event_loop()
-percentages = []
-# get starting percentage
-for _colony in _colonys:
-    percentages.append([_colony.name, _map.getColorPercentage(_colony.color)])
-i = 0
 clock = pygame.time.Clock()
-_map.updateMap()
-# while simulation is running
-while not isDone(percentages):
+
+# font for stats
+font_1 = pygame.font.SysFont('calibri', 15)
+font_2 = pygame.font.SysFont('calibri', 20)
+
+# load image
+_image = pygame.image.load(map_path)
+
+# get 3d pixel array
+_pixel_arr = pygame.surfarray.array3d(_image)
+
+h = _pixel_arr.shape[0]
+w = _pixel_arr.shape[1]
+
+
+# create display surface
+display_surface = pygame.display.set_mode((h, w))
+
+scale = 1
+zoom_dim = [(0, h), (0, w)]
+
+# set the pygame window name
+pygame.display.set_caption('Empire - Cellular Automaton')
+pygame.mouse.set_cursor(*pygame.cursors.broken_x)
+
+draw_map()
+
+# main loop for interacting with the world
+start = False
+while not start:
+    # pygame events
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w]:
+        old_zoom_dim = zoom_dim
+        zoom_dim = [(zoom_dim[0][0] + 10, zoom_dim[0][1] - 10),
+                    (zoom_dim[1][0] + 7, zoom_dim[1][1] - 7)]
+        scale += 0.5
+        if zoom_dim[0][0] > zoom_dim[0][1] or zoom_dim[1][0] > zoom_dim[1][1] or zoom_dim[0][0] == zoom_dim[0][1] or zoom_dim[1][0] == zoom_dim[1][1]:
+            zoom_dim = old_zoom_dim
+        if zoom_dim[0][0] <= 0 or zoom_dim[0][1] >= w and zoom_dim[1][0] <= 0 or zoom_dim[1][1] >= h:
+            zoom_dim = [(0, h), (0, w)]
+            scale = 1
+        draw_map()
+    elif keys[pygame.K_s]:
+        zoom_dim = [(zoom_dim[0][0] - 10, zoom_dim[0][1] + 10),
+                    (zoom_dim[1][0] - 7, zoom_dim[1][1] + 7)]
+        scale -= 0.5
+        if zoom_dim[0][0] > zoom_dim[0][1] or zoom_dim[1][0] > zoom_dim[1][1] or zoom_dim[0][0] == zoom_dim[0][1] or zoom_dim[1][0] == zoom_dim[1][1]:
+            zoom_dim = old_zoom_dim
+        if zoom_dim[0][0] <= 0 or zoom_dim[0][1] >= w and zoom_dim[1][0] <= 0 or zoom_dim[1][1] >= h:
+            zoom_dim = [(0, h), (0, w)]
+            scale = 1
+        draw_map()
+    elif keys[pygame.K_UP]:
+        zoom_dim = [
+            (zoom_dim[0][0], zoom_dim[0][1]), (zoom_dim[1][0] - 20 / scale, zoom_dim[1][1] - 20 / scale)]
+        if zoom_dim[0][0] <= 0 or zoom_dim[0][1] >= w and zoom_dim[1][0] <= 0 or zoom_dim[1][1] >= h:
+            zoom_dim = [(0, h), (0, w)]
+        draw_map()
+    elif keys[pygame.K_DOWN]:
+        zoom_dim = [
+            (zoom_dim[0][0], zoom_dim[0][1]), (zoom_dim[1][0] + 20 / scale, zoom_dim[1][1] + 20 / scale)]
+        if zoom_dim[0][0] <= 0 or zoom_dim[0][1] >= w and zoom_dim[1][0] <= 0 or zoom_dim[1][1] >= h:
+            zoom_dim = [(0, h), (0, w)]
+        draw_map()
+    elif keys[pygame.K_LEFT]:
+        zoom_dim = [
+            (zoom_dim[0][0] - 20 / scale, zoom_dim[0][1] - 20 / scale), (zoom_dim[1][0], zoom_dim[1][1])]
+        if zoom_dim[0][0] <= 0 or zoom_dim[0][1] >= w and zoom_dim[1][0] <= 0 or zoom_dim[1][1] >= h:
+            zoom_dim = [(0, h), (0, w)]
+        draw_map()
+    elif keys[pygame.K_RIGHT]:
+        zoom_dim = [
+            (zoom_dim[0][0] + 20 / scale, zoom_dim[0][1] + 20 / scale), (zoom_dim[1][0], zoom_dim[1][1])]
+        if zoom_dim[0][0] <= 0 or zoom_dim[0][1] >= w and zoom_dim[1][0] <= 0 or zoom_dim[1][1] >= h:
+            zoom_dim = [(0, h), (0, w)]
+        draw_map()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            # quit pygame
             pygame.quit()
-            # quit the program.
-            quit()
-    print("---------------------")
-    print("Generation: " + str(i + 1))
-    print("---------------------")
-    # init main task
-    loop.run_until_complete(main(i))
-    print("---------------------")
-    print("Rendered all colonys")
-    print("---------------------")
-    # clear percentage and append new percentage
-    percentages.clear()
-    for _colony in _colonys:
-        percentages.append(
-            [_colony.name, _map.getColorPercentage(_colony.color)])
-    print("---------------------")
-    print("Percentage:")
-    print(percentages)
-    print("---------------------")
-    # increase generation count
-    i += 1
-    # update map
-    _map.updateMap()
-    clock.tick(1)
-# close loop
-loop.close()
+            sys.exit(0)
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit(0)
+            elif event.key == pygame.K_RETURN:
+                if colonies:
+                    start = True
+                else:
+                    print("[Error] missing colonies ...")
+        elif event.type == pygame.MOUSEBUTTONUP:
+            pos = pygame.mouse.get_pos()
+            pos_mapped = (int(np.interp(pos[0], (0, h), (zoom_dim[0][0], zoom_dim[0][1]))), int(np.interp(
+                pos[1], (0, w), (zoom_dim[1][0], zoom_dim[1][1]))))
+            c_color = [random.randint(0, 255), random.randint(
+                0, 255), random.randint(0, 255)]
+            _pixel_arr[pos_mapped[0], pos_mapped[1]] = c_color
+            colonies.append([str(len(colonies)),
+                             c_color, 100, [pos_mapped[0], pos_mapped[1]]])
+            draw_map()
 
-# update map
-_map.updateMap()
+pygame.mouse.set_cursor(*pygame.cursors.arrow)
 
-# quit pygame
-pygame.quit()
+settings = {
+    'p_strength': [0, 100],
+    'p_reproductionValue': [0, 70],
+    'p_reproductionThreshold': 49,
+    'maxGen': 1000,
+    'display_map': display_map,
+    'colonies': colonies,
+    'world_pixel': world_pixel,
+    'days_per_generation': 100,
+    'map_path': map_path
+}
 
-# quit the program.
-quit()
+_setup = main.setup(settings)
+
+_setup.run()
