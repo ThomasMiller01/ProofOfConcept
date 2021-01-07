@@ -47,10 +47,11 @@ class Proxy_Util:
         :rtype: requests.Response or ProxyError        
         """
         usedProxies = []
-        for i in range(5):
+        for i in range(1):
             data, proxy = self.use_proxy(url, verify)
             usedProxies.append({'proxy': proxy, 'data': data})
             if data and self.validate_request(data):
+                print("proxy", proxy)
                 return data        
 
         # parse usedProxies
