@@ -6,22 +6,20 @@ public class GameManager : MonoBehaviour {
     public Settings settings;
     public Map map;
 
-    public Person[] people;
-    public Colony[] colonies;
+    public Person[] people;    
 
 	// Use this for initialization
 	void Start () {
-        this.colonies = new Colony[settings.colonies.Length];
+        this.map.loadTexture();
 
-        Dictionary<int, int> number_of_people = new Dictionary<int, int>();
+        Dictionary<Colony, int> number_of_people = new Dictionary<Colony, int>();
         int max_number_of_people = 0;
         
         // init colonies
         for(int i = 0; i < settings.colonies.Length; i++)
         {
-            Colony colony = new Colony(i, settings.colonies[i].name, settings.colonies[i].color);
-            this.colonies[i] = colony;
-            number_of_people[i] = settings.colonies[i].number_of_people;
+            Colony colony = new Colony(i, settings.colonies[i].name, settings.colonies[i].color);            
+            number_of_people[colony] = settings.colonies[i].number_of_people;
             max_number_of_people += settings.colonies[i].number_of_people;
         }
 
@@ -34,17 +32,16 @@ public class GameManager : MonoBehaviour {
         {
             for (int k=0; k < item.Value; k++)
             {
-                Person person = new Person(j, item.Key, 0, 0, 0, 0, 0);
+                Vector2 position = new Vector2(Random.Range(0, this.map.dimensions.x), Random.Range(0, this.map.dimensions.y));
+                Person person = new Person(j, item.Key, 0, 0, 0, (int)position.x, (int)position.y);
                 this.people[j] = person;
+                j++;
             }
-        }
-
-        // initially draw all people
-        this.map.draw(this.people);
+        }        
     }
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+        this.map.draw(this.people);
+    }
 }
