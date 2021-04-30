@@ -5,14 +5,12 @@ using UnityEngine;
 using Utils;
 
 public class Colony
-{
-    public int id;
+{    
     public string name;
     public Color color;
 
-    public Colony(int id, string name, string color)
-    {
-        this.id = id;
+    public Colony(string name, string color)
+    {        
         this.name = name;
         this.color = Utils.color.HexToColor(color);
     }
