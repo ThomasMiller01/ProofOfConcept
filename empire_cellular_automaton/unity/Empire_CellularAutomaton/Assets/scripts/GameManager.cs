@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour {
     public Settings settings;
     public Map map;
 
+    [System.NonSerialized]
     public List<Person> people;      
 
 	// Use this for initialization
@@ -20,12 +21,11 @@ public class GameManager : MonoBehaviour {
         {
             Colony colony = new Colony(c.name, c.color);
             for (int k = 0; k < c.number_of_people; k++)
-            {
-                Vector2 position = new Vector2(Random.Range(0, this.map.dimensions.x), Random.Range(0, this.map.dimensions.y));
-                Person person = new Person(colony, 0, 0, 0, (int)position.x, (int)position.y);
-                this.people.Add(person);                                
+            {                
+                Person person = new Person(colony, 0, 0, 0, c.start.x, c.start.y);
+                this.people.Add(person);                
             }            
-        }               
+        }
     }
 	
 	// Update is called once per frame
@@ -39,8 +39,12 @@ public class GameManager : MonoBehaviour {
 
     void render_person(Person person)
     {
-        /*// if person is already dead, do nothing
-        if (person.is_dead) return;
+        /*// if person is already dead
+        if (person.is_dead)
+        {
+            this.people.Remove(person);
+            return;
+        }
 
         // if person died of age, mark person as dead and do nothing
         if (person.age > person.strength)
@@ -65,6 +69,7 @@ public class GameManager : MonoBehaviour {
             // create new person
             Person child = new Person(person.colony, 0, person.strength, 0, person.pos.x, person.pos.y);
             this.people.Add(child);
+            this.map.setPerson(child);
         } else
         {
             person.reproduction_value++;
@@ -76,13 +81,16 @@ public class GameManager : MonoBehaviour {
         // move
         // get random direction and random neighbour to move to
         Vector2 dir = Utils.pixels.getRandomDirection();
-        Vector2 newPos = Utils.pixels.getRandomNeighbour(person.pos, dir);
+        Vector2 newPos = Utils.pixels.getRandomNeighbour(person.pos, dir);        
 
         // check, if the new position is valid
         bool validate_pos = Utils.pixels.validatePosition(newPos, new Vector2[] { new Vector2(0, this.map.dimensions.x), new Vector2(0, this.map.dimensions.y) });
-        if (validate_pos)
-        {
-            person.pos = newPos;
+        bool is_water = this.map.getPixel(newPos) == this.map.water;        
+
+        // if its a valid position and not water, move
+        if (validate_pos && !is_water)
+        {                        
+            person.pos = newPos;            
         }
     }
 }

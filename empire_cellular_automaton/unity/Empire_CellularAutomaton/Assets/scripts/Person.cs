@@ -8,8 +8,8 @@ public class Person
     public int age;
     public int strength;
     public int reproduction_value;
-    public Vector2 pos;
-    public bool is_dead;
+    public Vector2 pos;    
+    public bool is_dead;        
 
     public Person(Colony colony, int age, int strength, int reproduction_value, float x, float y)
     {        
