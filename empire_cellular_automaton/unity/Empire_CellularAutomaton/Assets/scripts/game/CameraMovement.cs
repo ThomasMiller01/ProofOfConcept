@@ -3,65 +3,77 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraMovement : MonoBehaviour {
-    // zoom
-    private float targetOrtho;
-    public float zoomSpeed = 1;    
-    public float smoothSpeed = 2.0f;
-    public float minOrtho = 0.1f;
-    private float maxOrtho;
 
-    // movement
-    public float moveSpeed = 0.1f;
+    public Camera cam;
+    public float zoomStep, zoomSmooth, minCamSize;
+    private float maxCamSize;
+    public SpriteRenderer mapRenderer;
+
+    private float mapMinX, mapMaxX, mapMinY, mapMaxY;
     private Vector3 dragOrigin;
-    private Vector3 clickOrigin = Vector3.zero;
-    private Vector3 basePos = Vector3.zero;
+    private float targetZoom;
 
-    void Start()
+    private void Awake()
     {
-        this.targetOrtho = Camera.main.orthographicSize;
-        this.maxOrtho = this.targetOrtho;
+        this.maxCamSize = cam.orthographicSize;
+        this.targetZoom = cam.orthographicSize;
+
+        this.mapMinX = mapRenderer.transform.position.x - mapRenderer.bounds.size.x / 2f;
+        this.mapMaxX = mapRenderer.transform.position.x + mapRenderer.bounds.size.x / 2f;
+
+        this.mapMinY = mapRenderer.transform.position.y - mapRenderer.bounds.size.y / 2f;
+        this.mapMaxY = mapRenderer.transform.position.y + mapRenderer.bounds.size.y / 2f;
     }
 
-    void Update()
+    private void Update()
     {
-        this.zoom();
-        this.movement();
+        this.PanCamera();
+        this.ZoomCamera();
     }
 
-    private void zoom()
+    private void PanCamera()
+    {
+        if (Input.GetMouseButtonDown(2))
+        {
+            this.dragOrigin = cam.ScreenToWorldPoint(Input.mousePosition);
+        }
+
+        if (Input.GetMouseButton(2))
+        {
+            Vector3 difference = this.dragOrigin - this.cam.ScreenToWorldPoint(Input.mousePosition);
+
+
+            this.cam.transform.position = this.ClampCamera(this.cam.transform.position + difference);            
+        }
+    }
+
+    private void ZoomCamera()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0.0f)
         {
-            this.targetOrtho -= scroll * this.zoomSpeed * (this.targetOrtho / 2);
-            this.targetOrtho = Mathf.Clamp(this.targetOrtho, this.minOrtho, this.maxOrtho);
+            this.targetZoom -= scroll * this.zoomStep * (this.targetZoom / 2);
+            this.targetZoom = Mathf.Clamp(this.targetZoom, this.minCamSize, this.maxCamSize);
         }
 
-        Camera.main.orthographicSize = Mathf.MoveTowards(Camera.main.orthographicSize, this.targetOrtho, this.smoothSpeed * Time.deltaTime);
+        cam.orthographicSize = Mathf.MoveTowards(cam.orthographicSize, this.targetZoom, this.zoomSmooth * Time.deltaTime);
+
+        this.cam.transform.position = this.ClampCamera(this.cam.transform.position);
     }
 
-    private void movement()
+    private Vector3 ClampCamera(Vector3 targetPosition)
     {
-        float move = (this.targetOrtho * this.moveSpeed) / 100;        
+        float camHeight = this.cam.orthographicSize;
+        float camWidth = this.cam.orthographicSize * this.cam.aspect;
 
-        if (Input.GetMouseButtonDown(2)) {
-            if (this.clickOrigin == Vector3.zero)
-            {
-                this.clickOrigin = Input.mousePosition;
-                this.basePos = transform.position;
-            }            
-        }
+        float minX = this.mapMinX + camWidth;
+        float maxX = this.mapMaxX - camWidth;
+        float minY = this.mapMinY + camHeight;
+        float maxY = this.mapMaxY - camHeight;
 
-        this.dragOrigin = Input.mousePosition;
+        float newX = Mathf.Clamp(targetPosition.x, minX, maxX);
+        float newY = Mathf.Clamp(targetPosition.y, minY, maxY);
 
-        if (!Input.GetMouseButton(2)) {
-            this.clickOrigin = Vector3.zero;
-            return;
-        }
-
-        float x = basePos.x + ((this.clickOrigin.x - this.dragOrigin.x) * move);
-        float y = this.basePos.y + ((this.clickOrigin.y - this.dragOrigin.y) * move);
-
-        transform.position = new Vector3(x, y, -10);
+        return new Vector3(newX, newY, targetPosition.z);
     }
 }
