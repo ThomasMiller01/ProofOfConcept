@@ -7,22 +7,38 @@ public class GameManager : MonoBehaviour {
     public Map map;
 
     [System.NonSerialized]
-    public List<Person> people;      
+    public List<Person> people;
 
-	// Use this for initialization
-	void Start () {
+    [System.NonSerialized]
+    public List<Person> children;
+
+    [System.NonSerialized]
+    public int day;
+
+    [System.NonSerialized]
+    public int year;
+
+    [System.NonSerialized]
+    public int generation;    
+
+    // Use this for initialization
+    void Start () {
         // preload map dimensions
         this.map.loadTexture();
 
         this.people = new List<Person>();
+        this.children = new List<Person>();
 
         // init colonies and people        
         foreach(var c in this.settings.colonies)
         {
             Colony colony = new Colony(c.name, c.color);
             for (int k = 0; k < c.number_of_people; k++)
-            {                
-                Person person = new Person(colony, 0, 0, 0, c.start.x, c.start.y);
+            {
+                int age = (int)Random.Range(0, this.settings.strength.y);
+                int strength = (int)Random.Range(this.settings.strength.x, this.settings.strength.y);
+                int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);
+                Person person = new Person(colony, age, strength, reproductionValue, c.start.x, c.start.y);
                 this.people.Add(person);                
             }            
         }
@@ -30,19 +46,43 @@ public class GameManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        // check for day
+        this.day++;
+        if (this.day == this.settings.days)
+        {
+            this.day = 0;
+
+            // check for year
+            this.year++;
+            if (this.year == this.settings.years)
+            {
+                this.year = 0;
+                this.generation++;
+            }            
+        }                
+
+        // render people
         foreach (Person person in this.people)
         {
             this.render_person(person);
         }
+
+        // remove dead people
+        this.people.RemoveAll(elem => elem.is_dead);
+
+        // add children        
+        this.people.AddRange(this.children);
+        this.children.Clear();
+
+        // draw to the screen
         this.map.draw(this.people);
     }
 
     void render_person(Person person)
     {
-        /*// if person is already dead
+        // if person is already dead
         if (person.is_dead)
-        {
-            this.people.Remove(person);
+        {            
             return;
         }
 
@@ -67,13 +107,18 @@ public class GameManager : MonoBehaviour {
             // mutations
 
             // create new person
-            Person child = new Person(person.colony, 0, person.strength, 0, person.pos.x, person.pos.y);
-            this.people.Add(child);
-            this.map.setPerson(child);
+            Person child = new Person(person.colony, (int)Random.Range(0, this.settings.strength.x), person.strength, 0, person.pos.x, person.pos.y);
+            this.children.Add(child);            
         } else
         {
-            person.reproduction_value++;
-        }*/
+            // if a person is not alone, the possibility to reproduce is smaller            
+            //bool is_alone = Utils.array.FindCount(this.people, elem => elem.pos == person.pos) == 1;
+            bool is_alone = true;
+            if (is_alone)
+            {
+                person.reproduction_value++;
+            }                        
+        }
 
         // TODO
         // disease

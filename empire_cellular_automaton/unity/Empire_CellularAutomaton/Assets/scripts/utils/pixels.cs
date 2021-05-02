@@ -5,12 +5,7 @@ using UnityEngine;
 namespace Utils
 {
     public class pixels
-    {
-        public static int array2dto1d(Vector2 pos, int width)
-        {
-            return (int)pos.y * width + (int)pos.x;
-        }
-
+    {        
         public static Vector2 WorldToScreen(GameObject gameObject, Vector2 pos)
         {
             Texture2D map_texture = gameObject.GetComponent<SpriteRenderer>().sprite.texture;
