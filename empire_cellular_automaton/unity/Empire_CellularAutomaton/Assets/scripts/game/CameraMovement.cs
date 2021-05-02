@@ -33,7 +33,7 @@ public class CameraMovement : MonoBehaviour {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0.0f)
         {
-            this.targetOrtho -= scroll * this.zoomSpeed;
+            this.targetOrtho -= scroll * this.zoomSpeed * (this.targetOrtho / 2);
             this.targetOrtho = Mathf.Clamp(this.targetOrtho, this.minOrtho, this.maxOrtho);
         }
 
