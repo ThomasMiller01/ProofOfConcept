@@ -10,6 +10,7 @@ public class Person
     public int reproduction_value;
     public Vector2 pos;
     public bool is_dead;
+    public int birth_count;
 
     public Person(Colony colony, int age, int strength, int reproduction_value, float x, float y)
     {        
@@ -19,5 +20,6 @@ public class Person
         this.reproduction_value = reproduction_value;
         this.pos = new Vector2(x, y);
         this.is_dead = false;
+        this.birth_count = 0;
     }
 }

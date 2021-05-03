@@ -17,9 +17,9 @@ public class Stats : MonoBehaviour {
         string generation_text = "Gen [" + this.gameManager.generation.ToString() + "], Year [" + this.gameManager.year.ToString() + "], Day [" + this.gameManager.day.ToString() + "]";
         this.generation.text = generation_text;
 
-        // total people
-        int total_people = this.gameManager.people.Count;
-        this.people.text = "Total: " + total_people.ToString();
+        // population
+        int population = this.gameManager.people.Count;
+        this.people.text = "Population: " + population.ToString();
 
         // colonies
         string colonies_text = "";

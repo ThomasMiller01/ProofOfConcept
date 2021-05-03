@@ -8,5 +8,7 @@ public class Settings : MonoBehaviour {
     public int reproductionThreshold;    
     public Vector2 strength;
 
+    public int maxBirthCount;
+
     public ColonySettings[] colonies;
 }

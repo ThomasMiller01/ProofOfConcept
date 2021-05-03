@@ -102,6 +102,7 @@ public class GameManager : MonoBehaviour {
         if (person.reproduction_value >= this.settings.reproductionThreshold)
         {
             person.reproduction_value = 0;
+            person.birth_count++;
 
             // TODO
             // mutations
@@ -111,12 +112,14 @@ public class GameManager : MonoBehaviour {
             this.children.Add(child);            
         } else
         {
-            // if a person is not alone, the possibility to reproduce is smaller            
-            //bool is_alone = Utils.array.FindCount(this.people, elem => elem.pos == person.pos) == 1;
+            // if a person is not alone, the possibility to reproduce is smaller                        
             bool is_alone = true;
             if (is_alone)
             {
-                person.reproduction_value++;
+                if (Random.Range(0, this.settings.maxBirthCount) >= person.birth_count)
+                {
+                    person.reproduction_value++;
+                }                
             }                        
         }
 
