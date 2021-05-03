@@ -17,11 +17,8 @@ public class Stats : MonoBehaviour {
         string generation_text = "Gen [" + this.gameManager.generation.ToString() + "], Year [" + this.gameManager.year.ToString() + "], Day [" + this.gameManager.day.ToString() + "]";
         this.generation.text = generation_text;
 
-        // population
-        int population = this.gameManager.people.Count;
-        this.people.text = "Population: " + population.ToString();
-
-        // colonies
+        int population = 0;        
+        
         string colonies_text = "";
         Dictionary<string, int> colonies_dict = new Dictionary<string, int>();                
 
@@ -30,12 +27,18 @@ public class Stats : MonoBehaviour {
             colonies_dict[colony.name] = 0;            
         }
 
-        foreach (Person person in this.gameManager.people)
+        foreach(var item in this.gameManager.people)
         {
-            colonies_dict[person.colony.name]++;
+            foreach (Person person in item.Value)
+            {
+                colonies_dict[person.colony.name]++;
+                population++;
+            }
         }
 
-        foreach(var colony in colonies_dict)
+        this.people.text = "Population: " + population.ToString();
+
+        foreach (var colony in colonies_dict)
         {
             colonies_text += colony.Key + ": " + colony.Value.ToString() + "\n";
         }

@@ -12,14 +12,14 @@ public class Person
     public bool is_dead;
     public int birth_count;
 
-    public Person(Colony colony, int age, int strength, int reproduction_value, float x, float y)
+    public Person(Colony colony, int age, int strength, int reproduction_value, float x, float y, bool is_dead=false, int birth_count=0)
     {        
         this.colony = colony;
         this.age = age;
         this.strength = strength;
         this.reproduction_value = reproduction_value;
         this.pos = new Vector2(x, y);
-        this.is_dead = false;
-        this.birth_count = 0;
+        this.is_dead = is_dead;
+        this.birth_count = birth_count;
     }
 }

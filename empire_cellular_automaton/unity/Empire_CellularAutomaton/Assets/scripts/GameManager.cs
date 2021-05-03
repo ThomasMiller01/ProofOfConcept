@@ -7,10 +7,10 @@ public class GameManager : MonoBehaviour {
     public Map map;
 
     [System.NonSerialized]
-    public List<Person> people;
+    public Dictionary<Vector2, HashSet<Person>> people;
 
     [System.NonSerialized]
-    public List<Person> children;
+    public Dictionary<Vector2, HashSet<Person>> people_cache;    
 
     [System.NonSerialized]
     public int day;
@@ -26,8 +26,8 @@ public class GameManager : MonoBehaviour {
         // preload map dimensions
         this.map.loadTexture();
 
-        this.people = new List<Person>();
-        this.children = new List<Person>();
+        this.people = new Dictionary<Vector2, HashSet<Person>>();
+        this.people_cache = new Dictionary<Vector2, HashSet<Person>>();
 
         // init colonies and people        
         foreach(var c in this.settings.colonies)
@@ -39,9 +39,11 @@ public class GameManager : MonoBehaviour {
                 int strength = (int)Random.Range(this.settings.strength.x, this.settings.strength.y);
                 int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);
                 Person person = new Person(colony, age, strength, reproductionValue, c.start.x, c.start.y);
-                this.people.Add(person);                
+                if (!this.people.ContainsKey(person.pos)) this.people[person.pos] = new HashSet<Person>();
+                this.people[person.pos].Add(person);                
             }            
         }
+        this.people_cache = Utils.array.copy_population(this.people);
     }
 	
 	// Update is called once per frame
@@ -62,24 +64,33 @@ public class GameManager : MonoBehaviour {
         }                
 
         // render people
-        foreach (Person person in this.people)
+        foreach (var item in this.people)
         {
-            this.render_person(person);
+            foreach (Person person in item.Value)
+            {
+                this.render_person(person);
+            }
         }
 
         // remove dead people
-        this.people.RemoveAll(elem => elem.is_dead);
+        foreach (var item in this.people_cache)
+        {
+            item.Value.RemoveWhere(elem => elem.is_dead);            
+        }
 
-        // add children        
-        this.people.AddRange(this.children);
-        this.children.Clear();
+        this.people = Utils.array.copy_population(this.people_cache);
 
         // draw to the screen
         this.map.draw(this.people);
     }
 
-    void render_person(Person person)
+    void render_person(Person input)
     {
+        Person person = new Person(input.colony, input.age, input.strength, input.reproduction_value, input.pos.x, input.pos.y, input.is_dead, input.birth_count);
+
+        this.people_cache[person.pos].Remove(input);
+        this.people_cache[person.pos].Add(person);                
+
         // if person is already dead
         if (person.is_dead)
         {            
@@ -109,7 +120,8 @@ public class GameManager : MonoBehaviour {
 
             // create new person
             Person child = new Person(person.colony, (int)Random.Range(0, this.settings.strength.x), person.strength, 0, person.pos.x, person.pos.y);
-            this.children.Add(child);            
+            if (!this.people_cache.ContainsKey(child.pos)) this.people_cache[child.pos] = new HashSet<Person>();
+            this.people_cache[child.pos].Add(child);            
         } else
         {
             // if a person is not alone, the possibility to reproduce is smaller                        
@@ -133,12 +145,24 @@ public class GameManager : MonoBehaviour {
 
         // check, if the new position is valid
         bool validate_pos = Utils.pixels.validatePosition(newPos, new Vector2[] { new Vector2(0, this.map.dimensions.x), new Vector2(0, this.map.dimensions.y) });
-        bool is_water = this.map.getPixel(newPos) == this.map.water;        
+        
+        // is water at the new position
+        bool is_water = this.map.getPixel(newPos) == this.map.water;
 
-        // if its a valid position and not water, move
-        if (validate_pos && !is_water)
-        {                        
-            person.pos = newPos;            
+        // are there less people at the new position
+        bool is_place = true;
+        if (this.people_cache.ContainsKey(newPos) && this.people_cache[newPos].Count > this.people_cache[person.pos].Count) is_place = false;        
+
+        // only move if
+        // - its a valid position inside the world
+        // - its not water
+        // - there are less people than at the current position
+        if (validate_pos && !is_water && is_place)
+        {
+            this.people_cache[person.pos].Remove(person);
+            person.pos = newPos;
+            if (!this.people_cache.ContainsKey(person.pos)) this.people_cache[person.pos] = new HashSet<Person>();
+            this.people_cache[person.pos].Add(person);
         }
     }
 }

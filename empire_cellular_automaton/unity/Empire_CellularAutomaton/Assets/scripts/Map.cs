@@ -33,15 +33,19 @@ public class Map : MonoBehaviour {
         this.dimensions = new Vector2(this.map_texture.width, this.map_texture.height);                
     }
 
-    public void draw(List<Person> people)
+    public void draw(Dictionary<Vector2, HashSet<Person>> people)
     {
         Texture2D texture = new Texture2D(this.map_texture.width, this.map_texture.height);
 
         this.map_pixels = (Color32[])this.original_map_pixels.Clone();
 
-        foreach(Person person in people)
+        foreach (var item in people)
         {
-            this.map_pixels[Utils.array.convert2dto1d(person.pos, (int)this.dimensions.x)] = person.colony.color;
+            foreach(Person person in item.Value)
+            {                
+                this.map_pixels[Utils.array.convert2dto1d(person.pos, (int)this.dimensions.x)] = person.colony.color;
+                break;
+            }            
         }
 
         texture.SetPixels32(this.map_pixels);

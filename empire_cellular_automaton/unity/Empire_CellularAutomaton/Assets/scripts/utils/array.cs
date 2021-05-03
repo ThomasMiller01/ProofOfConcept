@@ -12,9 +12,15 @@ namespace Utils
             return (int)pos.y * width + (int)pos.x;
         }
 
-        public static int FindCount<T>(List<T> list, Predicate<T> predicate)
-        {
-            return list.FindAll(predicate).Count;            
+        public static Dictionary<Vector2, HashSet<Person>> copy_population(Dictionary<Vector2, HashSet<Person>> people)
+        {            
+            Dictionary<Vector2, HashSet<Person>> copied_dict = new Dictionary<Vector2, HashSet<Person>>();
+
+            foreach (var item in people)
+            {                
+                copied_dict[item.Key] = new HashSet<Person>(item.Value);
+            }
+            return copied_dict;
         }
     }
 }
