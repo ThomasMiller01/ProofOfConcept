@@ -5,34 +5,24 @@ using UnityEngine;
 public class GameManager : MonoBehaviour {
     public Settings settings;
     public Map map;
+    public Stats stats;
 
     [System.NonSerialized]
-    public Dictionary<Vector2, HashSet<Person>> people;
-
-    [System.NonSerialized]
-    public Dictionary<Vector2, HashSet<Person>> people_cache;    
-
-    [System.NonSerialized]
-    public int day;
-
-    [System.NonSerialized]
-    public int year;
-
-    [System.NonSerialized]
-    public int generation;    
+    public Dictionary<Vector2, HashSet<Person>> people;          
 
     // Use this for initialization
     void Start () {
         // preload map dimensions
         this.map.loadTexture();
 
-        this.people = new Dictionary<Vector2, HashSet<Person>>();
-        this.people_cache = new Dictionary<Vector2, HashSet<Person>>();
+        this.people = new Dictionary<Vector2, HashSet<Person>>();        
 
         // init colonies and people        
         foreach(var c in this.settings.colonies)
         {
             Colony colony = new Colony(c.name, c.color);
+            this.stats.colonies[colony.name] = new Dictionary<string, float>();
+            this.stats.colonies[colony.name]["population"] = c.number_of_people;
             for (int k = 0; k < c.number_of_people; k++)
             {
                 int age = (int)Random.Range(0, this.settings.strength.y);
@@ -40,45 +30,49 @@ public class GameManager : MonoBehaviour {
                 int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);
                 Person person = new Person(colony, age, strength, reproductionValue, c.start.x, c.start.y);
                 if (!this.people.ContainsKey(person.pos)) this.people[person.pos] = new HashSet<Person>();
-                this.people[person.pos].Add(person);                
+                this.people[person.pos].Add(person);
             }            
-        }
-        this.people_cache = Utils.array.copy_population(this.people);
+        }        
     }
 	
 	// Update is called once per frame
 	void Update () {
         // check for day
-        this.day++;
-        if (this.day == this.settings.days)
+        this.stats.day++;
+        if (this.stats.day == this.settings.days)
         {
-            this.day = 0;
+            this.stats.day = 0;
 
             // check for year
-            this.year++;
-            if (this.year == this.settings.years)
+            this.stats.year++;
+            if (this.stats.year == this.settings.years)
             {
-                this.year = 0;
-                this.generation++;
+                this.stats.year = 0;
+                this.stats.generation++;
             }            
-        }                
+        }
 
-        // render people
+        List<Person> people_cache = new List<Person>();
+
         foreach (var item in this.people)
         {
-            foreach (Person person in item.Value)
-            {
-                this.render_person(person);
-            }
+            people_cache.AddRange(item.Value);
         }
 
-        // remove dead people
-        foreach (var item in this.people_cache)
+        this.stats.population = 0;
+        foreach(var item in this.stats.colonies)
         {
-            item.Value.RemoveWhere(elem => elem.is_dead);            
+            this.stats.colonies[item.Key]["population"] = 0;
+            this.stats.colonies[item.Key]["age"] = 0;
+            this.stats.colonies[item.Key]["strength"] = 0;
+            this.stats.colonies[item.Key]["reproduction_value"] = 0;
         }
 
-        this.people = Utils.array.copy_population(this.people_cache);
+        // render people        
+        foreach (Person person in people_cache)
+        {            
+            this.render_person(person);
+        }                     
 
         // draw to the screen
         this.map.draw(this.people);
@@ -88,12 +82,13 @@ public class GameManager : MonoBehaviour {
     {
         Person person = new Person(input.colony, input.age, input.strength, input.reproduction_value, input.pos.x, input.pos.y, input.is_dead, input.birth_count);
 
-        this.people_cache[person.pos].Remove(input);
-        this.people_cache[person.pos].Add(person);                
+        this.people[person.pos].Remove(input);
+        this.people[person.pos].Add(person);                
 
         // if person is already dead
         if (person.is_dead)
-        {            
+        {
+            this.people[person.pos].Remove(person);
             return;
         }
 
@@ -120,8 +115,8 @@ public class GameManager : MonoBehaviour {
 
             // create new person
             Person child = new Person(person.colony, (int)Random.Range(0, this.settings.strength.x), person.strength, 0, person.pos.x, person.pos.y);
-            if (!this.people_cache.ContainsKey(child.pos)) this.people_cache[child.pos] = new HashSet<Person>();
-            this.people_cache[child.pos].Add(child);            
+            if (!this.people.ContainsKey(child.pos)) this.people[child.pos] = new HashSet<Person>();
+            this.people[child.pos].Add(child);            
         } else
         {
             // if a person is not alone, the possibility to reproduce is smaller                        
@@ -151,7 +146,7 @@ public class GameManager : MonoBehaviour {
 
         // are there less people at the new position
         bool is_place = true;
-        if (this.people_cache.ContainsKey(newPos) && this.people_cache[newPos].Count > this.people_cache[person.pos].Count) is_place = false;        
+        if (this.people.ContainsKey(newPos) && this.people[newPos].Count > this.people[person.pos].Count) is_place = false;        
 
         // only move if
         // - its a valid position inside the world
@@ -159,10 +154,17 @@ public class GameManager : MonoBehaviour {
         // - there are less people than at the current position
         if (validate_pos && !is_water && is_place)
         {
-            this.people_cache[person.pos].Remove(person);
+            this.people[person.pos].Remove(person);
             person.pos = newPos;
-            if (!this.people_cache.ContainsKey(person.pos)) this.people_cache[person.pos] = new HashSet<Person>();
-            this.people_cache[person.pos].Add(person);
+            if (!this.people.ContainsKey(person.pos)) this.people[person.pos] = new HashSet<Person>();
+            this.people[person.pos].Add(person);
         }
+
+        // increase population for stats
+        this.stats.population++;
+        this.stats.colonies[person.colony.name]["population"]++;
+        this.stats.colonies[person.colony.name]["age"] += person.age;
+        this.stats.colonies[person.colony.name]["strength"] += person.strength;
+        this.stats.colonies[person.colony.name]["reproduction_value"] += person.reproduction_value;
     }
 }
