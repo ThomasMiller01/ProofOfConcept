@@ -25,12 +25,11 @@ public class GameManager : MonoBehaviour {
             this.stats.colonies[colony.name]["population"] = c.number_of_people;
             for (int k = 0; k < c.number_of_people; k++)
             {
-                int age = (int)Random.Range(0, this.settings.strength.y);
+                int age = (int)Random.Range(0, this.settings.strength.x);                
                 int strength = (int)Random.Range(this.settings.strength.x, this.settings.strength.y);
-                int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);
-                Person person = new Person(colony, age, strength, reproductionValue, c.start.x, c.start.y);
-                if (!this.people.ContainsKey(person.pos)) this.people[person.pos] = new HashSet<Person>();
-                this.people[person.pos].Add(person);
+                int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);                
+                Person person = new Person(colony, age, Utils.simulation.get_mutation(strength), Utils.simulation.get_mutation(reproductionValue), c.start.x, c.start.y);
+                Utils.datastructure.add_human(person, this.people);                
             }            
         }        
     }
@@ -108,26 +107,18 @@ public class GameManager : MonoBehaviour {
         if (person.reproduction_value >= this.settings.reproductionThreshold)
         {
             person.reproduction_value = 0;
-            person.birth_count++;
-
-            // TODO
-            // mutations
+            person.birth_count++;            
 
             // create new person
-            Person child = new Person(person.colony, (int)Random.Range(0, this.settings.strength.x), person.strength, 0, person.pos.x, person.pos.y);
-            if (!this.people.ContainsKey(child.pos)) this.people[child.pos] = new HashSet<Person>();
-            this.people[child.pos].Add(child);            
+            Person child = new Person(person.colony, 0, Utils.simulation.get_mutation(person.strength), 0, person.pos.x, person.pos.y);
+            Utils.datastructure.add_human(child, this.people);            
         } else
         {
-            // if a person is not alone, the possibility to reproduce is smaller                        
-            bool is_alone = true;
-            if (is_alone)
+            // possibility to reproduce reduces the more children a person has
+            if (Random.Range(0, this.settings.maxBirthCount) >= person.birth_count)
             {
-                if (Random.Range(0, this.settings.maxBirthCount) >= person.birth_count)
-                {
-                    person.reproduction_value++;
-                }                
-            }                        
+                person.reproduction_value++;
+            }                            
         }
 
         // TODO
@@ -156,8 +147,7 @@ public class GameManager : MonoBehaviour {
         {
             this.people[person.pos].Remove(person);
             person.pos = newPos;
-            if (!this.people.ContainsKey(person.pos)) this.people[person.pos] = new HashSet<Person>();
-            this.people[person.pos].Add(person);
+            Utils.datastructure.add_human(person, this.people);
         }
 
         // increase population for stats

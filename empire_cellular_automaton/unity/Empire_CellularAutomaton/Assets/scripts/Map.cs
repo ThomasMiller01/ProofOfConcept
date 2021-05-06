@@ -43,7 +43,7 @@ public class Map : MonoBehaviour {
         {
             foreach(Person person in item.Value)
             {                
-                this.map_pixels[Utils.array.convert2dto1d(person.pos, (int)this.dimensions.x)] = person.colony.color;
+                this.map_pixels[Utils.datastructure.convert2dto1d(person.pos, (int)this.dimensions.x)] = person.colony.color;
                 break;
             }            
         }
@@ -57,6 +57,6 @@ public class Map : MonoBehaviour {
 
     public Color getPixel(Vector2 pos)
     {
-        return this.map_pixels[Utils.array.convert2dto1d(pos, (int)this.dimensions.x)];
+        return this.map_pixels[Utils.datastructure.convert2dto1d(pos, (int)this.dimensions.x)];
     }
 }
