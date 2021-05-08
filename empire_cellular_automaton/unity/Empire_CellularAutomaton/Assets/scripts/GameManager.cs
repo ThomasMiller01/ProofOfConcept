@@ -51,15 +51,9 @@ public class GameManager : MonoBehaviour {
             }            
         }
 
-        List<Person> people_cache = new List<Person>();
-
-        foreach (var item in this.people)
-        {
-            people_cache.AddRange(item.Value);
-        }
-
+        // reset statistics
         this.stats.population = 0;
-        foreach(var item in this.stats.colonies)
+        foreach (var item in this.stats.colonies)
         {
             this.stats.colonies[item.Key]["population"] = 0;
             this.stats.colonies[item.Key]["age"] = 0;
@@ -67,11 +61,18 @@ public class GameManager : MonoBehaviour {
             this.stats.colonies[item.Key]["reproduction_value"] = 0;
         }
 
+        List<Person> people_cache = new List<Person>();
+
+        foreach (var item in this.people)
+        {
+            people_cache.AddRange(item.Value);
+        }        
+
         // render people        
-        foreach (Person person in people_cache)
-        {            
-            this.render_person(person);
-        }                     
+        for (int i=0; i<people_cache.Count; i++)
+        {
+            this.render_person(people_cache[i]);
+        }        
 
         // draw to the screen
         this.map.draw(this.people);
@@ -137,7 +138,8 @@ public class GameManager : MonoBehaviour {
 
         // are there less people at the new position
         bool is_place = true;
-        if (this.people.ContainsKey(newPos) && this.people[newPos].Count > this.people[person.pos].Count) is_place = false;        
+        HashSet<Person> pos_set;
+        if (this.people.TryGetValue(newPos, out pos_set) && pos_set.Count > this.people[person.pos].Count) is_place = false;        
 
         // only move if
         // - its a valid position inside the world
