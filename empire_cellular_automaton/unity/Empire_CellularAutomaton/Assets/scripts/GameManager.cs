@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void Update () {        
         // check for day
         this.stats.day++;
         if (this.stats.day == this.settings.days)
@@ -63,9 +63,9 @@ public class GameManager : MonoBehaviour {
 
         List<Person> people_cache = new List<Person>();
 
-        foreach (var item in this.people)
+        foreach (HashSet<Person> value in this.people.Values)
         {
-            people_cache.AddRange(item.Value);
+            people_cache.AddRange(value);
         }        
 
         // render people        

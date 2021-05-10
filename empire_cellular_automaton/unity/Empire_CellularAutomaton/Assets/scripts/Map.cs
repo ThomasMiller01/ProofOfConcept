@@ -18,11 +18,15 @@ public class Map : MonoBehaviour {
     public Color32[] map_pixels;
 
     [System.NonSerialized]
-    public Color32[] original_map_pixels;    
+    public Color32[] original_map_pixels;
+
+    [System.NonSerialized]
+    SpriteRenderer spriteRenderer;
 
     void Start()
-    {
-        Utils.sprite.setSprite(this.gameObject, Utils.sprite.createSprite(this.map_texture));
+    {        
+        this.spriteRenderer = this.gameObject.GetComponent<SpriteRenderer>();
+        this.spriteRenderer.sprite = Utils.sprite.createSprite(this.map_texture);
     }
 
     public void loadTexture()
@@ -34,25 +38,25 @@ public class Map : MonoBehaviour {
     }
 
     public void draw(Dictionary<Vector2, HashSet<Person>> people)
-    {
+    {        
         Texture2D texture = new Texture2D(this.map_texture.width, this.map_texture.height);
 
         this.map_pixels = (Color32[])this.original_map_pixels.Clone();
 
-        foreach (var item in people)
+        foreach(HashSet<Person> value in people.Values)
         {
-            foreach(Person person in item.Value)
-            {                
+            foreach(Person person in value)
+            {
                 this.map_pixels[Utils.datastructure.convert2dto1d(person.pos, (int)this.dimensions.x)] = person.colony.color;
                 break;
-            }            
-        }
+            }
+        }        
 
         texture.SetPixels32(this.map_pixels);
         
         texture.Apply();
 
-        Utils.sprite.setSprite(this.gameObject, Utils.sprite.createSprite(texture));        
+        this.spriteRenderer.sprite = Utils.sprite.createSprite(texture);        
     }    
 
     public Color getPixel(Vector2 pos)

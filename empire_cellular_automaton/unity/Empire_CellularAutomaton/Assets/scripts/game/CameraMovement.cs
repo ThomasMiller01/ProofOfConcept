@@ -15,14 +15,17 @@ public class CameraMovement : MonoBehaviour {
 
     private void Awake()
     {
-        this.maxCamSize = cam.orthographicSize;
-        this.targetZoom = cam.orthographicSize;
+        this.maxCamSize = this.cam.orthographicSize;
+        this.targetZoom = this.cam.orthographicSize;
 
-        this.mapMinX = mapRenderer.transform.position.x - mapRenderer.bounds.size.x / 2f;
-        this.mapMaxX = mapRenderer.transform.position.x + mapRenderer.bounds.size.x / 2f;
+        Bounds bounds = this.CameraBounds(this.cam);
+        Transform transform = cam.transform;
 
-        this.mapMinY = mapRenderer.transform.position.y - mapRenderer.bounds.size.y / 2f;
-        this.mapMaxY = mapRenderer.transform.position.y + mapRenderer.bounds.size.y / 2f;
+        this.mapMinX = transform.position.x - bounds.size.x / 2f;
+        this.mapMaxX = transform.position.x + bounds.size.x / 2f;
+
+        this.mapMinY = transform.position.y - bounds.size.y / 2f;
+        this.mapMaxY = transform.position.y + bounds.size.y / 2f;
     }
 
     private void Update()
@@ -52,7 +55,7 @@ public class CameraMovement : MonoBehaviour {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0.0f)
         {
-            this.targetZoom -= scroll * this.zoomStep * (this.targetZoom / 2);
+            this.targetZoom -= scroll * this.zoomStep * (this.targetZoom / 10);
             this.targetZoom = Mathf.Clamp(this.targetZoom, this.minCamSize, this.maxCamSize);
         }
 
@@ -75,5 +78,13 @@ public class CameraMovement : MonoBehaviour {
         float newY = Mathf.Clamp(targetPosition.y, minY, maxY);
 
         return new Vector3(newX, newY, targetPosition.z);
+    }
+
+    private Bounds CameraBounds(Camera cam)
+    {
+        float screenAspect = (float)Screen.width / (float)Screen.height;
+        float cameraHeight = cam.orthographicSize * 2;
+        Bounds bounds = new Bounds(cam.transform.position, new Vector3(cameraHeight * screenAspect, cameraHeight, 0));
+        return bounds;
     }
 }
