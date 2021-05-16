@@ -124,7 +124,7 @@ public class GameManager : MonoBehaviour {
 
         // TODO
         // disease
-
+        
         // move
         // get random direction and random neighbour to move to
         Vector2 dir = Utils.pixels.getRandomDirection();

@@ -41,8 +41,10 @@ public class Map : MonoBehaviour {
 
     public void draw(Dictionary<Vector2, HashSet<Person>> people)
     {        
-        Texture2D texture = new Texture2D(this.map_texture.width, this.map_texture.height);
-        
+        Texture2D texture = new Texture2D((int)this.dimensions.x, (int)this.dimensions.y);
+
+        texture.filterMode = FilterMode.Point;
+
         if (this.settings.EraseLastPos)
         {
             this.map_pixels = (Color32[])this.original_map_pixels.Clone();
@@ -55,11 +57,11 @@ public class Map : MonoBehaviour {
                 this.map_pixels[Utils.datastructure.convert2dto1d(person.pos, (int)this.dimensions.x)] = person.colony.color;
                 break;
             }
-        }        
+        }            
 
-        texture.SetPixels32(this.map_pixels);
+        texture.SetPixels32(this.map_pixels);        
         
-        texture.Apply();
+        texture.Apply();                
 
         this.spriteRenderer.sprite = Utils.sprite.createSprite(texture);        
     }    
