@@ -19,6 +19,6 @@ public class ColonySettings : MonoBehaviour {
 
         Vector2 screenPos = Utils.pixels.WorldToScreen(this.map, this.start);
 
-        Gizmos.DrawSphere(new Vector3(screenPos.x, screenPos.y), 0.05f);
+        Gizmos.DrawSphere(new Vector3(screenPos.x, screenPos.y), 5f);
     }
 }

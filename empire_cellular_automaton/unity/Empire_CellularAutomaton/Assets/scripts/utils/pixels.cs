@@ -16,15 +16,14 @@ namespace Utils
             Vector2 distances = pos - center;
 
             // convert world coordinates to screen coordinates
-            Vector2 world = distances / 100;
+            Vector2 world = distances;
 
             return world;
         }
 
         public static Vector2 getRandomNeighbour(Vector2 pos, Vector2 dir)
         {            
-            Vector2 newPos = new Vector2(pos.x + dir.x, pos.y + dir.y);
-            return newPos;
+            return new Vector2(pos.x + dir.x, pos.y + dir.y);            
         }
 
         public static Vector2 getRandomDirection()

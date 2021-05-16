@@ -10,5 +10,9 @@ public class Settings : MonoBehaviour {
 
     public int maxBirthCount;
 
-    public ColonySettings[] colonies;
+    public bool EraseLastPos;
+    public bool mutations;
+    public bool staticPopulation;
+
+    public ColonySettings[] colonies;    
 }

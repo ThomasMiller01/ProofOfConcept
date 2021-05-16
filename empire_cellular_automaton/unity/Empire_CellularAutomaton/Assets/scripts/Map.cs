@@ -9,7 +9,9 @@ public class Map : MonoBehaviour {
     public Texture2D map_texture;
 
     public Color32 land;
-    public Color32 water;    
+    public Color32 water;
+
+    public Settings settings;    
 
     [System.NonSerialized]
     public Vector2 dimensions;
@@ -40,8 +42,11 @@ public class Map : MonoBehaviour {
     public void draw(Dictionary<Vector2, HashSet<Person>> people)
     {        
         Texture2D texture = new Texture2D(this.map_texture.width, this.map_texture.height);
-
-        this.map_pixels = (Color32[])this.original_map_pixels.Clone();
+        
+        if (this.settings.EraseLastPos)
+        {
+            this.map_pixels = (Color32[])this.original_map_pixels.Clone();
+        }
 
         foreach(HashSet<Person> value in people.Values)
         {

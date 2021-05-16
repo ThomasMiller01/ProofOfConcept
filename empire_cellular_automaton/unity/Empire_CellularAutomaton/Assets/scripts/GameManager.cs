@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour {
                 int age = (int)Random.Range(0, this.settings.strength.x);                
                 int strength = (int)Random.Range(this.settings.strength.x, this.settings.strength.y);
                 int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);                
-                Person person = new Person(colony, age, Utils.simulation.get_mutation(strength), Utils.simulation.get_mutation(reproductionValue), c.start.x, c.start.y);
+                Person person = new Person(colony, age, Utils.simulation.get_mutation(strength, this.settings.mutations), Utils.simulation.get_mutation(reproductionValue, this.settings.mutations), c.start.x, c.start.y);
                 Utils.datastructure.add_human(person, this.people);                
             }            
         }        
@@ -93,7 +93,7 @@ public class GameManager : MonoBehaviour {
         }
 
         // if person died of age, mark person as dead and do nothing
-        if (person.age > person.strength)
+        if (person.age > person.strength && !this.settings.staticPopulation)
         {
             person.is_dead = true;
             return;
@@ -105,13 +105,13 @@ public class GameManager : MonoBehaviour {
         }
 
         // if person can reproduce
-        if (person.reproduction_value >= this.settings.reproductionThreshold)
+        if (person.reproduction_value >= this.settings.reproductionThreshold && !this.settings.staticPopulation)
         {
             person.reproduction_value = 0;
             person.birth_count++;            
 
             // create new person
-            Person child = new Person(person.colony, 0, Utils.simulation.get_mutation(person.strength), 0, person.pos.x, person.pos.y);
+            Person child = new Person(person.colony, 0, Utils.simulation.get_mutation(person.strength, this.settings.mutations), 0, person.pos.x, person.pos.y);
             Utils.datastructure.add_human(child, this.people);            
         } else
         {
