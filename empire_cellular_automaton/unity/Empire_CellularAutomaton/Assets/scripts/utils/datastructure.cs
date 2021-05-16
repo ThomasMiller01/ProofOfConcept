@@ -11,11 +11,22 @@ namespace Utils
         {
             return (int)pos.y * width + (int)pos.x;
         }
-
-        public static void add_human(Person human, Dictionary<Vector2, HashSet<Person>> people)
+        
+        public static IEnumerable<Vector2> next_pos(Vector2 pos)
         {
-            if (!people.ContainsKey(human.pos)) people[human.pos] = new HashSet<Person>();
-            people[human.pos].Add(human);
+            int radius = 0;            
+            for (int i = 0; i < 1000; i++)
+            {
+                int randX = UnityEngine.Random.Range(-radius, radius);
+                int randY = UnityEngine.Random.Range(-radius, radius);
+
+                int newX = (int)pos.x + randX;
+                int newY = (int)pos.y + randY;
+
+                if (i % 10 == 0) radius++;
+
+                yield return new Vector2(newX, newY);                                
+            }            
         }
     }
 }

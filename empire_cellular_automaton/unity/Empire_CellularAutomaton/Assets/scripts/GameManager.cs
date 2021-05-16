@@ -8,14 +8,14 @@ public class GameManager : MonoBehaviour {
     public Stats stats;
 
     [System.NonSerialized]
-    public Dictionary<Vector2, HashSet<Person>> people;          
+    public Person[,] people;    
 
     // Use this for initialization
     void Start () {
         // preload map dimensions
         this.map.loadTexture();
 
-        this.people = new Dictionary<Vector2, HashSet<Person>>();        
+        this.people = new Person[(int)this.map.dimensions.x, (int)this.map.dimensions.y];
 
         // init colonies and people        
         foreach(var c in this.settings.colonies)
@@ -25,11 +25,27 @@ public class GameManager : MonoBehaviour {
             this.stats.colonies[colony.name]["population"] = c.number_of_people;
             for (int k = 0; k < c.number_of_people; k++)
             {
-                int age = (int)Random.Range(0, this.settings.strength.x);                
+                int age = (int)Random.Range(0, this.settings.strength.x);
                 int strength = (int)Random.Range(this.settings.strength.x, this.settings.strength.y);
-                int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);                
-                Person person = new Person(colony, age, Utils.simulation.get_mutation(strength, this.settings.mutations), Utils.simulation.get_mutation(reproductionValue, this.settings.mutations), c.start.x, c.start.y);
-                Utils.datastructure.add_human(person, this.people);                
+                int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);
+                Person person = new Person(colony, age, Utils.simulation.get_mutation(strength, this.settings.mutations), Utils.simulation.get_mutation(reproductionValue, this.settings.mutations));
+
+                IEnumerable<Vector2> positions = Utils.datastructure.next_pos(c.start);
+                foreach(Vector2 pos in positions)
+                {
+                    // check for water
+                    // check for availability
+                    // check for end
+                    bool is_water = this.map.getPixel(pos) == this.map.water;
+                    bool is_valid = Utils.pixels.validatePosition(pos, new Vector2[] { new Vector2(0, this.map.dimensions.x), new Vector2(0, this.map.dimensions.y) });
+                    bool is_empty = this.people[(int)pos.x, (int)pos.y] == null;                    
+
+                    if (!is_water && is_valid && is_empty)
+                    {
+                        this.people[(int)pos.x, (int)pos.y] = person;
+                        break;
+                    }
+                }                
             }            
         }        
     }
@@ -61,34 +77,27 @@ public class GameManager : MonoBehaviour {
             this.stats.colonies[item.Key]["reproduction_value"] = 0;
         }
 
-        List<Person> people_cache = new List<Person>();
-
-        foreach (HashSet<Person> value in this.people.Values)
-        {
-            people_cache.AddRange(value);
-        }        
+        Person[,] people_cache = this.people;        
 
         // render people        
-        for (int i=0; i<people_cache.Count; i++)
+        for (int x=0; x<people_cache.GetLength(0); x++)
         {
-            this.render_person(people_cache[i]);
+            for (int y=0; y<people_cache.GetLength(1); y++)
+            {
+                if (people_cache[x, y] != null) this.render_person(people_cache[x, y], new Vector2(x, y));
+            }            
         }        
 
         // draw to the screen
         this.map.draw(this.people);
     }
 
-    void render_person(Person input)
-    {
-        Person person = new Person(input.colony, input.age, input.strength, input.reproduction_value, input.pos.x, input.pos.y, input.is_dead, input.birth_count);
-
-        this.people[person.pos].Remove(input);
-        this.people[person.pos].Add(person);                
-
+    void render_person(Person person, Vector2 pos)
+    {                
         // if person is already dead
         if (person.is_dead)
         {
-            this.people[person.pos].Remove(person);
+            this.people[(int)pos.x, (int)pos.y] = null;
             return;
         }
 
@@ -111,8 +120,24 @@ public class GameManager : MonoBehaviour {
             person.birth_count++;            
 
             // create new person
-            Person child = new Person(person.colony, 0, Utils.simulation.get_mutation(person.strength, this.settings.mutations), 0, person.pos.x, person.pos.y);
-            Utils.datastructure.add_human(child, this.people);            
+            Person child = new Person(person.colony, 0, Utils.simulation.get_mutation(person.strength, this.settings.mutations), 0);
+
+            IEnumerable<Vector2> positions = Utils.datastructure.next_pos(pos);
+            foreach (Vector2 child_pos in positions)
+            {
+                // check for water
+                // check is pos is valid
+                // check for availability                
+                bool child_is_water = this.map.getPixel(child_pos) == this.map.water;
+                bool child_is_valid = Utils.pixels.validatePosition(child_pos, new Vector2[] { new Vector2(0, this.map.dimensions.x), new Vector2(0, this.map.dimensions.y) });
+                bool child_is_empty = this.people[(int)child_pos.x, (int)child_pos.y] == null;                
+
+                if (!child_is_water && child_is_valid && child_is_empty)
+                {
+                    this.people[(int)child_pos.x, (int)child_pos.y] = person;
+                    break;
+                }
+            }
         } else
         {
             // possibility to reproduce reduces the more children a person has
@@ -128,28 +153,25 @@ public class GameManager : MonoBehaviour {
         // move
         // get random direction and random neighbour to move to
         Vector2 dir = Utils.pixels.getRandomDirection();
-        Vector2 newPos = Utils.pixels.getRandomNeighbour(person.pos, dir);        
+        Vector2 newPos = Utils.pixels.getRandomNeighbour(pos, dir);        
 
         // check, if the new position is valid
-        bool validate_pos = Utils.pixels.validatePosition(newPos, new Vector2[] { new Vector2(0, this.map.dimensions.x), new Vector2(0, this.map.dimensions.y) });
+        bool is_valid = Utils.pixels.validatePosition(newPos, new Vector2[] { new Vector2(0, this.map.dimensions.x), new Vector2(0, this.map.dimensions.y) });
         
         // is water at the new position
         bool is_water = this.map.getPixel(newPos) == this.map.water;
 
         // are there less people at the new position
-        bool is_place = true;
-        HashSet<Person> pos_set;
-        if (this.people.TryGetValue(newPos, out pos_set) && pos_set.Count > this.people[person.pos].Count) is_place = false;        
+        bool is_empty = this.people[(int)newPos.x, (int)newPos.y] == null;
 
         // only move if
         // - its a valid position inside the world
         // - its not water
         // - there are less people than at the current position
-        if (validate_pos && !is_water && is_place)
+        if (is_valid && !is_water && is_empty)
         {
-            this.people[person.pos].Remove(person);
-            person.pos = newPos;
-            Utils.datastructure.add_human(person, this.people);
+            this.people[(int)pos.x, (int)pos.y] = null;
+            this.people[(int)newPos.x, (int)newPos.y] = person;            
         }
 
         // increase population for stats
@@ -159,4 +181,5 @@ public class GameManager : MonoBehaviour {
         this.stats.colonies[person.colony.name]["strength"] += person.strength;
         this.stats.colonies[person.colony.name]["reproduction_value"] += person.reproduction_value;
     }
+    
 }
