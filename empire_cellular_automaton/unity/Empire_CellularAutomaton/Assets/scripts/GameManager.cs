@@ -43,12 +43,16 @@ public class GameManager : MonoBehaviour {
                     if (!is_water && is_valid && is_empty)
                     {
                         this.people[(int)pos.x, (int)pos.y] = person;
+
+                        // set pixel
+                        this.map.setPixel(pos, person.colony.color);
+
                         break;
                     }
                 }                
             }            
         }        
-    }
+    }    
 	
 	// Update is called once per frame
 	void Update () {        
@@ -96,8 +100,12 @@ public class GameManager : MonoBehaviour {
     {                
         // if person is already dead
         if (person.is_dead)
-        {
+        {            
             this.people[(int)pos.x, (int)pos.y] = null;
+
+            // set pixel to land
+            this.map.setPixel(pos, this.map.land);
+
             return;
         }
 
@@ -116,28 +124,30 @@ public class GameManager : MonoBehaviour {
         // if person can reproduce
         if (person.reproduction_value >= this.settings.reproductionThreshold && !this.settings.staticPopulation)
         {
-            person.reproduction_value = 0;
-            person.birth_count++;            
-
             // create new person
             Person child = new Person(person.colony, 0, Utils.simulation.get_mutation(person.strength, this.settings.mutations), 0);
 
-            IEnumerable<Vector2> positions = Utils.datastructure.next_pos(pos);
-            foreach (Vector2 child_pos in positions)
-            {
-                // check for water
-                // check is pos is valid
-                // check for availability                
-                bool child_is_water = this.map.getPixel(child_pos) == this.map.water;
-                bool child_is_valid = Utils.pixels.validatePosition(child_pos, new Vector2[] { new Vector2(0, this.map.dimensions.x), new Vector2(0, this.map.dimensions.y) });
-                bool child_is_empty = this.people[(int)child_pos.x, (int)child_pos.y] == null;                
+            Vector2 child_dir = Utils.pixels.getRandomDirection();
+            Vector2 child_pos = Utils.pixels.getRandomNeighbour(pos, child_dir);
 
-                if (!child_is_water && child_is_valid && child_is_empty)
-                {
-                    this.people[(int)child_pos.x, (int)child_pos.y] = person;
-                    break;
-                }
-            }
+            // check for water
+            // check is pos is valid
+            // check for availability                
+            bool child_is_water = this.map.getPixel(child_pos) == this.map.water;
+            bool child_is_valid = Utils.pixels.validatePosition(child_pos, new Vector2[] { new Vector2(0, this.map.dimensions.x), new Vector2(0, this.map.dimensions.y) });
+            bool child_is_empty = this.people[(int)child_pos.x, (int)child_pos.y] == null;
+
+            if (!child_is_water && child_is_valid && child_is_empty)
+            {
+                this.people[(int)child_pos.x, (int)child_pos.y] = person;
+
+                // set child pixel color
+                this.map.setPixel(child_pos, child.colony.color);
+                
+                // reset person reproduction value and increase birth count
+                person.reproduction_value = 0;
+                person.birth_count++;
+            }        
         } else
         {
             // possibility to reproduce reduces the more children a person has
@@ -146,9 +156,6 @@ public class GameManager : MonoBehaviour {
                 person.reproduction_value++;
             }                            
         }
-
-        // TODO
-        // disease
         
         // move
         // get random direction and random neighbour to move to
@@ -169,9 +176,13 @@ public class GameManager : MonoBehaviour {
         // - its not water
         // - there are less people than at the current position
         if (is_valid && !is_water && is_empty)
-        {
+        {            
             this.people[(int)pos.x, (int)pos.y] = null;
-            this.people[(int)newPos.x, (int)newPos.y] = person;            
+            this.people[(int)newPos.x, (int)newPos.y] = person;
+
+            // set color of pixel
+            if (this.settings.EraseLastPos) this.map.setPixel(pos, this.map.land);
+            this.map.setPixel(newPos, person.colony.color);
         }
 
         // increase population for stats

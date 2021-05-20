@@ -45,18 +45,18 @@ public class Map : MonoBehaviour {
 
         texture.filterMode = FilterMode.Point;
 
-        if (this.settings.EraseLastPos)
+        /*if (this.settings.EraseLastPos)
         {
             this.map_pixels = (Color32[])this.original_map_pixels.Clone();
-        }
+        }*/
 
-        for (int x = 0; x < people.GetLength(0); x++)
+        /*for (int x = 0; x < people.GetLength(0); x++)
         {
             for (int y = 0; y < people.GetLength(1); y++)
             {
                 if (people[x, y] != null) this.map_pixels[Utils.datastructure.convert2dto1d(new Vector2(x, y), (int)this.dimensions.x)] = people[x, y].colony.color;
             }
-        }                 
+        }*/
 
         texture.SetPixels32(this.map_pixels);        
         
@@ -68,5 +68,10 @@ public class Map : MonoBehaviour {
     public Color getPixel(Vector2 pos)
     {
         return this.map_pixels[Utils.datastructure.convert2dto1d(pos, (int)this.dimensions.x)];
+    }
+
+    public void setPixel(Vector2 pos, Color32 color)
+    {
+        this.map_pixels[Utils.datastructure.convert2dto1d(pos, (int)this.dimensions.x)] = color;
     }
 }

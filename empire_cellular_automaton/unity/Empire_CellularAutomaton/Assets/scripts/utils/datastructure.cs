@@ -13,8 +13,8 @@ namespace Utils
         }
         
         public static IEnumerable<Vector2> next_pos(Vector2 pos)
-        {
-            int radius = 0;            
+        {            
+            int radius = 1;
             for (int i = 0; i < 1000; i++)
             {
                 int randX = UnityEngine.Random.Range(-radius, radius);
