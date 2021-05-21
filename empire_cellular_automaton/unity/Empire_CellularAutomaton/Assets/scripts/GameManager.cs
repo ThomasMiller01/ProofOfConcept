@@ -211,19 +211,13 @@ public class GameManager : MonoBehaviour {
                         // if else the person has the greater strength
                         // the enemy dies
 
-                        other.is_dead = true;
-
-                        // slightly increase the strength of the person
-                        //person.strength = Utils.simulation.get_mutation(person.strength, this.settings.mutations, add: 100);
+                        other.is_dead = true;                        
                     }
                     else
                     {
                         // if else the enemy has the greater strength
                         // the person dies
-                        person.is_dead = true;
-
-                        // slightly increase the strength of the enemy
-                        //other.strength = Utils.simulation.get_mutation(other.strength, this.settings.mutations, add: 100);
+                        person.is_dead = true;                        
                     }
                 }                
             }
