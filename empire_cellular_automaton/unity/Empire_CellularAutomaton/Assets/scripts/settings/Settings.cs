@@ -13,6 +13,7 @@ public class Settings : MonoBehaviour {
     public bool EraseLastPos;
     public bool mutations;
     public bool staticPopulation;
+    public bool fight;
 
     public ColonySettings[] colonies;    
 }

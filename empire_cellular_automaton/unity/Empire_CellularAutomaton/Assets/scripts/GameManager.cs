@@ -25,10 +25,10 @@ public class GameManager : MonoBehaviour {
             this.stats.colonies[colony.name]["population"] = c.number_of_people;
             for (int k = 0; k < c.number_of_people; k++)
             {
-                int age = (int)Random.Range(0, this.settings.strength.x);
+                int age = (int)Random.Range(0, this.settings.strength.x);                
                 int strength = (int)Random.Range(this.settings.strength.x, this.settings.strength.y);
                 int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);
-                Person person = new Person(colony, age, Utils.simulation.get_mutation(strength, this.settings.mutations), Utils.simulation.get_mutation(reproductionValue, this.settings.mutations));
+                Person person = new Person(colony, age, strength, reproductionValue);
 
                 IEnumerable<Vector2> positions = Utils.datastructure.next_pos(c.start);
                 foreach(Vector2 pos in positions)
@@ -139,7 +139,7 @@ public class GameManager : MonoBehaviour {
 
             if (!child_is_water && child_is_valid && child_is_empty)
             {
-                this.people[(int)child_pos.x, (int)child_pos.y] = person;
+                this.people[(int)child_pos.x, (int)child_pos.y] = child;
 
                 // set child pixel color
                 this.map.setPixel(child_pos, child.colony.color);
@@ -183,6 +183,50 @@ public class GameManager : MonoBehaviour {
             // set color of pixel
             if (this.settings.EraseLastPos) this.map.setPixel(pos, this.map.land);
             this.map.setPixel(newPos, person.colony.color);
+        }
+
+        // if somebody else is on the field where the person wants to move
+        if (!is_empty)
+        {
+            // get person occupying the field
+            Person other = this.people[(int)newPos.x, (int)newPos.y];
+
+            // if they are member of the same colony
+            if (other.colony == person.colony)
+            {
+                // for now, do nothing
+                // spread the disease (TODO)
+            } else
+            {
+                if (this.settings.fight)
+                {
+                    // this is an enemy from another colony
+                    if (person.strength == other.strength)
+                    {
+                        // if they have the same strength
+                        // nothing happens
+                    }
+                    else if (person.strength > other.strength)
+                    {
+                        // if else the person has the greater strength
+                        // the enemy dies
+
+                        other.is_dead = true;
+
+                        // slightly increase the strength of the person
+                        //person.strength = Utils.simulation.get_mutation(person.strength, this.settings.mutations, add: 100);
+                    }
+                    else
+                    {
+                        // if else the enemy has the greater strength
+                        // the person dies
+                        person.is_dead = true;
+
+                        // slightly increase the strength of the enemy
+                        //other.strength = Utils.simulation.get_mutation(other.strength, this.settings.mutations, add: 100);
+                    }
+                }                
+            }
         }
 
         // increase population for stats
