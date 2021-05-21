@@ -81,8 +81,8 @@ public class GameManager : MonoBehaviour {
             this.stats.colonies[item.Key]["reproduction_value"] = 0;
         }
 
-        Person[,] people_cache = this.people.Clone() as Person[,];        
-
+        Person[,] people_cache = this.people.Clone() as Person[,];
+        
         // render people        
         for (int x=0; x<people_cache.GetLength(0); x++)
         {

@@ -11,9 +11,9 @@ namespace Utils
         {
             return (int)pos.y * width + (int)pos.x;
         }
-        
+
         public static IEnumerable<Vector2> next_pos(Vector2 pos)
-        {            
+        {
             int radius = 1;
             for (int i = 0; i < 1000; i++)
             {
@@ -25,8 +25,8 @@ namespace Utils
 
                 if (i % 10 == 0) radius++;
 
-                yield return new Vector2(newX, newY);                                
-            }            
+                yield return new Vector2(newX, newY);
+            }
         }
     }
 }
