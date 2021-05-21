@@ -6,7 +6,7 @@ using Utils;
 
 public class Map : MonoBehaviour {
 
-    public Texture2D map_texture;
+    public Texture2D original_map_texture;
 
     public Color32 land;
     public Color32 water;
@@ -20,7 +20,7 @@ public class Map : MonoBehaviour {
     public Color32[] map_pixels;
 
     [System.NonSerialized]
-    public Color32[] original_map_pixels;
+    public Texture2D map_texture;
 
     [System.NonSerialized]
     SpriteRenderer spriteRenderer;
@@ -28,41 +28,27 @@ public class Map : MonoBehaviour {
     void Start()
     {        
         this.spriteRenderer = this.gameObject.GetComponent<SpriteRenderer>();
-        this.spriteRenderer.sprite = Utils.sprite.createSprite(this.map_texture);
+        this.spriteRenderer.sprite = Utils.sprite.createSprite(this.original_map_texture);
     }
 
     public void loadTexture()
     {        
-        this.original_map_pixels = this.map_texture.GetPixels32();
-        this.map_pixels = (Color32[])this.original_map_pixels.Clone();
+        // set start pixels and dimensions
+        this.map_pixels = this.original_map_texture.GetPixels32();                
+        this.dimensions = new Vector2(this.original_map_texture.width, this.original_map_texture.height);
 
-        this.dimensions = new Vector2(this.map_texture.width, this.map_texture.height);                
+        // set texture to work with
+        this.map_texture = new Texture2D((int)this.dimensions.x, (int)this.dimensions.y);
+        this.map_texture.filterMode = FilterMode.Point;
     }
 
-    public void draw(Person[,] people)
-    {        
-        Texture2D texture = new Texture2D((int)this.dimensions.x, (int)this.dimensions.y);
-
-        texture.filterMode = FilterMode.Point;
-
-        /*if (this.settings.EraseLastPos)
-        {
-            this.map_pixels = (Color32[])this.original_map_pixels.Clone();
-        }*/
-
-        /*for (int x = 0; x < people.GetLength(0); x++)
-        {
-            for (int y = 0; y < people.GetLength(1); y++)
-            {
-                if (people[x, y] != null) this.map_pixels[Utils.datastructure.convert2dto1d(new Vector2(x, y), (int)this.dimensions.x)] = people[x, y].colony.color;
-            }
-        }*/
-
-        texture.SetPixels32(this.map_pixels);        
+    public void draw()
+    {
+        this.map_texture.SetPixels32(this.map_pixels);                
         
-        texture.Apply();                
+        this.map_texture.Apply();
 
-        this.spriteRenderer.sprite = Utils.sprite.createSprite(texture);        
+        this.spriteRenderer.sprite = Utils.sprite.createSprite(this.map_texture);
     }    
 
     public Color getPixel(Vector2 pos)

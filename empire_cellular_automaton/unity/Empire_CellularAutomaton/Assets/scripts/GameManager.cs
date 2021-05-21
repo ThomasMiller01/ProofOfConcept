@@ -55,7 +55,7 @@ public class GameManager : MonoBehaviour {
     }    
 	
 	// Update is called once per frame
-	void Update () {        
+	void Update () {
         // check for day
         this.stats.day++;
         if (this.stats.day == this.settings.days)
@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour {
             this.stats.colonies[item.Key]["reproduction_value"] = 0;
         }
 
-        Person[,] people_cache = this.people;        
+        Person[,] people_cache = this.people.Clone() as Person[,];        
 
         // render people        
         for (int x=0; x<people_cache.GetLength(0); x++)
@@ -89,11 +89,11 @@ public class GameManager : MonoBehaviour {
             for (int y=0; y<people_cache.GetLength(1); y++)
             {
                 if (people_cache[x, y] != null) this.render_person(people_cache[x, y], new Vector2(x, y));
-            }            
-        }        
+            }
+        }
 
         // draw to the screen
-        this.map.draw(this.people);
+        this.map.draw();
     }
 
     void render_person(Person person, Vector2 pos)
