@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour {
@@ -23,6 +24,11 @@ public class GameManager : MonoBehaviour {
             Colony colony = new Colony(c.name, c.color);
             this.stats.colonies[colony.name] = new Dictionary<string, float>();
             this.stats.colonies[colony.name]["population"] = c.number_of_people;
+
+            this.map.setPixel(c.start, Utils.color.HexToColor("800080"));
+
+            IEnumerator <Vector2> positions = Utils.datastructure.next_pos(c.start).GetEnumerator();            
+
             for (int k = 0; k < c.number_of_people; k++)
             {
                 int age = (int)Random.Range(0, this.settings.strength.x);                
@@ -30,32 +36,36 @@ public class GameManager : MonoBehaviour {
                 int reproductionValue = (int)Random.Range(0, this.settings.reproductionThreshold);
                 Person person = new Person(colony, age, strength, reproductionValue);
 
-                IEnumerable<Vector2> positions = Utils.datastructure.next_pos(c.start);
-                foreach(Vector2 pos in positions)
+                bool has_remaining = true;
+
+                while (has_remaining)
                 {
-                    // check for water
-                    // check for availability
-                    // check for end
+                    has_remaining = positions.MoveNext();
+
+                    Vector2 pos = positions.Current;
+
                     bool is_water = this.map.getPixel(pos) == this.map.water;
                     bool is_valid = Utils.pixels.validatePosition(pos, new Vector2[] { new Vector2(0, this.map.dimensions.x), new Vector2(0, this.map.dimensions.y) });
-                    bool is_empty = this.people[(int)pos.x, (int)pos.y] == null;                    
+                    bool is_empty = this.people[(int)pos.x, (int)pos.y] == null;
 
                     if (!is_water && is_valid && is_empty)
-                    {
+                    {                                             
                         this.people[(int)pos.x, (int)pos.y] = person;
 
                         // set pixel
                         this.map.setPixel(pos, person.colony.color);
 
-                        break;
+                        has_remaining = false;
                     }
-                }                
+                }                                
             }            
-        }        
+        }
+
+        this.map.draw();
     }    
 	
 	// Update is called once per frame
-	void Update () {
+	void Update () {        
         // check for day
         this.stats.day++;
         if (this.stats.day == this.settings.days)
