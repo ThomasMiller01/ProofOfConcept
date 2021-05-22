@@ -9,7 +9,7 @@ public class Person
     public int strength;
     public int reproduction_value;    
     public bool is_dead;
-    public int birth_count;
+    public int birth_count;    
 
     public Person(Colony colony, int age, int strength, int reproduction_value, bool is_dead=false, int birth_count=0)
     {        
@@ -18,6 +18,6 @@ public class Person
         this.strength = strength;
         this.reproduction_value = reproduction_value;        
         this.is_dead = is_dead;
-        this.birth_count = birth_count;
+        this.birth_count = birth_count;        
     }
 }

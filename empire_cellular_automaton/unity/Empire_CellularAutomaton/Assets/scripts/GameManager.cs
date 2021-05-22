@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour {
@@ -91,7 +92,7 @@ public class GameManager : MonoBehaviour {
             this.stats.colonies[item.Key]["reproduction_value"] = 0;
         }
 
-        Person[,] people_cache = this.people.Clone() as Person[,];
+        Person[,] people_cache = this.people.Clone() as Person[,];                 
         
         // render people        
         for (int x=0; x<people_cache.GetLength(0); x++)
@@ -196,7 +197,7 @@ public class GameManager : MonoBehaviour {
         }
 
         // if somebody else is on the field where the person wants to move
-        if (!is_empty)
+        if (!is_empty && !this.settings.staticPopulation)
         {
             // get person occupying the field
             Person other = this.people[(int)newPos.x, (int)newPos.y];
