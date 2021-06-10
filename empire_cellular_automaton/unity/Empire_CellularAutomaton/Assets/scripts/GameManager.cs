@@ -79,10 +79,6 @@ public class GameManager : MonoBehaviour {
                 }
             }
         }
-        foreach (var c in this.settings.colonies)
-        {
-            
-        }
 
         this.map.draw();
     }
@@ -193,6 +189,7 @@ public class GameManager : MonoBehaviour {
         people_shared_cache.Dispose();
         people_shared.Dispose();
         map_shared.Dispose();
+        colony_color_shared.Dispose();
         colony_stats_shared.Dispose();
 
         // draw to the screen
