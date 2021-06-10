@@ -17,7 +17,9 @@ public class Stats : MonoBehaviour {
     [System.NonSerialized]
     public int population;
     [System.NonSerialized]
-    public Dictionary<string, Dictionary<string, float>> colonies = new Dictionary<string, Dictionary<string, float>>();
+    public Dictionary<int, Dictionary<string, float>> colonies = new Dictionary<int, Dictionary<string, float>>();
+    [System.NonSerialized]
+    public Dictionary<int, string> colonies_name = new Dictionary<int, string>();
 
     // Update is called once per frame
     void Update () {
@@ -35,8 +37,16 @@ public class Stats : MonoBehaviour {
             float age = Mathf.Round(item.Value["age"] / item.Value["population"] / 365 * 100f) / 100f;
             float strength = Mathf.Round(item.Value["strength"] / item.Value["population"]);
             float reproduction_value = Mathf.Round(item.Value["reproduction_value"] / item.Value["population"]);
-            colonies_text.Add(item.Key + ": " + population + "\n  - age: " + age + " years\n  - strength: " + strength + "\n  - reproduction_value: " + reproduction_value);
+            colonies_text.Add(this.colonies_name[item.Key] + ": " + population + "\n  - age: " + age + " years\n  - strength: " + strength + "\n  - reproduction_value: " + reproduction_value);
         }
         this.coloniesText.text = string.Join("\n", colonies_text.ToArray());
     }
+}
+
+public struct ColonyStats
+{
+    public float population;
+    public float age;
+    public float strength;
+    public float reproduction_value;
 }

@@ -36,8 +36,10 @@ namespace Utils
                 new Vector2(-1, 0), // left                
             };
 
+            System.Random rnd = new System.Random();
+
             // return random dir
-            return directions[Random.Range(0, directions.Length)];
+            return directions[rnd.Next(0, directions.Length)];
         }
         
         public static bool validatePosition(Vector2 pos, Vector2[] boundaries)

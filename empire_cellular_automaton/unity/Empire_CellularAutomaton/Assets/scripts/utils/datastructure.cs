@@ -12,6 +12,13 @@ namespace Utils
             return (int)pos.y * width + (int)pos.x;
         }
 
+        public static Vector2 convert1dto2d(int index, int width)
+        {
+            int x = index % width;
+            int y = index / width;
+            return new Vector2(x, y);
+        }
+
         public static IEnumerable<Vector2> next_pos(Vector2 center)
         {
             int max_radius = 50;
